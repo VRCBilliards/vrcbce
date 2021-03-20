@@ -71,4 +71,10 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
 # Asset ignoring
-!Assets/*
+Assets/*
+*.asset
+*.json
+*.cs
+ProjectVersion.txt
+*.meta
+*.asmdef
