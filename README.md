@@ -1,6 +1,6 @@
 # VRCBilliards: Community Edition (Secret pre-release version!)
 
-This is an UNFINISHED and PROBABLY BUGGY adaption of the old VRCBilliards prefab, created by Harry_T and forked/maintained for a while by Xiexe, to the now Udon Reliable Sync ("Spring Networking Patch") version.
+This is an UNFINISHED and PROBABLY BUGGY adaption of the old VRCBilliards prefab, created by Harry_T and forked/maintained for a while by Xiexe, to the new Udon Reliable Sync ("Spring Networking Patch") version.
 
 If you're here you're presumably curious and would like to take a look. Pull the repo and have fun!
 
