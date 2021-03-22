@@ -124,6 +124,7 @@ namespace VRCBilliards
          */
 
         [Header("Other VRCBilliards Components")]
+        public GameObject baseObject;
         public PoolMenu poolMenu;
 
         [Header("Table Colours")]
@@ -201,6 +202,8 @@ namespace VRCBilliards
         public Mesh nineBall;
         public Mesh fourBallAdd;
         public Mesh fourBallMinus;
+
+        private Quaternion baseObjectRot;
 
         /// <summary>
         /// 19:0 (0x01)		True whilst balls are rolling
@@ -459,6 +462,8 @@ namespace VRCBilliards
 
         public void Start()
         {
+            baseObjectRot = baseObject.transform.rotation;
+
             mainSrc = GetComponent<AudioSource>();
 
             if (audioSourcePoolContainer != null) // Xiexe: Use a pool for audio instead of using the PlayClipAtPoint method because PlayClipAtPoint is buggy and VRC audio controls do not modify it.
@@ -1184,8 +1189,6 @@ namespace VRCBilliards
             // Check if simulation has settled
             if (!ballsMoving && gameIsSimulating)
             {
-                Debug.Log("[PoolStateManager] [AdvancePhysicsStep] Table has settled: ending simulation.");
-
                 gameIsSimulating = false;
 
                 // Make sure we only run this from the client who initiated the move
@@ -1219,10 +1222,8 @@ namespace VRCBilliards
 
                     // Common informations
                     bool isSetComplete = (ballPocketedState & bmask) == bmask;
-                    Debug.Log($"isSetComplete : {isSetComplete}");
 
                     bool isScratch = (ballPocketedState & 0x1U) == 0x1U;
-                    Debug.Log($"isScratch : {isScratch}");
 
                     // Append black to mask if set is done
                     if (isSetComplete)
@@ -1509,10 +1510,11 @@ namespace VRCBilliards
                     zz = Mathf.Sign(A.z);
 
                     // Its in a pocket
-                    if (A.z * zz > TABLE_HEIGHT + POCKET_DEPTH || A.z * zz > (A.x * -zx) + TABLE_WIDTH + TABLE_HEIGHT + POCKET_DEPTH)
+                    if (
+                        A.z * zz > TABLE_HEIGHT + POCKET_DEPTH ||
+                        A.z * zz > (A.x * -zx) + TABLE_WIDTH + TABLE_HEIGHT + POCKET_DEPTH
+                    )
                     {
-                        Debug.Log($"Ball {i} is now in a pocket");
-
                         uint total = 0U;
 
                         // Get total for X positioning
@@ -1528,41 +1530,29 @@ namespace VRCBilliards
 
                         // This is where we actually save the pocketed/non-pocketed state of balls.
                         ballPocketedState ^= 1U << i;
-                        Debug.Log($"ball pocketed state after saving after a physics step: {Convert.ToString(ballPocketedState, 2)}");
 
                         uint bmask = 0x1FCU << ((int)(Convert.ToUInt32(newIsTeam2Turn) ^ playerColours) * 7);
+                        mainSrc.PlayOneShot(sinkSfx, 1.0f);
 
-                        // Good pocket
+                        // If good pocket
                         if (((0x1U << i) & (bmask | (isOpen ? 0xFFFCU : 0x0000U) | ((bmask & ballPocketedState) == bmask ? 0x2U : 0x0U))) > 0)
                         {
                             // Make a bright flash
                             tableCurrentColour *= 1.9f;
-                            mainSrc.PlayOneShot(sinkSfx, 1.0f);
                         }
                         else
                         {
-                            // bad
                             tableCurrentColour = pointerColourErr;
-                            mainSrc.PlayOneShot(sinkSfx, 1.0f);
                         }
 
-#if !UNITY_ANDROID
                         // VFX ( make ball move )
                         Rigidbody body = balls[i].GetComponent<Rigidbody>();
                         body.isKinematic = false;
-                        body.velocity = new Vector3(
+                        body.velocity = baseObjectRot * new Vector3(
                             currentBallVelocities[i].x,
                             0.0f,
                             currentBallVelocities[i].z
                         );
-#else
-                                ballsToRender[id].transform.position = new Vector3(
-                                    ball_CO[id].x,
-                                    RACHEIGHT,
-                                    ball_CO[id].y
-                            
-                                );
-#endif
                     }
                 }
 
@@ -2357,12 +2347,12 @@ namespace VRCBilliards
         /// <summary>
         /// Advance simulation 1 step for ball id
         /// </summary>
-        /// <param name="id"></param>
-        private void AdvanceSimulationForBall(int id)
+        /// <param name="ballID"></param>
+        private void AdvanceSimulationForBall(int ballID)
         {
             // Since v1.5.0
-            Vector3 V = currentBallVelocities[id];
-            Vector3 W = currentAngularVelocities[id];
+            Vector3 V = currentBallVelocities[ballID];
+            Vector3 W = currentAngularVelocities[ballID];
 
             // Equations derived from: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.89.4627&rep=rep1&type=pdf
             // 
@@ -2430,14 +2420,16 @@ namespace VRCBilliards
                 ballsMoving = true;
             }
 
-            currentAngularVelocities[id] = W;
-            currentBallVelocities[id] = V;
-            balls[id].transform.Rotate(W.normalized, W.magnitude * FIXED_TIME_STEP * -Mathf.Rad2Deg, Space.World);
+            currentAngularVelocities[ballID] = W;
+            currentBallVelocities[ballID] = V;
 
-            uint ball_bit = 0x1U << id;
+            // FSP [22/03/21]: Use the base object's rotation as a factor in the axis. This stops the balls spinning incorrectly.
+            balls[ballID].transform.Rotate((baseObjectRot * W).normalized, W.magnitude * FIXED_TIME_STEP * -Mathf.Rad2Deg, Space.World);
+
+            uint ball_bit = 0x1U << ballID;
 
             // ball/ball collisions
-            for (int i = id + 1; i < 16; i++)
+            for (int i = ballID + 1; i < 16; i++)
             {
                 ball_bit <<= 1;
 
@@ -2447,36 +2439,34 @@ namespace VRCBilliards
                     continue;
                 }
 
-                Vector3 delta = currentBallPositions[i] - currentBallPositions[id];
+                Vector3 delta = currentBallPositions[i] - currentBallPositions[ballID];
                 float dist = delta.magnitude;
 
                 if (dist < BALL_DIAMETER)
                 {
-                    // Physics shit
-
                     Vector3 normal = delta / dist;
 
-                    Vector3 velocityDelta = currentBallVelocities[id] - currentBallVelocities[i];
+                    Vector3 velocityDelta = currentBallVelocities[ballID] - currentBallVelocities[i];
 
                     float dot = Vector3.Dot(velocityDelta, normal);
 
                     if (dot > 0.0f)
                     {
                         Vector3 reflection = normal * dot;
-                        currentBallVelocities[id] -= reflection;
+                        currentBallVelocities[ballID] -= reflection;
                         currentBallVelocities[i] += reflection;
 
                         // Prevent sound spam if it happens
-                        if (currentBallVelocities[id].sqrMagnitude > 0 && currentBallVelocities[i].sqrMagnitude > 0)
+                        if (currentBallVelocities[ballID].sqrMagnitude > 0 && currentBallVelocities[i].sqrMagnitude > 0)
                         {
                             int clip = UnityEngine.Random.Range(0, hitsSfx.Length - 1);
-                            float vol = Mathf.Clamp01(currentBallVelocities[id].magnitude * reflection.magnitude);
-                            ballPool[id].transform.position = balls[id].transform.position;
-                            ballPool[id].PlayOneShot(hitsSfx[clip], vol);
+                            float vol = Mathf.Clamp01(currentBallVelocities[ballID].magnitude * reflection.magnitude);
+                            ballPool[ballID].transform.position = balls[ballID].transform.position;
+                            ballPool[ballID].PlayOneShot(hitsSfx[clip], vol);
                         }
 
                         // First hit detected
-                        if (id == 0)
+                        if (ballID == 0)
                         {
                             if (isFourBall)
                             {
