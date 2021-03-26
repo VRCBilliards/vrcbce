@@ -2393,7 +2393,16 @@ namespace VRCBilliards
 
                 // Calculate rolling angular velocity
                 W.x = -V.z * BALL_1OR;
-                W.y = 0.0f;
+                
+                if( 0.3f > Mathf.Abs( W.y ) )
+                {
+                    W.y = 0.0f;
+                }
+                else
+                {
+                    W.y -= Mathf.Sign(W.y) * 0.3f;
+                }
+      
                 W.z = V.x * BALL_1OR;
 
                 // Stopping scenario
