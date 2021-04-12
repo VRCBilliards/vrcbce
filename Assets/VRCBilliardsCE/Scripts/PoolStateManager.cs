@@ -303,7 +303,6 @@ namespace VRCBilliards
         /// <summary>
         /// 20:0 (0xffff)	Latest packet number
         /// </summary>
-        [UdonSynced]
         private uint currentClock;
         /// <summary>
         /// 21:0 (0xffff)	Game number
@@ -1584,11 +1583,11 @@ namespace VRCBilliards
 
             // TODO: Investigate why clock values are not being incremented correctly.
             // It looks like Clock can be discarded. IMO it is still a useful check, but it can be safely disabled ATM.
-            // if (newClock <= currentClock)
-            // {
-            //     Debug.LogWarning($"[FairlySadPanda.PoolStateManager] [ReadNetworkData] Received a new network payload, but the clock {newClock} was not greater than the current clock value {currentClock}");
-            //     return;
-            // }
+            if (newClock <= currentClock)
+            {
+                Debug.LogWarning($"[FairlySadPanda.PoolStateManager] [ReadNetworkData] Received a new network payload, but the clock {newClock} was not greater than the current clock value {currentClock}");
+                return;
+            }
 
             currentClock = newClock;
 
