@@ -9662,7 +9662,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: isTurnLocalLive
+      Data: isDesktopLocalTurn
     - Name: $v
       Entry: 7
       Data: 544|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -9683,10 +9683,10 @@ MonoBehaviour:
       Data: SystemBoolean
     - Name: symbolOriginalName
       Entry: 1
-      Data: isTurnLocalLive
+      Data: isDesktopLocalTurn
     - Name: symbolUniqueName
       Entry: 1
-      Data: isTurnLocalLive
+      Data: isDesktopLocalTurn
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
@@ -9719,7 +9719,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: isDesktopFrameIgnore
+      Data: isEntertingDesktopModeThisFrame
     - Name: $v
       Entry: 7
       Data: 547|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -9740,10 +9740,10 @@ MonoBehaviour:
       Data: SystemBoolean
     - Name: symbolOriginalName
       Entry: 1
-      Data: isDesktopFrameIgnore
+      Data: isEntertingDesktopModeThisFrame
     - Name: symbolUniqueName
       Entry: 1
-      Data: isDesktopFrameIgnore
+      Data: isEntertingDesktopModeThisFrame
     - Name: symbolDefaultValue
       Entry: 6
       Data: 

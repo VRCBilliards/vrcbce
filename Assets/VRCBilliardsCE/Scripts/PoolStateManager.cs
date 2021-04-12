@@ -423,8 +423,8 @@ namespace VRCBilliards
         private float desktopShootReference;
         private float desktopClampX = TABLE_WIDTH;
         private float desktopClampY = TABLE_HEIGHT;
-        private bool isTurnLocalLive;
-        private bool isDesktopFrameIgnore;
+        private bool isDesktopLocalTurn;
+        private bool isEntertingDesktopModeThisFrame;
         /// <summary>
         /// Cue input tracking
         /// </summary>
@@ -916,7 +916,10 @@ namespace VRCBilliards
                 return;
             }
 
+            Debug.Log($"Game ID WAS: {gameID}");
             gameID++;
+            Debug.Log($"Game ID IS: {gameID}");
+
             isPlayerAllowedToPlay = true;
 
             OnLocalNewGame();
@@ -1139,8 +1142,10 @@ namespace VRCBilliards
 
         public void OnDesktopTopDownViewStart()
         {
+            Debug.Log("[PoolStateManager.OnDesktopTopDownViewStart] Top Down view started.");
+
             isDesktopShootUI = true;
-            isDesktopFrameIgnore = true;
+            isEntertingDesktopModeThisFrame = true;
             desktopBase.SetActive(true);
 
             // Lock player in place
@@ -1577,19 +1582,19 @@ namespace VRCBilliards
         {
             Debug.Log("Reading network data");
 
-            if (newClock <= currentClock)
-            {
-                Debug.LogWarning($"[FairlySadPanda.PoolStateManager] [ReadNetworkData] Received a new network payload, but the clock {newClock} was not greater than the current clock value {currentClock}");
-                return;
-            }
+            // TODO: Investigate why clock values are not being incremented correctly.
+            // It looks like Clock can be discarded. IMO it is still a useful check, but it can be safely disabled ATM.
+            // if (newClock <= currentClock)
+            // {
+            //     Debug.LogWarning($"[FairlySadPanda.PoolStateManager] [ReadNetworkData] Received a new network payload, but the clock {newClock} was not greater than the current clock value {currentClock}");
+            //     return;
+            // }
 
             currentClock = newClock;
 
-            // MAIN DECODE ===================================================================================================
-            CopyGameStateToOldState();
-
             // Events ==========================================================================================================
 
+            Debug.Log($"gameID {gameID} > oldGameID {oldGameID}? {gameID > oldGameID}. isGameInMenus? {isGameInMenus}.");
             if (gameID > oldGameID && !isGameInMenus)
             {
                 // EV: 1
@@ -1624,6 +1629,8 @@ namespace VRCBilliards
 
                 return;
             }
+
+            CopyGameStateToOldState();
 
             if (isTableLocked)
             {
@@ -1710,7 +1717,12 @@ namespace VRCBilliards
             // Its basically 'turn start' event
             if (isPlayerAllowedToPlay)
             {
+                Debug.Log("Is it our turn?");
+                Debug.Log($"LocalPlayerID: {localPlayerID}, playerIsTeam2 {playerIsTeam2} newIsTeam2Turn {newIsTeam2Turn}");
+
                 bool isOurTurn = ((localPlayerID >= 0) && (playerIsTeam2 == newIsTeam2Turn)) || isGameModePractice;
+
+                Debug.Log($"isOurTurn {isOurTurn}");
 
                 // Check if teammate placed the positioner
                 if (!isFoul)
@@ -1719,20 +1731,18 @@ namespace VRCBilliards
                     marker.SetActive(false);
                 }
 
-#if !UNITY_ANDROID
                 if (isOurTurn)
                 {
                     // Update for desktop
-                    isTurnLocalLive = true;
+                    isDesktopLocalTurn = true;
 
                     // Reset hit point
                     desktopHitCursor = Vector3.zero;
                 }
                 else
                 {
-                    isTurnLocalLive = false;
+                    isDesktopLocalTurn = false;
                 }
-#endif
 
                 if (isNineBall)
                 {
@@ -2015,13 +2025,15 @@ namespace VRCBilliards
                 }
                 else if (!playerIsTeam2)                       // Local player is 1, or 3
                 {
-                    gripControllers[1].AllowAccess();
-                    gripControllers[0].DenyAccess();
+                    Debug.Log("Player is on team 1, granting access to cue 0");
+                    gripControllers[0].AllowAccess();
+                    gripControllers[1].DenyAccess();
                 }
                 else                                                            // Local player is 0, or 2
                 {
-                    gripControllers[0].AllowAccess();
-                    gripControllers[1].DenyAccess();
+                    Debug.Log("Player is on team 2, granting access to cue 1");
+                    gripControllers[1].AllowAccess();
+                    gripControllers[0].DenyAccess();
                 }
             }
             else
@@ -2393,8 +2405,8 @@ namespace VRCBilliards
 
                 // Calculate rolling angular velocity
                 W.x = -V.z * BALL_1OR;
-                
-                if( 0.3f > Mathf.Abs( W.y ) )
+
+                if (0.3f > Mathf.Abs(W.y))
                 {
                     W.y = 0.0f;
                 }
@@ -2402,7 +2414,7 @@ namespace VRCBilliards
                 {
                     W.y -= Mathf.Sign(W.y) * 0.3f;
                 }
-      
+
                 W.z = V.x * BALL_1OR;
 
                 // Stopping scenario
@@ -2709,6 +2721,8 @@ namespace VRCBilliards
 
         private void OnDesktopTopDownViewExit()
         {
+            Debug.Log("[PoolStateManager.OnDesktopTopDownViewExit] Top Down view exited.");
+
             isDesktopShootUI = false;
             desktopBase.SetActive(false);
 
@@ -2721,9 +2735,9 @@ namespace VRCBilliards
         // TODO: Single use function, but it short-circuits so cannot be easily put into its using function.
         private void UpdateDesktopUI()
         {
-            if (isDesktopFrameIgnore)
+            if (isEntertingDesktopModeThisFrame)
             {
-                isDesktopFrameIgnore = false;
+                isEntertingDesktopModeThisFrame = false;
                 return;
             }
 
@@ -2751,7 +2765,7 @@ namespace VRCBilliards
                  desktopClampY
             );
 
-            if (isTurnLocalLive)
+            if (isDesktopLocalTurn)
             {
                 Vector3 ncursor = deskTopCursor;
                 ncursor.y = 0.0f;
@@ -2807,7 +2821,7 @@ namespace VRCBilliards
                             Vector3 p = desktopShootVector.normalized * vel;
                             currentAngularVelocities[0] = Vector3.Cross(r_1, p) * -25.0f;
                             cue.transform.localPosition = new Vector3(2000.0f, 2000.0f, 2000.0f);
-                            isTurnLocalLive = false;
+                            isDesktopLocalTurn = false;
                             HitBallWithCue();
                         }
 

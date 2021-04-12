@@ -108,11 +108,13 @@ namespace VRCBilliards
                     // Temporary target
                     target.transform.position = gameObject.transform.position + Vector3.up;
 
+                    // How close are we to the table?
                     Vector3 playerpos = gameController.gameObject.transform.InverseTransformPoint(Networking.LocalPlayer.GetPosition());
 
                     // Check turn entry
                     if ((Mathf.Abs(playerpos.x) < 2.0f) && (Mathf.Abs(playerpos.z) < 1.5f))
                     {
+                        // If we're close to the table, make it so we can enter desktop top-down view.
                         VRCPlayerApi.TrackingData hmd = Networking.LocalPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
                         pressE.SetActive(true);
                         pressE.transform.position = hmd.position + (hmd.rotation * Vector3.forward);
