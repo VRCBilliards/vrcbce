@@ -17,7 +17,10 @@ namespace VRCBilliards
          */
 
 #if UNITY_ANDROID
-    const float MAX_DELTA = 0.075f;					// Maximum steps/frame ( 5 ish )
+        /// <summary>
+        /// Maximum steps/frame ( 5ish )
+        /// </summary>
+    const float MAX_DELTA = 0.075f;
 #else
         /// <summary>
         /// Maximum steps/frame ( 8 )
@@ -104,11 +107,6 @@ namespace VRCBilliards
         /// Vectors cannot be const.
         /// </summary>
         private Vector3 CONTACT_POINT = new Vector3(0.0f, -0.03f, 0.0f);
-
-#if UNITY_ANDROID
-    uint ANDROID_UNIFORM_CLOCK = 0x00u;
-    uint ANDROID_CLOCDIVIDER = 0x8u;
-#endif
 
         private const float SINA = 0.28078832987f;
         private const float COSA = 0.95976971915f;
@@ -298,12 +296,6 @@ namespace VRCBilliards
         /// </summary>
         [UdonSynced]
         private bool isTeams;
-        [UdonSynced]
-        private uint newClock;
-        /// <summary>
-        /// 20:0 (0xffff)	Latest packet number
-        /// </summary>
-        private uint currentClock;
         /// <summary>
         /// 21:0 (0xffff)	Game number
         /// </summary>
@@ -315,7 +307,7 @@ namespace VRCBilliards
         private uint oldPocketed;
         private bool oldIsTeam2Turn;
         private bool oldOpen;
-        private bool oldIsGameNotRunning;
+        private bool oldIsGameInMenus;
         private uint oldGameID;
 
         /// <summary>
@@ -679,26 +671,11 @@ namespace VRCBilliards
             if (isGameInMenus)
             {
                 // Flashing if we won
-#if !UNITY_ANDROID
                 tableCurrentColour = tableSrcColour * ((Mathf.Sin(Time.timeSinceLevelLoad * 3.0f) * 0.5f) + 1.0f);
-#endif
             }
             else
             {
-#if !UNITY_ANDROID
                 tableCurrentColour = Color.Lerp(tableCurrentColour, tableSrcColour, Time.deltaTime * 3.0f);
-#else
-                // Run uniform updates at a slower rate on android (/8)
-                ANDROID_UNIFORM_CLOCK ++;
-
-                if( ANDROID_UNIFORM_CLOCK >= ANDROID_CLOCDIVIDER )
-                {
-                    tableCurrentColour = Color.Lerp( tableCurrentColour, tableSrcColour, Time.deltaTime * 24.0f );
-                    tableMaterial.SetColor( uniform_tablecolour, tableCurrentColour );
-
-                    ANDROID_UNIFORM_CLOCK = 0x00u;
-                }
-#endif
             }
 
             float timePercentage;
@@ -736,9 +713,7 @@ namespace VRCBilliards
                 timePercentage = 0.0f;
             }
 
-#if !UNITY_ANDROID
             tableMaterial.SetColor(uniformTableColour, new Color(tableCurrentColour.r, tableCurrentColour.g, tableCurrentColour.b, timePercentage));
-#endif
 
             // Run the intro animation.
             if (introAminTimer > 0.0f)
@@ -1073,9 +1048,7 @@ namespace VRCBilliards
             {
                 isArmed = true;
 
-#if !UNITY_ANDROID
                 guidelineMat.SetColor("_Colour", aimLocked);
-#endif
             }
         }
 
@@ -1085,10 +1058,7 @@ namespace VRCBilliards
         public void EndHit()
         {
             isArmed = false;
-
-#if !UNITY_ANDROID
             guidelineMat.SetColor("_Colour", aimAiming);
-#endif
         }
 
         /// <summary>
@@ -1122,20 +1092,9 @@ namespace VRCBilliards
                 isPlayerAllowedToPlay = false;
                 gameIsSimulating = false;
 
-                // For good measure in case other clients trigger an event whilst owner
-                newClock += 2;
-
                 Networking.SetOwner(Networking.LocalPlayer, gameObject);
 
                 RefreshNetworkData(newIsTeam2Turn);
-
-                OnLocalGameOver();
-
-                //resetMessage.text = "Reset";
-            }
-            else
-            {
-                //resetMessage.text = "Only:\n" + Networking.GetOwner(playerTotems[0]).displayName + " and " + Networking.GetOwner(playerTotems[1]).displayName + "\ncan reset";
             }
         }
 
@@ -1566,9 +1525,8 @@ namespace VRCBilliards
 
         private void RefreshNetworkData(bool newIsTeam2Playing)
         {
-            Debug.Log($"Is it team 2 turn? {newIsTeam2Playing}");
             newIsTeam2Turn = newIsTeam2Playing;
-            newClock++;
+
             Networking.SetOwner(Networking.LocalPlayer, gameObject);
             RequestSerialization();
             ReadNetworkData();
@@ -1581,19 +1539,8 @@ namespace VRCBilliards
         {
             Debug.Log("Reading network data");
 
-            // TODO: Investigate why clock values are not being incremented correctly.
-            // It looks like Clock can be discarded. IMO it is still a useful check, but it can be safely disabled ATM.
-            if (newClock <= currentClock)
-            {
-                Debug.LogWarning($"[FairlySadPanda.PoolStateManager] [ReadNetworkData] Received a new network payload, but the clock {newClock} was not greater than the current clock value {currentClock}");
-                return;
-            }
-
-            currentClock = newClock;
-
             // Events ==========================================================================================================
 
-            Debug.Log($"gameID {gameID} > oldGameID {oldGameID}? {gameID > oldGameID}. isGameInMenus? {isGameInMenus}.");
             if (gameID > oldGameID && !isGameInMenus)
             {
                 // EV: 1
@@ -1619,14 +1566,12 @@ namespace VRCBilliards
             }
 
             // Check if game is over
-            if (!oldIsGameNotRunning && isGameInMenus)
+            if (!oldIsGameInMenus && isGameInMenus)
             {
                 Debug.Log("[PoolStateMangager] [ReadNetworkData] Game is declared as over.");
                 // EV: 4
 
                 OnLocalGameOver();
-
-                return;
             }
 
             CopyGameStateToOldState();
@@ -1751,9 +1696,7 @@ namespace VRCBilliards
                     marker9ball.transform.localPosition = currentBallPositions[target];
                 }
 
-#if !UNITY_ANDROID
                 RackBalls();
-#endif
 
                 if (timerType > 0 && !isTimerRunning)
                 {
@@ -1910,9 +1853,7 @@ namespace VRCBilliards
             // TODO: Replace this hack. This exists because for some reason a game over event may be called in such a way that the table is stuck in perma-simulating mode.
             tableCollisionParent.SetActive(false);
 
-#if !UNITY_ANDROID
             RackBalls();   // To make sure rigidbodies are completely off
-#endif
 
             isRepositioningCueBall = false;
             marker.SetActive(false);
@@ -2696,8 +2637,6 @@ namespace VRCBilliards
             isTeam2Winner = newIsTeam2Winner;
 
             RefreshNetworkData(newIsTeam2Turn);
-
-            OnLocalGameOver();
         }
 
         private void OnTurnOverFoul()
@@ -2714,7 +2653,7 @@ namespace VRCBilliards
         private void CopyGameStateToOldState()
         {
             oldOpen = isOpen;
-            oldIsGameNotRunning = isGameInMenus;
+            oldIsGameInMenus = isGameInMenus;
             oldGameID = gameID;
         }
 
@@ -2874,6 +2813,8 @@ namespace VRCBilliards
 
                 cue.transform.localRotation = r * xr;
                 cue.transform.position = gameObject.transform.TransformPoint(currentBallPositions[0] + (r * xr * worldHit));
+
+                Debug.Log($"[PoolStateManager.UpdateDesktopUI] Cue is now at {cue.transform.position}");
             }
 
             desktopCursorObject.transform.localPosition = deskTopCursor;

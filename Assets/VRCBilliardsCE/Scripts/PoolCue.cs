@@ -225,6 +225,9 @@ namespace VRCBilliards
             {
                 pressE.SetActive(false);
                 gameController.OnPutDownCueLocally();
+
+                target.transform.position = targetResetPosition;
+                gameObject.transform.position = cueResetPosition;
             }
         }
 

@@ -167,7 +167,7 @@ namespace VRCBilliards
             int player4ID
         )
         {
-            Debug.Log($"Got a new menu update: teams {newIsTeams} team 2's turn {isTeam2Playing} game mode {gameMode} timer mode {timerMode} player 1 {player1ID} player 2 {player2ID} player 3 {player3ID} player 4 {player4ID}");
+            Debug.Log($"Got a new menu update: teams? {newIsTeams} team 2's turn? {isTeam2Playing} game mode {gameMode} timer mode {timerMode} player 1 {player1ID} player 2 {player2ID} player 3 {player3ID} player 4 {player4ID}");
 
             if (newIsTeams)
             {
