@@ -20,4 +20,4 @@ There are only two rules for pull request to this repo:
 Rule 1: The code in this project is written to look like normal Unity/C# code. C# has several standards (and teams tend to set their own) but for reference, refer to the Unity documentation, Unity example scripts, and Microsoft's best practice [https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/inside-a-program/coding-conventions](here). Generally, put variables at the top of the behaviour, avoid using underscore ahead of properties and methods unless it's a public method that needs to be non-RPCable for security reasons (a Udon-specific use of the underscore)), use
 camelCase for properties and arguments, and use PascalCase for everything else.
 
-Rule 2: Be OK with feedback on your PR and change it if requested! (It's surprising that this needs to be said.)
+Rule 2: Be aware you might be asked to make small or large changes to have code accepted onto this repo. If you'd like to diverge, feel free to fork.
