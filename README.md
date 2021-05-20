@@ -1,10 +1,8 @@
-# VRCBilliards: Community Edition
-
-![Prefabs Logo](https://pbs.twimg.com/profile_images/1123996895855222790/4trRO4PA_400x400.jpg =200x200)
+![Prefabs Logo](https://avatars.githubusercontent.com/u/50210138?s=200&v=4)
 
 _This prefab could not have been constructed without the kind support of the Prefabs community. <3_
 
-# What is this?
+# VRCBilliards: Community Edition
 
 ![Image of the table](https://i.imgur.com/cLoMK2p.png)
 
