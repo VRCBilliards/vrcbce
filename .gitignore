@@ -79,6 +79,8 @@ ProjectVersion.txt
 *.meta
 *.asmdef
 
+!Assets/Shaders
+!Assets/FSP
 !Assets/FSP/**/*.*
 !Assets/VRCBilliardsCE
 !Assets/VRCBilliardsCE/**/*.*

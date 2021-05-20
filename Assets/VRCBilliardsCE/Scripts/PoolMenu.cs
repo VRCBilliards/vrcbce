@@ -18,6 +18,7 @@ namespace VRCBilliards
         public GameObject player3Button;
         public GameObject player4Button;
         public GameObject leaveButton;
+        public GameObject startGameButton;
 
         public TextMeshProUGUI teamsTxt;
         public TextMeshProUGUI gameModeTxt;
@@ -40,6 +41,8 @@ namespace VRCBilliards
 
         private int currentGameMode;
         private bool isTeams;
+        private bool isSignedUpToPlay;
+        private bool canStartGame;
 
         // TODO: This all needs to be secured.
         public void UnlockTable()
@@ -94,22 +97,34 @@ namespace VRCBilliards
 
         public void SignUpAsPlayer1()
         {
-            manager.JoinGame(0);
+            if (!isSignedUpToPlay)
+            {
+                manager.JoinGame(0);
+            }
         }
 
         public void SignUpAsPlayer2()
         {
-            manager.JoinGame(1);
+            if (!isSignedUpToPlay)
+            {
+                manager.JoinGame(1);
+            }
         }
 
         public void SignUpAsPlayer3()
         {
-            manager.JoinGame(2);
+            if (!isSignedUpToPlay)
+            {
+                manager.JoinGame(2);
+            }
         }
 
         public void SignUpAsPlayer4()
         {
-            manager.JoinGame(3);
+            if (!isSignedUpToPlay)
+            {
+                manager.JoinGame(3);
+            }
         }
 
         public void LeaveGame()
@@ -119,12 +134,18 @@ namespace VRCBilliards
 
         public void StartGame()
         {
-            manager.StartNewGame();
+            if (canStartGame)
+            {
+                manager.StartNewGame();
+            }
         }
 
         public void EndGame()
         {
-            manager.ForceReset();
+            if (isSignedUpToPlay)
+            {
+                manager.ForceReset();
+            }
         }
 
         public void EnableResetButton()
@@ -272,6 +293,29 @@ namespace VRCBilliards
                 player4ScoreText.text = "";
             }
 
+            int id = Networking.LocalPlayer.playerId;
+            if (id == player1ID || id == player2ID || id == player3ID || id == player4ID)
+            {
+                isSignedUpToPlay = true;
+
+                if (id == player1ID)
+                {
+                    canStartGame = true;
+                    startGameButton.SetActive(true);
+                }
+                else
+                {
+                    canStartGame = false;
+                    startGameButton.SetActive(false);
+                }
+            }
+            else
+            {
+                isSignedUpToPlay = false;
+                canStartGame = false;
+                startGameButton.SetActive(false);
+            }
+
             if (!found)
             {
                 player1Button.SetActive(true);
@@ -323,6 +367,11 @@ namespace VRCBilliards
             {
                 team1ScoreText.text = $"{score}";
             }
+        }
+
+        public void GameWasReset()
+        {
+            winnerText.text = "The game was ended!";
         }
 
         public void TeamWins(bool isTeam2)
