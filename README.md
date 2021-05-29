@@ -48,7 +48,7 @@ Installation Steps:
 
 This is a full, history-free fork of the Harry_T 8Ball prefab. This project is an alternative to that prefab, but is not a competitor. This prefab exists as a Community Edition which simplifies the code a lot and makes it easier to edit. It is also provided under MIT, and the maintainers of this codebase commit to being open and inclusive to anyone who would like to modify the prefab, add additional modes, fix bugs, and use the prefab as a learning tool.
 
-We encourage anyone to have a go modifing this prefab.
+We encourage anyone to have a go modifying this prefab.
 
 # Note on Pull Requests to this repo
 
