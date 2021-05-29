@@ -19,10 +19,13 @@ namespace VRCBilliards
         public GameObject player4Button;
         public GameObject leaveButton;
         public GameObject startGameButton;
+        public GameObject guideLineEnableButton;
+        public GameObject guideLineDisableButton;
 
         public TextMeshProUGUI teamsTxt;
         public TextMeshProUGUI gameModeTxt;
         public TextMeshProUGUI timer;
+        public TextMeshProUGUI guidelineStatus;
 
         public TextMeshProUGUI player1MenuText;
         public TextMeshProUGUI player2MenuText;
@@ -39,7 +42,6 @@ namespace VRCBilliards
 
         public TextMeshProUGUI winnerText;
 
-        private int currentGameMode;
         private bool isTeams;
         private bool isSignedUpToPlay;
         private bool canStartGame;
@@ -93,6 +95,16 @@ namespace VRCBilliards
         public void DecreaseTimer()
         {
             manager.DecreaseTimer();
+        }
+
+        public void EnableGuideline()
+        {
+            manager.EnableGuideline();
+        }
+
+        public void DisableGuideline()
+        {
+            manager.DisableGuideline();
         }
 
         public void SignUpAsPlayer1()
@@ -185,7 +197,8 @@ namespace VRCBilliards
             int player1ID,
             int player2ID,
             int player3ID,
-            int player4ID
+            int player4ID,
+            bool guideline
         )
         {
             Debug.Log($"Got a new menu update: teams? {newIsTeams} team 2's turn? {isTeam2Playing} game mode {gameMode} timer mode {timerMode} player 1 {player1ID} player 2 {player2ID} player 3 {player3ID} player 4 {player4ID}");
@@ -200,8 +213,6 @@ namespace VRCBilliards
                 teamsTxt.text = "Teams: NO";
                 isTeams = false;
             }
-
-            currentGameMode = gameMode;
 
             switch (gameMode)
             {
@@ -326,6 +337,19 @@ namespace VRCBilliards
                     player3Button.SetActive(true);
                     player4Button.SetActive(true);
                 }
+            }
+
+            if (guideline)
+            {
+                guideLineDisableButton.SetActive(true);
+                guideLineEnableButton.SetActive(false);
+                guidelineStatus.text = "Guideline On";
+            }
+            else
+            {
+                guideLineDisableButton.SetActive(false);
+                guideLineEnableButton.SetActive(true);
+                guidelineStatus.text = "Guideline Off";
             }
         }
 
