@@ -712,7 +712,6 @@ GameObject:
   - component: {fileID: 582441486056605250}
   - component: {fileID: 105553689786454270}
   - component: {fileID: 8558853872037851137}
-  - component: {fileID: 1795139573662902061}
   m_Layer: 0
   m_Name: Button
   m_TagString: Untagged
@@ -769,19 +768,11 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 105553689786454256}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 0.15, y: 0.15, z: 0.15}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!222 &1795139573662902061
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 105553689786454256}
-  m_CullTransparentMesh: 0
 --- !u!1 &105553689794197673
 GameObject:
   m_ObjectHideFlags: 0
@@ -20949,7 +20940,6 @@ GameObject:
   - component: {fileID: 9116386613134727572}
   - component: {fileID: 8221714463608587751}
   - component: {fileID: 8221714463608587750}
-  - component: {fileID: 3086532425252695742}
   m_Layer: 0
   m_Name: Button
   m_TagString: Untagged
@@ -20980,7 +20970,7 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8221714463608587752}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 0.15, y: 0.15, z: 0.15}
@@ -21010,14 +21000,6 @@ MonoBehaviour:
   publicVariablesUnityEngineObjects:
   - {fileID: 105553690150650538}
   publicVariablesSerializationDataFormat: 0
---- !u!222 &3086532425252695742
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8221714463608587752}
-  m_CullTransparentMesh: 0
 --- !u!1 &8221714463891165625
 GameObject:
   m_ObjectHideFlags: 0
