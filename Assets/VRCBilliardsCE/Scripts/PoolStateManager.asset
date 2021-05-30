@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: PoolStateManager
   m_EditorClassIdentifier:
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 68def5afb169b0b41be5d9ee253758c4,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 90fedb94bcf17b24b895c668c33e5f33,
     type: 2}
   udonAssembly:
   assemblyError:
@@ -7790,13 +7790,7 @@ MonoBehaviour:
       Data: 445|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
-      Data: 1
-    - Name:
-      Entry: 7
-      Data: 446|UdonSharp.UdonSyncedAttribute, UdonSharp.Runtime
-    - Name:
-      Entry: 8
-      Data:
+      Data: 0
     - Name:
       Entry: 13
       Data:
@@ -7850,7 +7844,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 449|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 448|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -7907,7 +7901,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 452|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 451|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -7964,7 +7958,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 455|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 454|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -8021,7 +8015,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 458|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 457|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -8078,7 +8072,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 461|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 460|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -8135,7 +8129,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 464|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 463|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -8192,7 +8186,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 467|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 466|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -8249,7 +8243,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 470|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 469|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -8306,13 +8300,13 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 473|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 472|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 1
     - Name:
       Entry: 7
-      Data: 474|UdonSharp.UdonSyncedAttribute, UdonSharp.Runtime
+      Data: 473|UdonSharp.UdonSyncedAttribute, UdonSharp.Runtime
     - Name:
       Entry: 8
       Data:
@@ -8345,7 +8339,7 @@ MonoBehaviour:
       Data: 476|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 7
-      Data: 477|System.RuntimeType, mscorlib
+      Data: 476|System.RuntimeType, mscorlib
     - Name:
       Entry: 1
       Data: System.Int32[], mscorlib
@@ -8375,13 +8369,13 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 478|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 477|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 1
     - Name:
       Entry: 7
-      Data: 479|UdonSharp.UdonSyncedAttribute, UdonSharp.Runtime
+      Data: 478|UdonSharp.UdonSyncedAttribute, UdonSharp.Runtime
     - Name:
       Entry: 8
       Data:
@@ -8438,7 +8432,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 482|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 481|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -8495,7 +8489,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 485|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 484|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -8552,7 +8546,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 488|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 487|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -8609,7 +8603,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 491|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 490|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -8666,7 +8660,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 494|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 493|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -8723,7 +8717,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 497|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 496|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -8756,7 +8750,7 @@ MonoBehaviour:
       Data: 499|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 7
-      Data: 500|System.RuntimeType, mscorlib
+      Data: 499|System.RuntimeType, mscorlib
     - Name:
       Entry: 1
       Data: UnityEngine.Vector3[], UnityEngine.CoreModule
@@ -8786,13 +8780,13 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 501|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 500|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 1
     - Name:
       Entry: 7
-      Data: 502|UdonSharp.UdonSyncedAttribute, UdonSharp.Runtime
+      Data: 501|UdonSharp.UdonSyncedAttribute, UdonSharp.Runtime
     - Name:
       Entry: 8
       Data:
@@ -8849,13 +8843,13 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 505|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 504|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 1
     - Name:
       Entry: 7
-      Data: 506|UdonSharp.UdonSyncedAttribute, UdonSharp.Runtime
+      Data: 505|UdonSharp.UdonSyncedAttribute, UdonSharp.Runtime
     - Name:
       Entry: 8
       Data:
@@ -8912,13 +8906,13 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 509|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 508|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 1
     - Name:
       Entry: 7
-      Data: 510|UdonSharp.UdonSyncedAttribute, UdonSharp.Runtime
+      Data: 509|UdonSharp.UdonSyncedAttribute, UdonSharp.Runtime
     - Name:
       Entry: 8
       Data:
@@ -8975,7 +8969,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 513|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 512|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -9032,7 +9026,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 516|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 515|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -9089,7 +9083,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 519|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 518|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -9146,7 +9140,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 522|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 521|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -9203,7 +9197,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 525|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 524|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -9260,7 +9254,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 528|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 527|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -9317,7 +9311,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 531|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 530|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -9374,7 +9368,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 534|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 533|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -9431,7 +9425,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 537|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 536|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -9488,7 +9482,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 540|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 539|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -9545,7 +9539,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 543|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 542|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -9602,7 +9596,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 546|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 545|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -9659,7 +9653,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 549|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 548|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -9716,7 +9710,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 552|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 551|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -9773,7 +9767,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 555|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 554|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -9830,7 +9824,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 558|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 557|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -9887,7 +9881,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 561|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 560|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -9944,7 +9938,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 564|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 563|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -10001,7 +9995,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 567|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 566|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -10058,7 +10052,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 570|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 569|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -10115,7 +10109,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 573|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 572|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -10172,7 +10166,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 576|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 575|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -10229,7 +10223,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 579|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 578|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -10286,7 +10280,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 582|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 581|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -10343,7 +10337,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 585|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 584|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -10400,7 +10394,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 588|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 587|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -10457,7 +10451,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 591|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 590|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -10514,7 +10508,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 594|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 593|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -10571,7 +10565,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 597|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 596|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -10628,7 +10622,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 600|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 599|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -10685,7 +10679,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 603|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 602|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -10742,13 +10736,13 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 606|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 605|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 1
     - Name:
       Entry: 7
-      Data: 607|UdonSharp.UdonSyncedAttribute, UdonSharp.Runtime
+      Data: 606|UdonSharp.UdonSyncedAttribute, UdonSharp.Runtime
     - Name:
       Entry: 8
       Data:
@@ -10805,13 +10799,13 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 610|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 609|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 1
     - Name:
       Entry: 7
-      Data: 611|UdonSharp.UdonSyncedAttribute, UdonSharp.Runtime
+      Data: 610|UdonSharp.UdonSyncedAttribute, UdonSharp.Runtime
     - Name:
       Entry: 8
       Data:
@@ -10868,13 +10862,13 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 614|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 613|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 1
     - Name:
       Entry: 7
-      Data: 615|UdonSharp.UdonSyncedAttribute, UdonSharp.Runtime
+      Data: 614|UdonSharp.UdonSyncedAttribute, UdonSharp.Runtime
     - Name:
       Entry: 8
       Data:
@@ -10931,13 +10925,13 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 618|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 617|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 1
     - Name:
       Entry: 7
-      Data: 619|UdonSharp.UdonSyncedAttribute, UdonSharp.Runtime
+      Data: 618|UdonSharp.UdonSyncedAttribute, UdonSharp.Runtime
     - Name:
       Entry: 8
       Data:
@@ -10994,13 +10988,13 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 622|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 621|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 1
     - Name:
       Entry: 7
-      Data: 623|UdonSharp.UdonSyncedAttribute, UdonSharp.Runtime
+      Data: 622|UdonSharp.UdonSyncedAttribute, UdonSharp.Runtime
     - Name:
       Entry: 8
       Data:
@@ -11033,7 +11027,7 @@ MonoBehaviour:
       Data: 625|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 7
-      Data: 626|System.RuntimeType, mscorlib
+      Data: 625|System.RuntimeType, mscorlib
     - Name:
       Entry: 1
       Data: FairlySadPanda.Utilities.Logger, Assembly-CSharp
@@ -11063,7 +11057,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 627|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 626|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -11120,13 +11114,13 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 630|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 629|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 1
     - Name:
       Entry: 7
-      Data: 631|UdonSharp.UdonSyncedAttribute, UdonSharp.Runtime
+      Data: 630|UdonSharp.UdonSyncedAttribute, UdonSharp.Runtime
     - Name:
       Entry: 8
       Data:
@@ -11183,7 +11177,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 634|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 633|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0
@@ -11240,7 +11234,7 @@ MonoBehaviour:
       Data:
     - Name: fieldAttributes
       Entry: 7
-      Data: 637|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 636|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name:
       Entry: 12
       Data: 0

@@ -1,6 +1,7 @@
 using TMPro;
 using UdonSharp;
 using UnityEngine;
+using UnityEngine.UI;
 using VRC.SDKBase;
 using VRC.Udon;
 
@@ -8,31 +9,53 @@ namespace VRCBilliards
 {
     public class PoolMenu : UdonSharpBehaviour
     {
+        [Header("Pool State Manager")]
         public PoolStateManager manager;
 
+        [Header("Style")]
+        public Color selectedColor = Color.white;
+        public Color unselectedColor = Color.gray;
+
+        [Header("Menu / Buttons")]
         public GameObject resetGameButton;
         public GameObject lockMenu;
         public GameObject mainMenu;
+        public GameObject startGameButton;
+
+        [Header("Game Mode")]
+        public TextMeshProUGUI gameModeTxt;
+        public Image[] gameModeButtons = { };
+
+        [Header("Guide Line")]
+        public bool toggleGuideLineButtonsActive = true;
+        public GameObject guideLineEnableButton;
+        public GameObject guideLineDisableButton;
+        public TextMeshProUGUI guidelineStatus;
+        public Image[] guideLineButtons = { };
+
+        [Header("Timer")]
+        public TextMeshProUGUI timer;
+        public string noTimerText = "No Limit";
+        public string timerValueText = "{}s Limit";
+        public Image timerButton, noTimerButton;
+
+        [Header("Teams")]
+        public TextMeshProUGUI teamsTxt;
+        public Image[] teamsButtons = {};
+
+        [Header("Players")]
         public GameObject player1Button;
         public GameObject player2Button;
         public GameObject player3Button;
         public GameObject player4Button;
         public GameObject leaveButton;
-        public GameObject startGameButton;
-        public GameObject guideLineEnableButton;
-        public GameObject guideLineDisableButton;
-
-        public TextMeshProUGUI teamsTxt;
-        public TextMeshProUGUI gameModeTxt;
-        public TextMeshProUGUI timer;
-        public TextMeshProUGUI guidelineStatus;
-
-        public string defaultEmptyPlayerSlotText = "Open Slot";
+        public string defaultEmptyPlayerSlotText = "<color=grey>Player {}</color>";
         public TextMeshProUGUI player1MenuText;
         public TextMeshProUGUI player2MenuText;
         public TextMeshProUGUI player3MenuText;
         public TextMeshProUGUI player4MenuText;
 
+        [Header("Score")]
         public TextMeshProUGUI player1ScoreText;
         public TextMeshProUGUI player2ScoreText;
         public TextMeshProUGUI player3ScoreText;
@@ -186,6 +209,15 @@ namespace VRCBilliards
             mainMenu.SetActive(true);
         }
 
+        private void UpdateButtonColors(Image[] buttons, int selectedIndex)
+        {
+            if (buttons == null) return;
+            for (int i = 0; i < buttons.Length; i++)
+            {
+                buttons[i].color = i == selectedIndex ? selectedColor : unselectedColor;
+            }
+        }
+
         /// <summary>
         /// Recieve a new set of data from the manager that can be displayed to viewers.
         /// </summary>
@@ -206,33 +238,38 @@ namespace VRCBilliards
 
             if (newIsTeams)
             {
-                teamsTxt.text = "Teams: YES";
+                if (Utilities.IsValid(teamsTxt)) teamsTxt.text = "Teams: YES";
                 isTeams = true;
             }
             else
             {
-                teamsTxt.text = "Teams: NO";
+                if (Utilities.IsValid(teamsTxt)) teamsTxt.text = "Teams: NO";
                 isTeams = false;
             }
+            UpdateButtonColors(teamsButtons, newIsTeams ? 0 : 1);
 
             switch (gameMode)
             {
                 case 0:
-                    gameModeTxt.text = "American 8-Ball";
+                    if (Utilities.IsValid(gameModeTxt)) gameModeTxt.text = "American 8-Ball";
+                    UpdateButtonColors(gameModeButtons, 0);
 
                     break;
                 case 1:
-                    gameModeTxt.text = "American 9-Ball";
+                    if (Utilities.IsValid(gameModeTxt)) gameModeTxt.text = "American 9-Ball";
+                    UpdateButtonColors(gameModeButtons, 1);
 
                     break;
                 case 2:
                     if (isKorean4Ball)
                     {
-                        gameModeTxt.text = "Korean 4-Ball";
+                        if (Utilities.IsValid(gameModeTxt)) gameModeTxt.text = "Korean 4-Ball";
+                        UpdateButtonColors(gameModeButtons, 3);
                     }
                     else
                     {
-                        gameModeTxt.text = "Japanese 4-Ball";
+                        if (Utilities.IsValid(gameModeTxt)) gameModeTxt.text = "Japanese 4-Ball";
+                        UpdateButtonColors(gameModeButtons, 2);
                     }
 
                     break;
@@ -241,21 +278,23 @@ namespace VRCBilliards
             switch (timerMode)
             {
                 case 0:
-                    timer.text = "No Limit";
+                    if (Utilities.IsValid(timer)) timer.text = noTimerText;
                     break;
                 case 1:
-                    timer.text = "10s Limit";
+                    if (Utilities.IsValid(timer)) timer.text = timerValueText.Replace("{}", "10");
                     break;
                 case 2:
-                    timer.text = "15s Limit";
+                    if (Utilities.IsValid(timer)) timer.text = timerValueText.Replace("{}", "15");
                     break;
                 case 3:
-                    timer.text = "30s Limit";
+                    if (Utilities.IsValid(timer)) timer.text = timerValueText.Replace("{}", "30");
                     break;
                 case 4:
-                    timer.text = "60s Limit";
+                    if (Utilities.IsValid(timer)) timer.text = timerValueText.Replace("{}", "60");
                     break;
             }
+            if (Utilities.IsValid(timerButton)) timerButton.color = timerMode != 0 ? selectedColor : unselectedColor;
+            if (Utilities.IsValid(noTimerButton)) noTimerButton.color = timerMode == 0 ? selectedColor : unselectedColor;
 
             leaveButton.SetActive(false);
             player1Button.SetActive(false);
@@ -271,7 +310,7 @@ namespace VRCBilliards
             }
             else
             {
-                player1MenuText.text = defaultEmptyPlayerSlotText;
+                player1MenuText.text = defaultEmptyPlayerSlotText.Replace("{}", "1");
                 player1ScoreText.text = "";
             }
 
@@ -281,7 +320,7 @@ namespace VRCBilliards
             }
             else
             {
-                player2MenuText.text = defaultEmptyPlayerSlotText;
+                player2MenuText.text = defaultEmptyPlayerSlotText.Replace("{}", "2");
                 player2ScoreText.text = "";
             }
 
@@ -291,7 +330,7 @@ namespace VRCBilliards
             }
             else
             {
-                player3MenuText.text = newIsTeams ? defaultEmptyPlayerSlotText : "";
+                player3MenuText.text = newIsTeams ? defaultEmptyPlayerSlotText.Replace("{}", "3") : "";
                 player3ScoreText.text = "";
             }
 
@@ -301,7 +340,7 @@ namespace VRCBilliards
             }
             else
             {
-                player4MenuText.text = newIsTeams ? defaultEmptyPlayerSlotText : "";
+                player4MenuText.text = newIsTeams ? defaultEmptyPlayerSlotText.Replace("{}", "4") : "";
                 player4ScoreText.text = "";
             }
 
@@ -342,15 +381,23 @@ namespace VRCBilliards
 
             if (guideline)
             {
-                guideLineDisableButton.SetActive(true);
-                guideLineEnableButton.SetActive(false);
-                guidelineStatus.text = "Guideline On";
+                if (toggleGuideLineButtonsActive)
+                {
+                    guideLineDisableButton.SetActive(true);
+                    guideLineEnableButton.SetActive(false);
+                }
+                UpdateButtonColors(guideLineButtons, 0);
+                if (Utilities.IsValid(guidelineStatus)) guidelineStatus.text = "Guideline On";
             }
             else
             {
-                guideLineDisableButton.SetActive(false);
-                guideLineEnableButton.SetActive(true);
-                guidelineStatus.text = "Guideline Off";
+                if (toggleGuideLineButtonsActive)
+                {
+                    guideLineDisableButton.SetActive(false);
+                    guideLineEnableButton.SetActive(true);
+                }
+                UpdateButtonColors(guideLineButtons, 1);
+                if (Utilities.IsValid(guidelineStatus)) guidelineStatus.text = "Guideline Off";
             }
         }
 
