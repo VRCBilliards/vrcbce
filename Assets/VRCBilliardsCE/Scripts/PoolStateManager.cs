@@ -115,9 +115,9 @@ namespace VRCBilliards
         private const float COSA = 0.95976971915f;
         private const float F = 1.72909790282f;
 
-        private const string uniformTableColour = "_EmissionColour";
-        private const string uniformMarkerColour = "_Color";
-        private const string unofmrCueColour = "_EmissionColor";
+        public string uniformTableColour = "_EmissionColour";
+        public string uniformMarkerColour = "_Color";
+        public string unofmrCueColour = "_EmissionColor";
         private const float desktopCursorSpeed = 0.035f;
 
         /*
@@ -1401,7 +1401,7 @@ namespace VRCBilliards
                     Some notes on what's going on below:
                     &= is bitwise AND. 0b0101 &= 0b0100 is 0b0100
                     |= is bitwise OR. 0b0101 |= 0b0100 is 0b0101
-                    << is a bitshift leftwards. 
+                    << is a bitshift leftwards.
                     */
 
                     uint bmask = 0b1111111111111100;
@@ -1601,16 +1601,16 @@ namespace VRCBilliards
                     A = currentBallPositions[index];
 
                     // REGIONS
-                    /*  
+                    /*
                         *  QUADS:							SUBSECTION:				SUBSECTION:
                         *    zx, zy:							zz:						zw:
-                        *																
+                        *
                         *  o----o----o  +:  1			\_________/				\_________/
                         *  | -+ | ++ |  -: -1		     |	    /		              /  /
                         *  |----+----|					  -  |  +   |		      -     /   |
                         *  | -- | +- |						  |	   |		          /  +  |
                         *  o----o----o						  |      |             /       |
-                        * 
+                        *
                         */
 
                     // Setup major regions
@@ -2458,7 +2458,7 @@ namespace VRCBilliards
             //
             // f = 2/7
             // f₁ = 5/7
-            // 
+            //
             // Velocity delta:
             //   Δvₓ = −vₓ∙( f∙sin²θ + (1+e)∙cos²θ ) − Rωᵤ∙sinθ
             //   Δvᵧ = 0
@@ -2468,8 +2468,8 @@ namespace VRCBilliards
             //   Sₓ = vₓ∙sinθ - vᵧ∙cosθ+ωᵤ
             //   Sᵧ = 0
             //   Sᵤ = -vᵤ - ωᵧ∙cosθ + ωₓ∙cosθ
-            //   
-            //   k = (5∙Sᵤ) / ( 2∙mRA ); 
+            //
+            //   k = (5∙Sᵤ) / ( 2∙mRA );
             //   c = vₓ∙cosθ - vᵧ∙cosθ
             //
             // Angular delta:
@@ -2500,7 +2500,7 @@ namespace VRCBilliards
 
             //V1.x = -V.x * ((2.0f/7.0f) * SINA2 + EP1 * COSA2) - (2.0f/7.0f) * BALL_PL_X * W.z * SINA;
             //V1.z = (5.0f/7.0f)*V.z + (2.0f/7.0f) * BALL_PL_X * (W.x * SINA - W.y * COSA) - V.z;
-            //V1.y = 0.0f; 
+            //V1.y = 0.0f;
             // (baked):
             V1.x = (-V.x * F) - (0.00240675711f * W.z);
             V1.z = (0.71428571428f * V.z) + (0.00857142857f * ((W.x * SINA) - (W.y * COSA))) - V.z;
@@ -2511,7 +2511,7 @@ namespace VRCBilliards
             s_x = (V.x * SINA) + W.z;
             s_z = -V.z - (W.y * COSA) + (W.x * SINA);
 
-            // k = (5.0f * s_z) / ( 2 * BALL_MASS * A ); 
+            // k = (5.0f * s_z) / ( 2 * BALL_MASS * A );
             // (baked):
             k = s_z * 0.71428571428f;
 
@@ -2568,13 +2568,13 @@ namespace VRCBilliards
             Vector3 W = currentAngularVelocities[ballID];
 
             // Equations derived from: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.89.4627&rep=rep1&type=pdf
-            // 
+            //
             // R: Contact location with ball and floor aka: (0,-r,0)
             // µₛ: Slipping friction coefficient
             // µᵣ: Rolling friction coefficient
             // i: Up vector aka: (0,1,0)
             // g: Planet Earth's gravitation acceleration ( 9.80665 )
-            // 
+            //
             // Relative contact velocity (marlow):
             //   c = v + R✕ω
             //
