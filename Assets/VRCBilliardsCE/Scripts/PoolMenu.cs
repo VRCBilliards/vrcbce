@@ -27,6 +27,7 @@ namespace VRCBilliards
         public TextMeshProUGUI timer;
         public TextMeshProUGUI guidelineStatus;
 
+        public string defaultEmptyPlayerSlotText = "Open Slot";
         public TextMeshProUGUI player1MenuText;
         public TextMeshProUGUI player2MenuText;
         public TextMeshProUGUI player3MenuText;
@@ -270,7 +271,7 @@ namespace VRCBilliards
             }
             else
             {
-                player1MenuText.text = "";
+                player1MenuText.text = defaultEmptyPlayerSlotText;
                 player1ScoreText.text = "";
             }
 
@@ -280,7 +281,7 @@ namespace VRCBilliards
             }
             else
             {
-                player2MenuText.text = "";
+                player2MenuText.text = defaultEmptyPlayerSlotText;
                 player2ScoreText.text = "";
             }
 
@@ -290,7 +291,7 @@ namespace VRCBilliards
             }
             else
             {
-                player3MenuText.text = "";
+                player3MenuText.text = newIsTeams ? defaultEmptyPlayerSlotText : "";
                 player3ScoreText.text = "";
             }
 
@@ -300,7 +301,7 @@ namespace VRCBilliards
             }
             else
             {
-                player4MenuText.text = "";
+                player4MenuText.text = newIsTeams ? defaultEmptyPlayerSlotText : "";
                 player4ScoreText.text = "";
             }
 
