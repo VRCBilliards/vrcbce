@@ -115,9 +115,6 @@ namespace VRCBilliards
         private const float COSA = 0.95976971915f;
         private const float F = 1.72909790282f;
 
-        public string uniformTableColour = "_EmissionColour";
-        public string uniformMarkerColour = "_Color";
-        public string unofmrCueColour = "_EmissionColor";
         private const float desktopCursorSpeed = 0.035f;
 
         /*
@@ -128,6 +125,11 @@ namespace VRCBilliards
         public GameObject baseObject;
         public PoolMenu poolMenu;
         public GameObject shadows;
+
+        [Header("Shader Information")]
+        public string uniformTableColour = "_EmissionColour";
+        public string uniformMarkerColour = "_Color";
+        public string unofmrCueColour = "_EmissionColor";
 
         [Header("Options")]
         [Tooltip("Use fake shadows? Fake shadows are high-performance, but they may clash with your world's lighting.")]
