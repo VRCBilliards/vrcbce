@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: PoolStateManager
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 68def5afb169b0b41be5d9ee253758c4,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 090c7a231f3c9e2489d303eb59560870,
     type: 2}
   udonAssembly: 
   assemblyError: 
@@ -1450,7 +1450,7 @@ MonoBehaviour:
       Data: 
     - Name: declarationType
       Entry: 3
-      Data: 258
+      Data: 1
     - Name: syncMode
       Entry: 3
       Data: 0
@@ -1507,7 +1507,7 @@ MonoBehaviour:
       Data: 78
     - Name: declarationType
       Entry: 3
-      Data: 258
+      Data: 1
     - Name: syncMode
       Entry: 3
       Data: 0
@@ -1564,7 +1564,7 @@ MonoBehaviour:
       Data: 78
     - Name: declarationType
       Entry: 3
-      Data: 258
+      Data: 1
     - Name: syncMode
       Entry: 3
       Data: 0
