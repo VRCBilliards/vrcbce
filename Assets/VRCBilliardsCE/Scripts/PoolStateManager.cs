@@ -127,7 +127,7 @@ namespace VRCBilliards
         public GameObject shadows;
 
         [Header("Shader Information")]
-        public string uniformTableColour = "_EmissionColour";
+        public string uniformTableColour = "_EmissionColor";
         public string uniformMarkerColour = "_Color";
         public string unofmrCueColour = "_EmissionColor";
 
