@@ -40,7 +40,7 @@
 			v2f vert (appdata v)
 			{
 				v2f o;
-				float offset = _ShadowOffset - 0.0025;
+				float offset = _ShadowOffset - 0.000025;
 				float3 base = mul( unity_ObjectToWorld, float4(0.0,0.0,0.0,1.0) );
 				float scale = 1-saturate(abs(base.y - offset) * 15);
 

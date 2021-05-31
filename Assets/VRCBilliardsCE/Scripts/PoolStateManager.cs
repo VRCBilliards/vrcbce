@@ -1,7 +1,9 @@
 ﻿using System;
 using UdonSharp;
 using UnityEngine;
+using UnityEngine.Animations;
 using UnityEngine.Rendering;
+using UnityEngine.UI;
 using VRC.SDKBase;
 
 namespace VRCBilliards
@@ -113,9 +115,6 @@ namespace VRCBilliards
         private const float COSA = 0.95976971915f;
         private const float F = 1.72909790282f;
 
-        private const string uniformTableColour = "_EmissionColour";
-        private const string uniformMarkerColour = "_Color";
-        private const string unofmrCueColour = "_EmissionColor";
         private const float desktopCursorSpeed = 0.035f;
 
         /*
@@ -125,6 +124,19 @@ namespace VRCBilliards
         [Header("Other VRCBilliards Components")]
         public GameObject baseObject;
         public PoolMenu poolMenu;
+        public GameObject shadows;
+
+        [Header("Shader Information")]
+        public string uniformTableColour = "_EmissionColour";
+        public string uniformMarkerColour = "_Color";
+        public string unofmrCueColour = "_EmissionColor";
+
+        [Header("Options")]
+        [Tooltip("Use fake shadows? Fake shadows are high-performance, but they may clash with your world's lighting.")]
+        public bool fakeBallShadows = true;
+        [Tooltip("Change the length of the intro ball-drop animation. If you set this to zero, the animation will not play at all.")]
+        [Range(0f, 5f)]
+        public float introAnimationLength = 2.0f;
 
         [Header("Table Colours")]
         public Color tableBlue = new Color(0.0f, 0.75f, 1.75f, 1.0f);
@@ -159,6 +171,8 @@ namespace VRCBilliards
         [Header("Table Objects")]
         [Tooltip("The balls that are used by the table.\nThe order of the balls is as follows: cue, black, all blue in ascending order, then all orange in ascending order.\nIf the order of the balls is incorrect, gameplay will not proceed correctly.")]
         public GameObject[] balls;
+        [Tooltip("The shadow object for each ball")]
+        public PositionConstraint[] ballShadowPosConstraints;
         public GameObject cueTip;
         public GameObject guideline;
         public GameObject devhit;
@@ -208,17 +222,17 @@ namespace VRCBilliards
         private Quaternion baseObjectRot;
 
         /// <summary>
-        /// 19:0 (0x01)		True whilst balls are rolling
+        /// True whilst balls are rolling
         /// </summary>
         [UdonSynced]
         private bool gameIsSimulating;
         /// <summary>
-        /// 19:13 (0x6000)	Timer ID 2 bit		{ 0: inf, 1: 10s, 2: 15s, 3: 30s, 4: 60s, 5: undefined }
+        /// Timer ID 2 bit	{ 0: inf, 1: 10s, 2: 15s, 3: 30s, 4: 60s, 5: undefined }
         /// </summary>
         [UdonSynced]
         private uint timerType;
         /// <summary>
-        /// 19:7 (0x80)		Permission for player to play
+        /// Permission for player to play
         /// </summary>
         [UdonSynced]
         private bool isPlayerAllowedToPlay;
@@ -227,6 +241,9 @@ namespace VRCBilliards
         /// </summary>
         private bool isArmed;
         private int localPlayerID = -1;
+
+        [UdonSynced]
+        private bool guideLineEnabled = true;
 
         [Header("Desktop Stuff")]
         public GameObject desktopCursorObject;
@@ -458,6 +475,9 @@ namespace VRCBilliards
         [UdonSynced]
         private bool gameWasReset;
 
+        private float ballShadowOffset;
+        private MeshRenderer[] shadowRenders;
+
         /// SUBSCRIPTIONS
 
         public void Start()
@@ -498,6 +518,15 @@ namespace VRCBilliards
             marker.SetActive(false);
             marker9ball.SetActive(false);
             point4Ball.SetActive(false);
+
+            shadows.SetActive(fakeBallShadows);
+            ballShadowOffset = balls[0].transform.position.y - ballShadowPosConstraints[0].gameObject.transform.position.y;
+            if (logger)
+            {
+                logger.Log(name, $"ball shadow offset is {ballShadowOffset}");
+            }
+
+            shadowRenders = shadows.GetComponentsInChildren<MeshRenderer>();
         }
 
         public void Update()
@@ -651,7 +680,11 @@ namespace VRCBilliards
                     // Get where the cue will strike the ball
                     if (IsIntersectiNgWithSphere(lpos2, cueVDir, cueballPosition))
                     {
-                        guideline.SetActive(true);
+                        if (guideLineEnabled)
+                        {
+                            guideline.SetActive(true);
+                        }
+
                         devhit.SetActive(true);
                         devhit.transform.localPosition = raySphereOutput;
 
@@ -745,23 +778,60 @@ namespace VRCBilliards
                 }
 
                 // Cueball drops late
-                temp = balls[0].transform.localPosition;
+                GameObject ball = balls[0];
+                temp = ball.transform.localPosition;
+                float height = ball.transform.position.y - ballShadowOffset;
+
                 atime = Mathf.Clamp(introAminTimer - 0.33f, 0.0f, 1.0f);
                 aitime = 1.0f - atime;
                 temp.y = Mathf.Abs(Mathf.Cos(atime * 6.29f)) * atime * 0.5f;
-                balls[0].transform.localPosition = temp;
-                balls[0].transform.localScale = new Vector3(aitime, aitime, aitime);
+                ball.transform.localPosition = temp;
+
+                Vector3 scale = new Vector3(aitime, aitime, aitime);
+                ball.transform.localScale = scale;
+
+                PositionConstraint posCon = ballShadowPosConstraints[0];
+                posCon.constraintActive = false;
+                posCon.gameObject.transform.position = new Vector3(ball.transform.position.x, height, ball.transform.position.z);
+                posCon.gameObject.transform.localScale = scale;
+
+                MeshRenderer r = shadowRenders[0];
+                Color c = r.material.color;
+                r.material.color = new Color(c.r, c.g, c.b, aitime);
 
                 for (int i = 1; i < 16; i++)
                 {
-                    temp = balls[i].transform.localPosition;
+                    ball = balls[i];
+
+                    temp = ball.transform.localPosition;
+                    height = ball.transform.position.y - ballShadowOffset;
+
                     atime = Mathf.Clamp(introAminTimer - 0.84f - (i * 0.03f), 0.0f, 1.0f);
                     aitime = 1.0f - atime;
 
                     temp.y = Mathf.Abs(Mathf.Cos(atime * 6.29f)) * atime * 0.5f;
-                    balls[i].transform.localPosition = temp;
-                    balls[i].transform.localScale = new Vector3(aitime, aitime, aitime);
+                    ball.transform.localPosition = temp;
+
+                    scale = new Vector3(aitime, aitime, aitime);
+                    ball.transform.localScale = scale;
+
+                    posCon = ballShadowPosConstraints[i];
+                    posCon.constraintActive = false;
+                    posCon.gameObject.transform.position = new Vector3(ball.transform.position.x, height, ball.transform.position.z);
+                    posCon.gameObject.transform.localScale = scale;
+
+                    r = shadowRenders[i];
+                    c = r.material.color;
+                    r.material.color = new Color(c.r, c.g, c.b, aitime);
                 }
+            }
+        }
+
+        public void _ReEnableShadowConstraints()
+        {
+            foreach (PositionConstraint con in ballShadowPosConstraints)
+            {
+                con.constraintActive = true;
             }
         }
 
@@ -958,6 +1028,30 @@ namespace VRCBilliards
             Networking.SetOwner(Networking.LocalPlayer, gameObject);
 
             isTeams = false;
+            RefreshNetworkData(false);
+        }
+
+        public void EnableGuideline()
+        {
+            if (logger)
+            {
+                logger.Log(name, "EnableGuideline");
+            }
+
+            Networking.SetOwner(Networking.LocalPlayer, gameObject);
+            guideLineEnabled = true;
+            RefreshNetworkData(false);
+        }
+
+        public void DisableGuideline()
+        {
+            if (logger)
+            {
+                logger.Log(name, "DisableGuideline");
+            }
+
+            Networking.SetOwner(Networking.LocalPlayer, gameObject);
+            guideLineEnabled = false;
             RefreshNetworkData(false);
         }
 
@@ -1309,7 +1403,7 @@ namespace VRCBilliards
                     Some notes on what's going on below:
                     &= is bitwise AND. 0b0101 &= 0b0100 is 0b0100
                     |= is bitwise OR. 0b0101 |= 0b0100 is 0b0101
-                    << is a bitshift leftwards. 
+                    << is a bitshift leftwards.
                     */
 
                     uint bmask = 0b1111111111111100;
@@ -1509,16 +1603,16 @@ namespace VRCBilliards
                     A = currentBallPositions[index];
 
                     // REGIONS
-                    /*  
+                    /*
                         *  QUADS:							SUBSECTION:				SUBSECTION:
                         *    zx, zy:							zz:						zw:
-                        *																
+                        *
                         *  o----o----o  +:  1			\_________/				\_________/
                         *  | -+ | ++ |  -: -1		     |	    /		              /  /
                         *  |----+----|					  -  |  +   |		      -     /   |
                         *  | -- | +- |						  |	   |		          /  +  |
                         *  o----o----o						  |      |             /       |
-                        * 
+                        *
                         */
 
                     // Setup major regions
@@ -1740,7 +1834,8 @@ namespace VRCBilliards
                 player1ID,
                 player2ID,
                 player3ID,
-                player4ID
+                player4ID,
+                guideLineEnabled
             );
 
             if (isGameInMenus)
@@ -2015,7 +2110,8 @@ namespace VRCBilliards
                 player1ID,
                 player2ID,
                 player3ID,
-                player4ID
+                player4ID,
+                guideLineEnabled
             );
 
             poolMenu.EnableMainMenu();
@@ -2227,11 +2323,13 @@ namespace VRCBilliards
                 for (int i = 0; i <= 9; i++)
                 {
                     balls[i].SetActive(true);
+                    ballShadowPosConstraints[i].gameObject.SetActive(true);
                 }
 
                 for (int i = 10; i < 16; i++)
                 {
                     balls[i].SetActive(false);
+                    ballShadowPosConstraints[i].gameObject.SetActive(false);
                 }
             }
             else if (isFourBall)
@@ -2239,24 +2337,36 @@ namespace VRCBilliards
                 for (int i = 1; i < 16; i++)
                 {
                     balls[i].SetActive(false);
+                    ballShadowPosConstraints[i].gameObject.SetActive(false);
                 }
 
-                balls[0].SetActive(true);
-                balls[2].SetActive(true);
-                balls[3].SetActive(true);
-                balls[9].SetActive(true);
+                balls[0].gameObject.SetActive(true);
+                balls[2].gameObject.SetActive(true);
+                balls[3].gameObject.SetActive(true);
+                balls[9].gameObject.SetActive(true);
+
+                ballShadowPosConstraints[0].gameObject.SetActive(true);
+                ballShadowPosConstraints[2].gameObject.SetActive(true);
+                ballShadowPosConstraints[3].gameObject.SetActive(true);
+                ballShadowPosConstraints[9].gameObject.SetActive(true);
+
             }
             else
             {
                 for (int i = 0; i < 16; i++)
                 {
                     balls[i].SetActive(true);
+                    ballShadowPosConstraints[i].gameObject.SetActive(true);
                 }
             }
 
             // Effects
-            introAminTimer = 2.0f;
-            mainSrc.PlayOneShot(introSfx, 1.0f);
+            introAminTimer = introAnimationLength;
+            if (introAminTimer > 0.0f)
+            {
+                mainSrc.PlayOneShot(introSfx, 1.0f);
+                SendCustomEventDelayedSeconds(nameof(_ReEnableShadowConstraints), introAnimationLength);
+            }
 
             isTimerRunning = false;
 
@@ -2350,7 +2460,7 @@ namespace VRCBilliards
             //
             // f = 2/7
             // f₁ = 5/7
-            // 
+            //
             // Velocity delta:
             //   Δvₓ = −vₓ∙( f∙sin²θ + (1+e)∙cos²θ ) − Rωᵤ∙sinθ
             //   Δvᵧ = 0
@@ -2360,8 +2470,8 @@ namespace VRCBilliards
             //   Sₓ = vₓ∙sinθ - vᵧ∙cosθ+ωᵤ
             //   Sᵧ = 0
             //   Sᵤ = -vᵤ - ωᵧ∙cosθ + ωₓ∙cosθ
-            //   
-            //   k = (5∙Sᵤ) / ( 2∙mRA ); 
+            //
+            //   k = (5∙Sᵤ) / ( 2∙mRA );
             //   c = vₓ∙cosθ - vᵧ∙cosθ
             //
             // Angular delta:
@@ -2392,7 +2502,7 @@ namespace VRCBilliards
 
             //V1.x = -V.x * ((2.0f/7.0f) * SINA2 + EP1 * COSA2) - (2.0f/7.0f) * BALL_PL_X * W.z * SINA;
             //V1.z = (5.0f/7.0f)*V.z + (2.0f/7.0f) * BALL_PL_X * (W.x * SINA - W.y * COSA) - V.z;
-            //V1.y = 0.0f; 
+            //V1.y = 0.0f;
             // (baked):
             V1.x = (-V.x * F) - (0.00240675711f * W.z);
             V1.z = (0.71428571428f * V.z) + (0.00857142857f * ((W.x * SINA) - (W.y * COSA))) - V.z;
@@ -2403,7 +2513,7 @@ namespace VRCBilliards
             s_x = (V.x * SINA) + W.z;
             s_z = -V.z - (W.y * COSA) + (W.x * SINA);
 
-            // k = (5.0f * s_z) / ( 2 * BALL_MASS * A ); 
+            // k = (5.0f * s_z) / ( 2 * BALL_MASS * A );
             // (baked):
             k = s_z * 0.71428571428f;
 
@@ -2460,13 +2570,13 @@ namespace VRCBilliards
             Vector3 W = currentAngularVelocities[ballID];
 
             // Equations derived from: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.89.4627&rep=rep1&type=pdf
-            // 
+            //
             // R: Contact location with ball and floor aka: (0,-r,0)
             // µₛ: Slipping friction coefficient
             // µᵣ: Rolling friction coefficient
             // i: Up vector aka: (0,1,0)
             // g: Planet Earth's gravitation acceleration ( 9.80665 )
-            // 
+            //
             // Relative contact velocity (marlow):
             //   c = v + R✕ω
             //
