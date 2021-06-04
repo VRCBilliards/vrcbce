@@ -356,6 +356,7 @@ namespace VRCBilliards
         /// <summary>
         /// Repositioner is active
         /// </summary>
+        [UdonSynced]
         private bool isRepositioningCueBall;
         /// <summary>
         /// For clamping to table or set lower for kitchen
@@ -615,8 +616,6 @@ namespace VRCBilliards
             // if shot is prepared for next hit
             if (isPlayerAllowedToPlay)
             {
-                bool isContact = false;
-
                 if (isRepositioningCueBall)
                 {
                     // Clamp position to table / kitchen
@@ -642,7 +641,7 @@ namespace VRCBilliards
 
                 Vector3 cueballPosition = currentBallPositions[0];
 
-                if (isArmed && !isContact)
+                if (isArmed)
                 {
                     float sweepTimeBall = Vector3.Dot(cueballPosition - cueLLPos, cueVDir);
 
@@ -941,7 +940,7 @@ namespace VRCBilliards
             RefreshNetworkData(false);
         }
 
-        private void removePlayerFromGame(int playerID)
+        private void RemovePlayerFromGame(int playerID)
         {
             Networking.SetOwner(Networking.LocalPlayer, gameObject);
 
@@ -964,11 +963,6 @@ namespace VRCBilliards
             }
 
             RefreshNetworkData(false);
-        }
-
-        private void endGameAsPlayerLeft()
-        {
-
         }
 
         public void IncreaseTimer()
@@ -1272,6 +1266,11 @@ namespace VRCBilliards
 
             if (!IsCueContacting())
             {
+                if (logger)
+                {
+                    logger.Log(name, "disabling marker because the ball hase been placed");
+                }
+
                 isRepositioningCueBall = false;
                 marker.SetActive(false);
 
@@ -1755,6 +1754,8 @@ namespace VRCBilliards
                 logger.Log(name, "ReadNetworkData");
             }
 
+            marker.SetActive(false);
+
             // Events ==========================================================================================================
 
             if (gameID > oldGameID && !isGameInMenus)
@@ -1763,14 +1764,15 @@ namespace VRCBilliards
 
                 if (((localPlayerID >= 0) && (playerIsTeam2 == newIsTeam2Turn)) || isGameModePractice)
                 {
+                    if (logger)
+                    {
+                        logger.Log(name, "enabling marker because it is the start of the game and we are breaking");
+                    }
+
                     isRepositioningCueBall = true;
                     repoMaxX = -SPOT_POSITION_X;
                     marker.transform.localPosition = currentBallPositions[0];
                     marker.SetActive(true);
-                }
-                else
-                {
-                    marker.SetActive(false);
                 }
             }
 
@@ -2089,6 +2091,10 @@ namespace VRCBilliards
 
             RackBalls();   // To make sure rigidbodies are completely off
 
+            if (logger)
+            {
+                logger.Log(name, "disabling marker because the game is over");
+            }
             isRepositioningCueBall = false;
             marker.SetActive(false);
 
@@ -2167,6 +2173,11 @@ namespace VRCBilliards
             {
                 isRepositioningCueBall = true;
                 repoMaxX = TABLE_WIDTH;
+
+                if (logger)
+                {
+                    logger.Log(name, "enabling marker because it is our turn and there was a foul last turn");
+                }
                 marker.SetActive(true);
                 marker.transform.localPosition = currentBallPositions[0];
             }
@@ -3087,8 +3098,10 @@ namespace VRCBilliards
 
         private void HitBallWithCue()
         {
-            // Make sure repositioner is turned off if the player decides he just
-            // wanted to hit it without putting it somewhere
+            if (logger)
+            {
+                logger.Log(name, "disabling marker because the ball hase been hit");
+            }
             isRepositioningCueBall = false;
             marker.SetActive(false);
             devhit.SetActive(false);
@@ -3184,7 +3197,7 @@ namespace VRCBilliards
             {
                 if (isGameInMenus)
                 {
-                    removePlayerFromGame(player.playerId);
+                    RemovePlayerFromGame(player.playerId);
                 }
                 else
                 {
