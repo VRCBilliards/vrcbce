@@ -1,4 +1,4 @@
-﻿using UdonSharp;
+using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 
@@ -149,7 +149,7 @@ namespace VRCBilliards
                 {
                     // TODO: Fix a bug where 2p on Desktop doesn't see their cue.
 
-                    // put cue at base position	
+                    // put cue at base position
                     cueParent.transform.position = cueMainGripOriginalPosition;
                     cueParent.transform.LookAt(cueOffhandGripOriginalPosition);
                 }
@@ -204,7 +204,7 @@ namespace VRCBilliards
             target.transform.localScale = Vector3.one; //TODO: This code is defective.
 
             // Register the cuetip with main game
-            // gameController.cuetip = objTip; 
+            // gameController.cuetip = objTip;
 
             // Not sure if this is necessary to do both since we pickup this one, but just to be safe
             Networking.SetOwner(Networking.LocalPlayer, gameObject);

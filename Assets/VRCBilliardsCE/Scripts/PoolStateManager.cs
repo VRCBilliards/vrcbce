@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.Animations;

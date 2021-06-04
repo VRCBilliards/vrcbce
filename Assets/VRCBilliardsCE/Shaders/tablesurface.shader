@@ -1,4 +1,4 @@
-﻿Shader "VRCBilliards/TableSurface"
+Shader "VRCBilliards/TableSurface"
 {
 	Properties
 	{
@@ -34,7 +34,7 @@
 		fixed4 _EmissionColour;
 		fixed3 _ClothColour;
 
-		void vert ( inout appdata_full v, out Input o ) 
+		void vert ( inout appdata_full v, out Input o )
 		{
 			UNITY_INITIALIZE_OUTPUT(Input,o);
          o.modelPos = v.vertex.xyz;
