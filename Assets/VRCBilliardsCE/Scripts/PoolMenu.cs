@@ -1,8 +1,9 @@
-using TMPro;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon;
+using UnityEngine.UI;
+using TMPro;
 
 namespace VRCBilliards
 {
@@ -13,35 +14,35 @@ namespace VRCBilliards
         public GameObject resetGameButton;
         public GameObject lockMenu;
         public GameObject mainMenu;
-        public GameObject player1Button;
-        public GameObject player2Button;
-        public GameObject player3Button;
-        public GameObject player4Button;
+        public Button player1Button;
+        public Button player2Button;
+        public Button player3Button;
+        public Button player4Button;
         public GameObject leaveButton;
         public GameObject startGameButton;
         public GameObject guideLineEnableButton;
         public GameObject guideLineDisableButton;
 
-        public TextMeshProUGUI teamsTxt;
-        public TextMeshProUGUI gameModeTxt;
-        public TextMeshProUGUI timer;
-        public TextMeshProUGUI guidelineStatus;
+        public Text teamsTxt;
+        public Text gameModeTxt;
+        public Text timer;
+        public Text guidelineStatus;
 
         public string defaultEmptyPlayerSlotText = "Open Slot";
-        public TextMeshProUGUI player1MenuText;
-        public TextMeshProUGUI player2MenuText;
-        public TextMeshProUGUI player3MenuText;
-        public TextMeshProUGUI player4MenuText;
+        public Text player1MenuText;
+        public Text player2MenuText;
+        public Text player3MenuText;
+        public Text player4MenuText;
 
-        public TextMeshProUGUI player1ScoreText;
-        public TextMeshProUGUI player2ScoreText;
-        public TextMeshProUGUI player3ScoreText;
-        public TextMeshProUGUI player4ScoreText;
+        public Text player1ScoreText;
+        public Text player2ScoreText;
+        public Text player3ScoreText;
+        public Text player4ScoreText;
 
-        public TextMeshProUGUI team1ScoreText;
-        public TextMeshProUGUI team2ScoreText;
+        public Text team1ScoreText;
+        public Text team2ScoreText;
 
-        public TextMeshProUGUI winnerText;
+        public Text winnerText;
 
         private bool isTeams;
         private bool isSignedUpToPlay;
@@ -258,10 +259,10 @@ namespace VRCBilliards
             }
 
             leaveButton.SetActive(false);
-            player1Button.SetActive(false);
-            player2Button.SetActive(false);
-            player3Button.SetActive(false);
-            player4Button.SetActive(false);
+            player1Button.interactable = false;
+            player2Button.interactable = false;
+            player3Button.interactable = false;
+            player4Button.interactable = false;
 
             bool found = false;
 
@@ -330,31 +331,27 @@ namespace VRCBilliards
 
             if (!found)
             {
-                player1Button.SetActive(true);
-                player2Button.SetActive(true);
+                player1Button.interactable = true;
+                player2Button.interactable = true;
 
                 if (newIsTeams)
                 {
-                    player3Button.SetActive(true);
-                    player4Button.SetActive(true);
+                    player3Button.interactable = true;
+                    player4Button.interactable = true;
                 }
             }
 
             if (guideline)
             {
-                guideLineDisableButton.SetActive(true);
-                guideLineEnableButton.SetActive(false);
                 guidelineStatus.text = "Guideline On";
             }
             else
             {
-                guideLineDisableButton.SetActive(false);
-                guideLineEnableButton.SetActive(true);
                 guidelineStatus.text = "Guideline Off";
             }
         }
 
-        private bool HandlePlayerState(TextMeshProUGUI menuText, TextMeshProUGUI scoreText, VRCPlayerApi player)
+        private bool HandlePlayerState(Text menuText, Text scoreText, VRCPlayerApi player)
         {
             menuText.text = player.displayName;
             scoreText.text = player.displayName;
@@ -363,10 +360,13 @@ namespace VRCBilliards
             {
                 leaveButton.SetActive(true);
 
-                player1Button.SetActive(false);
-                player2Button.SetActive(false);
-                player3Button.SetActive(false);
-                player4Button.SetActive(false);
+                ///TODO:
+                ///CHANGE FROM BUTTON TO UIToggle
+
+                player1Button.interactable = false;
+                player2Button.interactable = false;
+                player3Button.interactable = false;
+                player4Button.interactable = false;
 
                 return true;
             }

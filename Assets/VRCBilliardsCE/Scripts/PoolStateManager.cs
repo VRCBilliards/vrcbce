@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.Animations;
@@ -129,7 +129,7 @@ namespace VRCBilliards
         [Header("Shader Information")]
         public string uniformTableColour = "_EmissionColor";
         public string uniformMarkerColour = "_Color";
-        public string uniformCueColour = "_EmissionColor";
+        public string unofmrCueColour = "_EmissionColor";
 
         [Header("Options")]
         [Tooltip("Use fake shadows? Fake shadows are high-performance, but they may clash with your world's lighting.")]
@@ -296,7 +296,7 @@ namespace VRCBilliards
         /// 19:4 (0x10)		What colour the players have chosen
         /// </summary>
         [UdonSynced]
-        private bool isPlayer2Blue;
+        private uint playerColours;
         /// <summary>
         /// 19:5 (0x20)	The game isn't running
         /// </summary>
@@ -356,7 +356,6 @@ namespace VRCBilliards
         /// <summary>
         /// Repositioner is active
         /// </summary>
-        [UdonSynced]
         private bool isRepositioningCueBall;
         /// <summary>
         /// For clamping to table or set lower for kitchen
@@ -500,8 +499,8 @@ namespace VRCBilliards
 
             CopyGameStateToOldState();
 
-            cueRenderObjs[0].GetComponent<MeshRenderer>().materials[0].SetColor(uniformCueColour, tableBlack);
-            cueRenderObjs[1].GetComponent<MeshRenderer>().materials[0].SetColor(uniformCueColour, tableBlack);
+            cueRenderObjs[0].GetComponent<MeshRenderer>().materials[0].SetColor(unofmrCueColour, tableBlack);
+            cueRenderObjs[1].GetComponent<MeshRenderer>().materials[0].SetColor(unofmrCueColour, tableBlack);
 
             //guidelineMat.SetMatrix("_BaseTransform", transform.worldToLocalMatrix);
 
@@ -616,6 +615,8 @@ namespace VRCBilliards
             // if shot is prepared for next hit
             if (isPlayerAllowedToPlay)
             {
+                bool isContact = false;
+
                 if (isRepositioningCueBall)
                 {
                     // Clamp position to table / kitchen
@@ -629,19 +630,21 @@ namespace VRCBilliards
                     currentBallPositions[0] = temp;
                     balls[0].transform.localPosition = temp;
 
-                    if (IsCueContacting())
-                    {
-                        marker.GetComponent<MeshRenderer>().material.SetColor(uniformMarkerColour, markerNotOK);
-                    }
-                    else
-                    {
-                        marker.GetComponent<MeshRenderer>().material.SetColor(uniformMarkerColour, markerOK);
-                    }
+                    // isContact = IsCueContacting();
+
+                    // if (isContact)
+                    // {
+                    //     markerMaterial.SetColor(uniformMarkerColour, markerNotOK);
+                    // }
+                    // else
+                    // {
+                    //     markerMaterial.SetColor(uniformMarkerColour, markerOK);
+                    // }
                 }
 
                 Vector3 cueballPosition = currentBallPositions[0];
 
-                if (isArmed)
+                if (isArmed && !isContact)
                 {
                     float sweepTimeBall = Vector3.Dot(cueballPosition - cueLLPos, cueVDir);
 
@@ -940,7 +943,7 @@ namespace VRCBilliards
             RefreshNetworkData(false);
         }
 
-        private void RemovePlayerFromGame(int playerID)
+        private void removePlayerFromGame(int playerID)
         {
             Networking.SetOwner(Networking.LocalPlayer, gameObject);
 
@@ -963,6 +966,11 @@ namespace VRCBilliards
             }
 
             RefreshNetworkData(false);
+        }
+
+        private void endGameAsPlayerLeft()
+        {
+
         }
 
         public void IncreaseTimer()
@@ -1076,7 +1084,7 @@ namespace VRCBilliards
             gameIsSimulating = false;
             isOpen = true;
             isGameInMenus = false;
-            isPlayer2Blue = false;
+            playerColours = 0;
             isTeam2Winner = false;
 
             // Cue ball
@@ -1148,11 +1156,24 @@ namespace VRCBilliards
 
             oldPocketed = ballPocketedState;
 
-            ApplyTableColour(false);
+            ApplyTableColour(0);
 
             Networking.SetOwner(Networking.LocalPlayer, gameObject);
 
             RefreshNetworkData(false);
+        }
+
+        private void ActivateCueBallMover()
+        {
+            if (logger)
+            {
+                logger.Log(name, "ActivateCueBallMover");
+            }
+
+            isRepositioningCueBall = true;
+            repoMaxX = -SPOT_POSITION_X;
+            marker.transform.localPosition = currentBallPositions[0];
+            marker.SetActive(true);
         }
 
         public void Select8Ball()
@@ -1266,11 +1287,6 @@ namespace VRCBilliards
 
             if (!IsCueContacting())
             {
-                if (logger)
-                {
-                    logger.Log(name, "disabling marker because the ball hase been placed");
-                }
-
                 isRepositioningCueBall = false;
                 marker.SetActive(false);
 
@@ -1396,8 +1412,8 @@ namespace VRCBilliards
                     // Quash down the mask if table has closed
                     if (!isOpen)
                     {
-                        bmask &= 0x1FCu << ((int)(Convert.ToUInt32(isPlayer2Blue) ^ Convert.ToUInt32(newIsTeam2Turn)) * 7);
-                        emask = 0x1FCu << ((int)(Convert.ToUInt32(isPlayer2Blue) ^ Convert.ToUInt32(!newIsTeam2Turn)) * 7);
+                        bmask &= 0x1FCu << ((int)(playerColours ^ Convert.ToUInt32(newIsTeam2Turn)) * 7);
+                        emask = 0x1FCu << ((int)(playerColours ^ Convert.ToUInt32(!newIsTeam2Turn)) * 7);
                     }
 
                     // Common informations
@@ -1532,10 +1548,10 @@ namespace VRCBilliards
 
                             if (sunkBlues != sunkOranges)
                             {
-                                isPlayer2Blue = (sunkBlues > sunkOranges) ? newIsTeam2Turn : !newIsTeam2Turn;
+                                playerColours = (sunkBlues > sunkOranges) ? Convert.ToUInt32(newIsTeam2Turn) : Convert.ToUInt32(!newIsTeam2Turn);
 
                                 isOpen = false;
-                                ApplyTableColour(newIsTeam2Turn);
+                                ApplyTableColour(Convert.ToUInt32(newIsTeam2Turn));
                             }
                         }
 
@@ -1701,7 +1717,7 @@ namespace VRCBilliards
                         // This is where we actually save the pocketed/non-pocketed state of balls.
                         ballPocketedState ^= 1U << i;
 
-                        uint bmask = 0x1FCU << ((int)(Convert.ToUInt32(newIsTeam2Turn) ^ Convert.ToUInt32(isPlayer2Blue)) * 7);
+                        uint bmask = 0x1FCU << ((int)(Convert.ToUInt32(newIsTeam2Turn) ^ playerColours) * 7);
                         mainSrc.PlayOneShot(sinkSfx, 1.0f);
 
                         // If good pocket
@@ -1754,25 +1770,23 @@ namespace VRCBilliards
                 logger.Log(name, "ReadNetworkData");
             }
 
-            marker.SetActive(false);
-
             // Events ==========================================================================================================
 
             if (gameID > oldGameID && !isGameInMenus)
             {
                 OnRemoteNewGame();
 
-                if (((localPlayerID >= 0) && (playerIsTeam2 == newIsTeam2Turn)) || isGameModePractice)
+                if (((localPlayerID >= 0) && (playerIsTeam2 == newIsTeam2Turn)))
                 {
-                    if (logger)
-                    {
-                        logger.Log(name, "enabling marker because it is the start of the game and we are breaking");
-                    }
-
-                    isRepositioningCueBall = true;
-                    repoMaxX = -SPOT_POSITION_X;
-                    marker.transform.localPosition = currentBallPositions[0];
-                    marker.SetActive(true);
+                    ActivateCueBallMover();
+                }
+                else if (isGameModePractice)
+                {
+                    ActivateCueBallMover();
+                }
+                else
+                {
+                    marker.SetActive(false);
                 }
             }
 
@@ -1785,7 +1799,7 @@ namespace VRCBilliards
 
             if (oldOpen && !isOpen)
             {
-                ApplyTableColour(newIsTeam2Turn);
+                ApplyTableColour(Convert.ToUInt32(newIsTeam2Turn));
             }
 
             if (!oldIsGameInMenus && isGameInMenus)
@@ -1927,7 +1941,8 @@ namespace VRCBilliards
         /// <summary>
         /// Updates table colour target to appropriate player colour
         /// </summary>
-        private void ApplyTableColour(bool isTeam2Turn)
+        /// <param name="idsrc"></param>
+        private void ApplyTableColour(uint idsrc)
         {
             if (logger)
             {
@@ -1938,63 +1953,46 @@ namespace VRCBilliards
             {
                 if (!newIsTeam2Turn)
                 {
-                    cueRenderObjs[0].GetComponent<MeshRenderer>().materials[0].SetColor(uniformCueColour, pointerColour0);
-                    cueRenderObjs[1].GetComponent<MeshRenderer>().materials[0].SetColor(uniformCueColour, pointerColour1 * 0.5f);
+                    cueRenderObjs[0].GetComponent<MeshRenderer>().materials[0].SetColor(unofmrCueColour, pointerColour0);
+                    cueRenderObjs[1].GetComponent<MeshRenderer>().materials[0].SetColor(unofmrCueColour, pointerColour1 * 0.5f);
                 }
                 else
                 {
-                    cueRenderObjs[0].GetComponent<MeshRenderer>().materials[0].SetColor(uniformCueColour, pointerColour0 * 0.5f);
-                    cueRenderObjs[1].GetComponent<MeshRenderer>().materials[0].SetColor(uniformCueColour, pointerColour1);
+                    cueRenderObjs[0].GetComponent<MeshRenderer>().materials[0].SetColor(unofmrCueColour, pointerColour0 * 0.5f);
+                    cueRenderObjs[1].GetComponent<MeshRenderer>().materials[0].SetColor(unofmrCueColour, pointerColour1);
                 }
 
                 tableSrcColour = tableBlack;
             }
             else if (isNineBall)
             {
-                cueRenderObjs[Convert.ToInt32(newIsTeam2Turn)].GetComponent<MeshRenderer>().materials[0].SetColor(uniformCueColour, tableWhite);
-                cueRenderObjs[Convert.ToInt32(!newIsTeam2Turn)].GetComponent<MeshRenderer>().materials[0].SetColor(uniformCueColour, tableBlack);
+                cueRenderObjs[Convert.ToInt32(newIsTeam2Turn)].GetComponent<MeshRenderer>().materials[0].SetColor(unofmrCueColour, tableWhite);
+                cueRenderObjs[Convert.ToInt32(!newIsTeam2Turn)].GetComponent<MeshRenderer>().materials[0].SetColor(unofmrCueColour, tableBlack);
 
                 tableSrcColour = pointerColour2;
             }
             else if (!isOpen)
             {
-                if (isTeam2Turn)
+                if ((idsrc ^ playerColours) == 0)
                 {
-                    if (isPlayer2Blue)
-                    {
-                        tableSrcColour = tableBlue;
-                        cueRenderObjs[0].GetComponent<MeshRenderer>().material.SetColor(uniformCueColour, tableOrange * 0.33f);
-                        cueRenderObjs[1].GetComponent<MeshRenderer>().material.SetColor(uniformCueColour, tableBlue);
-                    }
-                    else
-                    {
-                        tableSrcColour = tableOrange;
-                        cueRenderObjs[0].GetComponent<MeshRenderer>().material.SetColor(uniformCueColour, tableBlue * 0.33f);
-                        cueRenderObjs[1].GetComponent<MeshRenderer>().material.SetColor(uniformCueColour, tableOrange);
-                    }
+                    // Set table colour to blue
+                    tableSrcColour = pointerColour0;
                 }
                 else
                 {
-                    if (isPlayer2Blue)
-                    {
-                        tableSrcColour = tableOrange;
-                        cueRenderObjs[0].GetComponent<MeshRenderer>().material.SetColor(uniformCueColour, tableOrange);
-                        cueRenderObjs[1].GetComponent<MeshRenderer>().material.SetColor(uniformCueColour, tableBlue * 0.33f);
-                    }
-                    else
-                    {
-                        tableSrcColour = tableBlue;
-                        cueRenderObjs[0].GetComponent<MeshRenderer>().material.SetColor(uniformCueColour, tableBlue);
-                        cueRenderObjs[1].GetComponent<MeshRenderer>().material.SetColor(uniformCueColour, tableOrange * 0.33f);
-                    }
+                    // Table colour to orange
+                    tableSrcColour = pointerColour1;
                 }
+
+                cueRenderObjs[playerColours].GetComponent<MeshRenderer>().materials[0].SetColor(unofmrCueColour, pointerColour0);
+                cueRenderObjs[playerColours ^ 0x1u].GetComponent<MeshRenderer>().materials[0].SetColor(unofmrCueColour, pointerColour1);
             }
             else
             {
                 tableSrcColour = pointerColour2;
 
-                cueRenderObjs[Convert.ToInt32(newIsTeam2Turn)].GetComponent<MeshRenderer>().materials[0].SetColor(uniformCueColour, tableWhite);
-                cueRenderObjs[Convert.ToInt32(!newIsTeam2Turn)].GetComponent<MeshRenderer>().materials[0].SetColor(uniformCueColour, tableBlack);
+                cueRenderObjs[Convert.ToInt32(newIsTeam2Turn)].GetComponent<MeshRenderer>().materials[0].SetColor(unofmrCueColour, tableWhite);
+                cueRenderObjs[Convert.ToInt32(!newIsTeam2Turn)].GetComponent<MeshRenderer>().materials[0].SetColor(unofmrCueColour, tableBlack);
             }
 
             cueGrips[Convert.ToInt32(newIsTeam2Turn)].SetColor(uniformMarkerColour, gripColourActive);
@@ -2073,7 +2071,7 @@ namespace VRCBilliards
                 logger.Log(name, "OnRemoteGameOver");
             }
 
-            ApplyTableColour(isTeam2Winner);
+            ApplyTableColour(Convert.ToUInt32(isTeam2Winner));
 
             if (gameWasReset)
             {
@@ -2091,10 +2089,6 @@ namespace VRCBilliards
 
             RackBalls();   // To make sure rigidbodies are completely off
 
-            if (logger)
-            {
-                logger.Log(name, "disabling marker because the game is over");
-            }
             isRepositioningCueBall = false;
             marker.SetActive(false);
 
@@ -2131,7 +2125,7 @@ namespace VRCBilliards
             }
 
             // Effects
-            ApplyTableColour(newIsTeam2Turn);
+            ApplyTableColour(Convert.ToUInt32(newIsTeam2Turn));
             mainSrc.PlayOneShot(newTurnSfx, 1.0f);
 
             // Register correct cuetip
@@ -2173,11 +2167,6 @@ namespace VRCBilliards
             {
                 isRepositioningCueBall = true;
                 repoMaxX = TABLE_WIDTH;
-
-                if (logger)
-                {
-                    logger.Log(name, "enabling marker because it is our turn and there was a foul last turn");
-                }
                 marker.SetActive(true);
                 marker.transform.localPosition = currentBallPositions[0];
             }
@@ -2297,7 +2286,7 @@ namespace VRCBilliards
                 tableReflection.RenderProbe();
             }
 
-            ApplyTableColour(false);
+            ApplyTableColour(0);
             GrantCueAccess();
 
             if (isNineBall)    // 9 ball specific
@@ -3098,10 +3087,8 @@ namespace VRCBilliards
 
         private void HitBallWithCue()
         {
-            if (logger)
-            {
-                logger.Log(name, "disabling marker because the ball hase been hit");
-            }
+            // Make sure repositioner is turned off if the player decides he just
+            // wanted to hit it without putting it somewhere
             isRepositioningCueBall = false;
             marker.SetActive(false);
             devhit.SetActive(false);
@@ -3156,7 +3143,7 @@ namespace VRCBilliards
                     {
                         if ((temp & 0x4) > 0)
                         {
-                            counters[i ^ Convert.ToUInt32(isPlayer2Blue)]++;
+                            counters[i ^ playerColours]++;
                         }
 
                         temp >>= 1;
@@ -3197,7 +3184,7 @@ namespace VRCBilliards
             {
                 if (isGameInMenus)
                 {
-                    RemovePlayerFromGame(player.playerId);
+                    removePlayerFromGame(player.playerId);
                 }
                 else
                 {

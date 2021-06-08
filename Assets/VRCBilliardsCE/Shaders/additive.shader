@@ -1,4 +1,4 @@
-Shader "VRCBilliards/additive"
+﻿Shader "VRCBilliards/additive"
 {
     Properties
     {
@@ -7,7 +7,7 @@ Shader "VRCBilliards/additive"
     SubShader
     {
 			Tags { "Queue" = "Transparent" }
-
+		
 			ZWrite Off
 			Cull Off
 
