@@ -17,9 +17,16 @@ namespace VRCBilliards
         public Color unselectedColor = Color.gray;
 
         [Header("Menu / Buttons")]
+        public bool useUnityUI;
+        public Button player1UIButton;
+        public Button player2UIButton;
+        public Button player3UIButton;
+        public Button player4UIButton;
+
         public GameObject resetGameButton;
         public GameObject lockMenu;
         public GameObject mainMenu;
+
         public GameObject startGameButton;
 
         [Header("Game Mode")]
@@ -41,7 +48,7 @@ namespace VRCBilliards
 
         [Header("Teams")]
         public TextMeshProUGUI teamsTxt;
-        public Image[] teamsButtons = {};
+        public Image[] teamsButtons = { };
 
         [Header("Players")]
         public GameObject player1Button;
@@ -212,8 +219,11 @@ namespace VRCBilliards
         private void UpdateButtonColors(Image[] buttons, int selectedIndex)
         {
             if (buttons == null) return;
+
             for (int i = 0; i < buttons.Length; i++)
             {
+                if (buttons[i] == null) continue;
+
                 buttons[i].color = i == selectedIndex ? selectedColor : unselectedColor;
             }
         }
@@ -297,10 +307,21 @@ namespace VRCBilliards
             if (Utilities.IsValid(noTimerButton)) noTimerButton.color = timerMode == 0 ? selectedColor : unselectedColor;
 
             leaveButton.SetActive(false);
-            player1Button.SetActive(false);
-            player2Button.SetActive(false);
-            player3Button.SetActive(false);
-            player4Button.SetActive(false);
+
+            if (useUnityUI)
+            {
+                player1UIButton.interactable = false;
+                player2UIButton.interactable = false;
+                player3UIButton.interactable = false;
+                player4UIButton.interactable = false;
+            }
+            else
+            {
+                player1Button.SetActive(false);
+                player2Button.SetActive(false);
+                player3Button.SetActive(false);
+                player4Button.SetActive(false);
+            }
 
             bool found = false;
 
@@ -369,33 +390,52 @@ namespace VRCBilliards
 
             if (!found)
             {
-                player1Button.SetActive(true);
-                player2Button.SetActive(true);
+                if (useUnityUI)
+                {
+                    player1UIButton.interactable = true;
+                    player2UIButton.interactable = true;
+
+                }
+                else
+                {
+                    player1Button.SetActive(true);
+                    player2Button.SetActive(true);
+                }
 
                 if (newIsTeams)
                 {
-                    player3Button.SetActive(true);
-                    player4Button.SetActive(true);
+                    if (useUnityUI)
+                    {
+                        player3UIButton.interactable = true;
+                        player4UIButton.interactable = true;
+                    }
+                    else
+                    {
+                        player3Button.SetActive(true);
+                        player4Button.SetActive(true);
+                    }
                 }
             }
 
             if (guideline)
             {
-                if (toggleGuideLineButtonsActive)
+                if (toggleGuideLineButtonsActive && !useUnityUI)
                 {
                     guideLineDisableButton.SetActive(true);
                     guideLineEnableButton.SetActive(false);
                 }
+
                 UpdateButtonColors(guideLineButtons, 0);
                 if (Utilities.IsValid(guidelineStatus)) guidelineStatus.text = "Guideline On";
             }
             else
             {
-                if (toggleGuideLineButtonsActive)
+                if (toggleGuideLineButtonsActive && !useUnityUI)
                 {
                     guideLineDisableButton.SetActive(false);
                     guideLineEnableButton.SetActive(true);
                 }
+
                 UpdateButtonColors(guideLineButtons, 1);
                 if (Utilities.IsValid(guidelineStatus)) guidelineStatus.text = "Guideline Off";
             }
@@ -410,10 +450,21 @@ namespace VRCBilliards
             {
                 leaveButton.SetActive(true);
 
-                player1Button.SetActive(false);
-                player2Button.SetActive(false);
-                player3Button.SetActive(false);
-                player4Button.SetActive(false);
+                if (useUnityUI)
+                {
+                    player1UIButton.interactable = false;
+                    player2UIButton.interactable = false;
+                    player3UIButton.interactable = false;
+                    player4UIButton.interactable = false;
+                }
+                else
+                {
+                    player1Button.SetActive(false);
+                    player2Button.SetActive(false);
+                    player3Button.SetActive(false);
+                    player4Button.SetActive(false);
+
+                }
 
                 return true;
             }
