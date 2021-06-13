@@ -44,6 +44,20 @@ Installation Steps:
 3. Import all the assets.
 4. In your Project folder, find "PoolTable" inside the VRCBilliards folder and drag-and-drop it into the scene.
 
+# Layer Requirements
+
+This prefab currently expects to be able to use Layer 23 for its desktop top-down camera! Layer 23 is unused by VRChat, but a Unity quirk means that this layer will not show up in your list of layers AND you'll need to manage this layer's collisions yourself.
+
+In the layers drop-down on the top right of your Unity window, select add layer, then name Layer 23 something.
+
+![Layer setup](https://i.imgur.com/1NDVoEV.png)
+
+Afterwards, go to your physics settings inside Project Settings in the Edit menu at the top of the screen, and make sure Layer 23 only collides with itself:
+
+![Physics setup](https://i.imgur.com/3ee8eVd.png)
+
+(This reminder was brought to you by Orels1 bugging me on the Prefabs Discord. Check our their [toolkit!](https://github.com/orels1/UdonToolkit))
+
 # Notes on "Community"
 
 This is a full, history-free fork of the Harry_T 8Ball prefab. This project is an alternative to that prefab, but is not a competitor. This prefab exists as a Community Edition which simplifies the code a lot and makes it easier to edit. It is also provided under MIT, and the maintainers of this codebase commit to being open and inclusive to anyone who would like to modify the prefab, add additional modes, fix bugs, and use the prefab as a learning tool.
