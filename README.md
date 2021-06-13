@@ -67,3 +67,7 @@ We encourage anyone to have a go modifying this prefab.
 # Note on Pull Requests to this repo
 
 The code in this project is written to look like normal Unity/C# code. C# has several standards (and teams tend to set their own) but for reference, refer to the Unity documentation, Unity example scripts, and Microsoft's best practice [https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/inside-a-program/coding-conventions](here). Generally, put variables at the top of the behaviour, avoid using underscore ahead of properties and methods unless it's a public method that needs to be non-RPCable for security reasons (a Udon-specific use of the underscore)), use camelCase for properties and arguments, and use PascalCase for everything else.
+
+# Original Creator
+
+The original creator of this prefab was Harry_T. Harry_T did (unsuccessfully) attempt to DMCA this repo off of Github, but didn't realize that they were releasing the exact same assets on their own Github as public domain. They are currently MIA after nuking their Github/Twitter. Despite this, it's only fair to cite them as the original source, and pay credit to the impressive bit of physics code that drives this entire prefab. They also made a small contribution directly to this repo.
