@@ -1,6 +1,7 @@
 using TMPro;
 using UdonSharp;
 using UnityEngine;
+using UnityEngine.UI;
 using VRC.SDKBase;
 using VRC.Udon;
 
@@ -13,10 +14,19 @@ namespace VRCBilliards
         public GameObject resetGameButton;
         public GameObject lockMenu;
         public GameObject mainMenu;
+
+        public bool useUnityUI;
+
         public GameObject player1Button;
         public GameObject player2Button;
         public GameObject player3Button;
         public GameObject player4Button;
+
+        public Button player1UIButton;
+        public Button player2UIButton;
+        public Button player3UIButton;
+        public Button player4UIButton;
+
         public GameObject leaveButton;
         public GameObject startGameButton;
         public GameObject guideLineEnableButton;
@@ -258,10 +268,21 @@ namespace VRCBilliards
             }
 
             leaveButton.SetActive(false);
-            player1Button.SetActive(false);
-            player2Button.SetActive(false);
-            player3Button.SetActive(false);
-            player4Button.SetActive(false);
+
+            if (useUnityUI)
+            {
+                player1UIButton.interactable = false;
+                player2UIButton.interactable = false;
+                player3UIButton.interactable = false;
+                player4UIButton.interactable = false;
+            }
+            else
+            {
+                player1Button.SetActive(false);
+                player2Button.SetActive(false);
+                player3Button.SetActive(false);
+                player4Button.SetActive(false);
+            }
 
             bool found = false;
 
@@ -330,26 +351,51 @@ namespace VRCBilliards
 
             if (!found)
             {
-                player1Button.SetActive(true);
-                player2Button.SetActive(true);
+                if (useUnityUI)
+                {
+                    player1UIButton.interactable = true;
+                    player2UIButton.interactable = true;
+
+                }
+                else
+                {
+                    player1Button.SetActive(true);
+                    player2Button.SetActive(true);
+                }
 
                 if (newIsTeams)
                 {
-                    player3Button.SetActive(true);
-                    player4Button.SetActive(true);
+                    if (useUnityUI)
+                    {
+                        player3UIButton.interactable = true;
+                        player4UIButton.interactable = true;
+                    }
+                    else
+                    {
+                        player3Button.SetActive(true);
+                        player4Button.SetActive(true);
+                    }
                 }
             }
 
             if (guideline)
             {
-                guideLineDisableButton.SetActive(true);
-                guideLineEnableButton.SetActive(false);
+                if (!useUnityUI)
+                {
+                    guideLineDisableButton.SetActive(true);
+                    guideLineEnableButton.SetActive(false);
+                }
+
                 guidelineStatus.text = "Guideline On";
             }
             else
             {
-                guideLineDisableButton.SetActive(false);
-                guideLineEnableButton.SetActive(true);
+                if (!useUnityUI)
+                {
+                    guideLineDisableButton.SetActive(false);
+                    guideLineEnableButton.SetActive(true);
+                }
+
                 guidelineStatus.text = "Guideline Off";
             }
         }
@@ -363,10 +409,21 @@ namespace VRCBilliards
             {
                 leaveButton.SetActive(true);
 
-                player1Button.SetActive(false);
-                player2Button.SetActive(false);
-                player3Button.SetActive(false);
-                player4Button.SetActive(false);
+                if (useUnityUI)
+                {
+                    player1UIButton.interactable = false;
+                    player2UIButton.interactable = false;
+                    player3UIButton.interactable = false;
+                    player4UIButton.interactable = false;
+                }
+                else
+                {
+                    player1Button.SetActive(false);
+                    player2Button.SetActive(false);
+                    player3Button.SetActive(false);
+                    player4Button.SetActive(false);
+
+                }
 
                 return true;
             }
