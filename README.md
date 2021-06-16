@@ -58,6 +58,11 @@ Afterwards, go to your physics settings inside Project Settings in the Edit menu
 
 (This reminder was brought to you by Orels1 bugging me on the Prefabs Discord. Check our their [toolkit!](https://github.com/orels1/UdonToolkit))
 
+# Known Unity-Related Bugs
+
+Problem: The prefab has giant text!
+Solution: Go into the TextMeshPro text component on each of the objects with giant text and scale down the text size (which has likely been reset to TMP's default of 36) to about 3. This will be fixed via not changing text size from the default in a future patch.
+
 # Notes on "Community"
 
 This is a full, history-free fork of the Harry_T 8Ball prefab. This project is an alternative to that prefab, but is not a competitor. This prefab exists as a Community Edition which simplifies the code a lot and makes it easier to edit. It is also provided under MIT, and the maintainers of this codebase commit to being open and inclusive to anyone who would like to modify the prefab, add additional modes, fix bugs, and use the prefab as a learning tool.
