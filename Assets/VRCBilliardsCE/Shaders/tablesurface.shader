@@ -1,4 +1,4 @@
-Shader "VRCBilliards/TableSurface"
+Shader "VRCBCE/TableSurface"
 {
 	Properties
 	{
