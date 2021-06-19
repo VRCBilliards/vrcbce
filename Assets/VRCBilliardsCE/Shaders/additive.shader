@@ -1,4 +1,4 @@
-Shader "VRCBilliards/additive"
+Shader "VRCBCE/Additive"
 {
     Properties
     {
