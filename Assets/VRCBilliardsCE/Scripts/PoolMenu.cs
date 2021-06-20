@@ -503,11 +503,11 @@ namespace VRCBilliards
             {
                 if (isTeam2)
                 {
-                    winnerText.text = $"{player2ScoreText.text} and ${player4ScoreText.text} win!";
+                    winnerText.text = $"{player2ScoreText.text} and {player4ScoreText.text} win!";
                 }
                 else
                 {
-                    winnerText.text = $"{player1ScoreText.text} and ${player3ScoreText.text} win!";
+                    winnerText.text = $"{player1ScoreText.text} and {player3ScoreText.text} win!";
                 }
             }
             else
