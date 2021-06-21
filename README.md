@@ -62,7 +62,7 @@ Afterwards, go to your physics settings inside Project Settings in the Edit menu
 
 Problem: The prefab has giant text!
 
-Solution: Go into the TextMeshPro text component on each of the objects with giant text and scale down the text size (which has likely been reset to TMP's default of 36) to about 3. This will be fixed via not changing text size from the default in a future patch.
+Solution: Go into the TextMeshPro text component on each of the objects with giant text and scale down the text size (which has likely been reset to TMP's default of 36) to about 3. This will be fixed via not changing text size from the default in a future patch. 
 
 # Notes on "Community"
 
