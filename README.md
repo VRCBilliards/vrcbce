@@ -42,7 +42,7 @@ Installation Steps:
 1. Download the latest release's unitpackage: https://github.com/FairlySadPanda/vrcbce/releases
 2. Open the unitypackage in your VRChat world's scene.
 3. Import all the assets.
-4. In your Project folder, find "PoolTable" inside the VRCBilliards folder and drag-and-drop it into the scene.
+4. In your Project folder, find "PoolTable (esnya)" or "PoolTable (M.O.O.N)" prefabs inside the VRCBilliards folder and drag-and-drop it into the scene.
 
 # Layer Requirements
 
