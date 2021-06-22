@@ -25,6 +25,17 @@ namespace FairlySadPanda
                 }
             }
 
+            public void Warning(string source, string log)
+            {
+                Debug.LogWarning($"[{Time.timeSinceLevelLoad:N2}] [<color=red>{source}</color>] {log}");
+                text.text += $"\n[{Time.timeSinceLevelLoad:N2}] [<color=yellow>{source}</color>] {log}";
+                while (text.text.Length > maxChars && text.text.Contains("\n"))
+                {
+                    text.text = text.text.Substring(text.text.IndexOf("\n") + 1);
+                }
+            }
+
+
             public void Error(string source, string log)
             {
                 Debug.LogError($"[{Time.timeSinceLevelLoad:N2}] [<color=red>{source}</color>] {log}");

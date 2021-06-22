@@ -7,7 +7,7 @@ namespace VRCBilliards
     public class PoolOtherHand : UdonSharpBehaviour
     {
         public GameObject objPrimary;
-        private PoolCue usPrimary;
+        private PoolCue cue;
 
         private Vector3 originalDelta;
         private bool isHolding;
@@ -15,13 +15,12 @@ namespace VRCBilliards
 
         public void Start()
         {
-            usPrimary = objPrimary.GetComponent<PoolCue>();
+            cue = objPrimary.GetComponent<PoolCue>();
             OnDrop();
         }
 
         public void Update()
         {
-            // Pseudo-parented while it left is let go
             if (!isHolding && isOtherBeingHeld)
             {
                 gameObject.transform.position = objPrimary.transform.TransformPoint(originalDelta);
@@ -30,12 +29,12 @@ namespace VRCBilliards
 
         public override void OnPickupUseDown()
         {
-            usPrimary.LockOther();
+            //cue.Lock();
         }
 
         public override void OnPickupUseUp()
         {
-            usPrimary.UnlockOther();
+            //cue.Unlock();
         }
 
         public override void OnPickup()
@@ -54,7 +53,7 @@ namespace VRCBilliards
             }
 
             isHolding = false;
-            usPrimary.UnlockOther();
+            //cue.Unlock();
         }
     }
 }

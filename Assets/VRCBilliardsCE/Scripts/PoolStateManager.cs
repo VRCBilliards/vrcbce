@@ -64,7 +64,7 @@ namespace VRCBilliards
         /// <summary>
         /// ball radius squared
         /// </summary>
-        private const float BALL_RSQR = 0.0009f;
+        private const float BALL_RADIUS_SQUARED = 0.0009f;
         /// <summary>
         /// ball diameter squared
         /// </summary>
@@ -117,6 +117,9 @@ namespace VRCBilliards
 
         private const float desktopCursorSpeed = 0.035f;
 
+        private const float DEFAULT_FORCE_MULTIPLIER = 1.5f;
+        private float forceMultiplier;
+
         /*
          * Public Variables
          */
@@ -137,6 +140,8 @@ namespace VRCBilliards
         [Tooltip("Change the length of the intro ball-drop animation. If you set this to zero, the animation will not play at all.")]
         [Range(0f, 5f)]
         public float introAnimationLength = 2.0f;
+        [Tooltip("If enabled, worldspace table scales beyond 1 in x or z will increase the force of hits to compensate, making it easier for regular-sized avatars to play.")]
+        public bool scaleHitForceWithScaleBeyond1;
 
         [Header("Table Colours")]
         public Color tableBlue = new Color(0.0f, 0.75f, 1.75f, 1.0f);
@@ -389,7 +394,7 @@ namespace VRCBilliards
         /// Game should run in practice mode
         /// </summary>
         private bool isGameModePractice;
-        private bool isDesktopShootUI;
+        private bool isInDesktopTopDownView;
         /// <summary>
         /// Interpreted value
         /// </summary>
@@ -441,10 +446,10 @@ namespace VRCBilliards
         /// <summary>
         /// Cue input tracking
         /// </summary>
-        private Vector3 cueLPos;
-        private Vector3 cueLLPos;
-        private Vector3 cueVDir;
-        private Vector3 cueShotDir;
+        private Vector3 localSpacePositionOfCueTip;
+        private Vector3 localSpacePositionOfCueTipLastFrame;
+        private Vector3 cueLocalForwardDirection;
+        private Vector3 cueArmedShotDirection;
         private float cueFDir;
         private Vector3 raySphereOutput;
         private uint lastViewTimer;
@@ -479,10 +484,12 @@ namespace VRCBilliards
         private float ballShadowOffset;
         private MeshRenderer[] shadowRenders;
 
-        /// SUBSCRIPTIONS
+        private bool isPlayerInVR;
 
         public void Start()
         {
+            isPlayerInVR = Networking.LocalPlayer.IsUserInVR();
+
             // Disable the reflection probe on Quest.
 #if UNITY_ANDROID
             tableReflection = null;
@@ -502,8 +509,6 @@ namespace VRCBilliards
 
             cueRenderObjs[0].GetComponent<MeshRenderer>().materials[0].SetColor(uniformCueColour, tableBlack);
             cueRenderObjs[1].GetComponent<MeshRenderer>().materials[0].SetColor(uniformCueColour, tableBlack);
-
-            //guidelineMat.SetMatrix("_BaseTransform", transform.worldToLocalMatrix);
 
             if (tableReflection != null)
             {
@@ -528,6 +533,33 @@ namespace VRCBilliards
             }
 
             shadowRenders = shadows.GetComponentsInChildren<MeshRenderer>();
+
+            Vector3 scale = baseObject.transform.lossyScale;
+            if (!(scale.x == scale.y && scale.y == scale.z))
+            {
+                if (logger)
+                {
+                    logger.Warning(name, "You appear to have scaled this table in a non-uniform way. VRCBCE makes no guarantees of what might happen when you do this. May God have mercy on your soul.");
+                }
+                else
+                {
+                    Debug.LogWarning("You appear to have scaled VRCBCE in a non-uniform way. VRCBCE makes no guarantees of what might happen when you do this. May God have mercy on your soul.");
+                }
+            }
+
+            if (scaleHitForceWithScaleBeyond1 && scale.x > 1f || scale.z > 1f)
+            {
+                float scaler = scale.x > scale.z ? scale.x : scale.z;
+                forceMultiplier = DEFAULT_FORCE_MULTIPLIER * scaler;
+                if (logger)
+                {
+                    logger.Log(name, $"Due to increased scale of {scaler} , setting force multiplier of hits to {DEFAULT_FORCE_MULTIPLIER} * {scaler} = {forceMultiplier}");
+                }
+            }
+            else
+            {
+                forceMultiplier = DEFAULT_FORCE_MULTIPLIER;
+            }
         }
 
         public void Update()
@@ -570,9 +602,23 @@ namespace VRCBilliards
                 }
             }
 
-            if (isDesktopShootUI)
+            if (isInDesktopTopDownView)
             {
-                UpdateDesktopUI();
+                HandleUpdatingDesktopViewUI();
+
+                if (Input.GetKeyDown(KeyCode.E))
+                {
+                    OnDesktopTopDownViewExit();
+                }
+            }
+            else if (canEnterDesktopTopDownView)
+            {
+                HandleUpdatingCanEnterDestopViewUI();
+
+                if (Input.GetKeyDown(KeyCode.E))
+                {
+                    OnDesktopTopDownViewStart();
+                }
             }
 
             // Run sim only if things are moving
@@ -610,8 +656,8 @@ namespace VRCBilliards
                 ballBit <<= 1;
             }
 
-            cueLPos = transform.InverseTransformPoint(cueTip.transform.position);
-            Vector3 lpos2 = cueLPos;
+            localSpacePositionOfCueTip = transform.InverseTransformPoint(cueTip.transform.position);
+            Vector3 copyOfLocalSpacePositionOfCueTip = localSpacePositionOfCueTip;
 
             // if shot is prepared for next hit
             if (isPlayerAllowedToPlay)
@@ -643,39 +689,40 @@ namespace VRCBilliards
 
                 if (isArmed)
                 {
-                    float sweepTimeBall = Vector3.Dot(cueballPosition - cueLLPos, cueVDir);
+                    float sweepTimeBall = Vector3.Dot(cueballPosition - localSpacePositionOfCueTipLastFrame, cueLocalForwardDirection);
 
                     // Check for potential skips due to low frame rate
-                    if (sweepTimeBall > 0.0f && sweepTimeBall < (cueLLPos - lpos2).magnitude)
+                    if (sweepTimeBall > 0.0f && sweepTimeBall < (localSpacePositionOfCueTipLastFrame - copyOfLocalSpacePositionOfCueTip).magnitude)
                     {
-                        lpos2 = cueLLPos + (cueVDir * sweepTimeBall);
+                        copyOfLocalSpacePositionOfCueTip = localSpacePositionOfCueTipLastFrame + (cueLocalForwardDirection * sweepTimeBall);
                     }
 
                     // Hit condition is when cuetip is gone inside ball
-                    if ((lpos2 - cueballPosition).sqrMagnitude < BALL_RSQR)
+                    if ((copyOfLocalSpacePositionOfCueTip - cueballPosition).sqrMagnitude < BALL_RADIUS_SQUARED)
                     {
-                        Vector3 horizontalForce = lpos2 - cueLLPos;
+                        Vector3 horizontalForce = copyOfLocalSpacePositionOfCueTip - localSpacePositionOfCueTipLastFrame;
                         horizontalForce.y = 0.0f;
 
                         // Compute velocity delta
-                        float vel = horizontalForce.magnitude / Time.deltaTime * 1.5f;
+                        float vel = forceMultiplier * (horizontalForce.magnitude / Time.deltaTime);
 
                         // Clamp velocity input to 20 m/s ( moderate break speed )
-                        currentBallVelocities[0] = cueShotDir * Mathf.Min(vel, 20.0f);
+                        currentBallVelocities[0] = cueArmedShotDirection * Mathf.Min(vel, 20.0f);
 
                         // Angular velocity: L=r(normalized)×p
                         Vector3 r = (raySphereOutput - cueballPosition) * BALL_1OR;
-                        Vector3 p = cueVDir * vel;
+                        Vector3 p = cueLocalForwardDirection * vel;
                         currentAngularVelocities[0] = Vector3.Cross(r, p) * -50.0f;
+
                         HitBallWithCue();
                     }
                 }
                 else
                 {
-                    cueVDir = transform.InverseTransformVector(cueTip.transform.forward);
+                    cueLocalForwardDirection = transform.InverseTransformVector(cueTip.transform.forward);
 
                     // Get where the cue will strike the ball
-                    if (IsIntersectiNgWithSphere(lpos2, cueVDir, cueballPosition))
+                    if (IsIntersectiNgWithSphere(copyOfLocalSpacePositionOfCueTip, cueLocalForwardDirection, cueballPosition))
                     {
                         if (guideLineEnabled)
                         {
@@ -685,18 +732,18 @@ namespace VRCBilliards
                         devhit.SetActive(true);
                         devhit.transform.localPosition = raySphereOutput;
 
-                        cueShotDir = cueVDir;
-                        cueShotDir.y = 0.0f;
+                        cueArmedShotDirection = cueLocalForwardDirection;
+                        cueArmedShotDirection.y = 0.0f;
 
-                        if (!isDesktopShootUI)
+                        if (!isInDesktopTopDownView)
                         {
                             // Compute deflection in VR mode
                             Vector3 scuffdir = cueballPosition - raySphereOutput;
                             scuffdir.y = 0.0f;
-                            cueShotDir += scuffdir.normalized * 0.17f;
+                            cueArmedShotDirection += scuffdir.normalized * 0.17f;
                         }
 
-                        cueFDir = Mathf.Atan2(cueShotDir.z, cueShotDir.x);
+                        cueFDir = Mathf.Atan2(cueArmedShotDirection.z, cueArmedShotDirection.x);
 
                         // Update the prediction line direction
                         guideline.transform.localPosition = currentBallPositions[0];
@@ -710,7 +757,7 @@ namespace VRCBilliards
                 }
             }
 
-            cueLLPos = lpos2;
+            localSpacePositionOfCueTipLastFrame = copyOfLocalSpacePositionOfCueTip;
 
             // Table outline colour
             if (isGameInMenus)
@@ -1235,8 +1282,6 @@ namespace VRCBilliards
             if (isOurTurn)
             {
                 isArmed = true;
-
-                //guidelineMat.SetColor("_Colour", aimLocked);
             }
         }
 
@@ -1314,12 +1359,15 @@ namespace VRCBilliards
                 logger.Log(name, "OnDesktopTopDownViewStart");
             }
 
-            isDesktopShootUI = true;
+            isInDesktopTopDownView = true;
             isEntertingDesktopModeThisFrame = true;
             desktopBase.SetActive(true);
 
             // Lock player in place
             Networking.LocalPlayer.Immobilize(true);
+
+            gripControllers[0].DisableConstraints();
+            gripControllers[1].DisableConstraints();
         }
 
         /// <summary>
@@ -2381,18 +2429,18 @@ namespace VRCBilliards
 
             isTimerRunning = false;
 
-            gripControllers[0].inTopDownMode = false;
-            gripControllers[1].inTopDownMode = false;
+            gripControllers[0].localPlayerIsInDesktopTopDownView = false;
+            gripControllers[1].localPlayerIsInDesktopTopDownView = false;
 
             if (!Networking.LocalPlayer.IsUserInVR())
             {
-                gripControllers[0].useDesktop = true;
-                gripControllers[1].useDesktop = true;
+                gripControllers[0].usingDesktop = true;
+                gripControllers[1].usingDesktop = true;
             }
             else
             {
-                gripControllers[0].useDesktop = false;
-                gripControllers[1].useDesktop = false;
+                gripControllers[0].usingDesktop = false;
+                gripControllers[1].usingDesktop = false;
             }
         }
 
@@ -2837,7 +2885,7 @@ namespace VRCBilliards
             Vector3 nrm = dir.normalized;
             Vector3 h = sphere - start;
             float lf = Vector3.Dot(nrm, h);
-            float s = BALL_RSQR - Vector3.Dot(h, h) + (lf * lf);
+            float s = BALL_RADIUS_SQUARED - Vector3.Dot(h, h) + (lf * lf);
 
             if (s < 0.0f)
             {
@@ -2938,27 +2986,24 @@ namespace VRCBilliards
                 logger.Log(name, "OnDesktopTopDownViewExit");
             }
 
-            isDesktopShootUI = false;
+            isInDesktopTopDownView = false;
             desktopBase.SetActive(false);
 
-            gripControllers[0].inTopDownMode = false;
-            gripControllers[1].inTopDownMode = false;
+            gripControllers[0].localPlayerIsInDesktopTopDownView = false;
+            gripControllers[1].localPlayerIsInDesktopTopDownView = false;
 
             Networking.LocalPlayer.Immobilize(false);
+
+            gripControllers[0].EnableConstraints();
+            gripControllers[1].EnableConstraints();
         }
 
         // TODO: Single use function, but it short-circuits so cannot be easily put into its using function.
-        private void UpdateDesktopUI()
+        private void HandleUpdatingDesktopViewUI()
         {
             if (isEntertingDesktopModeThisFrame)
             {
                 isEntertingDesktopModeThisFrame = false;
-                return;
-            }
-
-            if (Input.GetKeyDown(KeyCode.E))
-            {
-                OnDesktopTopDownViewExit();
                 return;
             }
 
@@ -3079,12 +3124,9 @@ namespace VRCBilliards
 
                 desktopHitPosition.transform.localPosition = desktopHitCursor;
 
-                // Get angle
-                float ang = Mathf.Atan2(delta.x, delta.z);
-
                 // Create rotation
                 Quaternion xr = Quaternion.AngleAxis(10.0f, Vector3.right);
-                Quaternion r = Quaternion.AngleAxis(ang * Mathf.Rad2Deg, Vector3.up);
+                Quaternion r = Quaternion.AngleAxis(Mathf.Atan2(delta.x, delta.z) * Mathf.Rad2Deg, Vector3.up);
 
                 Vector3 worldHit = new Vector3(desktopHitCursor.x * BALL_PL_X, desktopHitCursor.z * BALL_PL_X, -0.89f - shootAmt);
 
@@ -3205,6 +3247,99 @@ namespace VRCBilliards
                     ForceReset();
                 }
             }
+        }
+
+        /// <Summary> The object that contains the UI that appears when you can press E to enter the destop top-down view. </Summary>
+        [Tooltip("The object that contains the UI that appears when you can press E to enter the destop top-down view")]
+        public GameObject pressE;
+        /// <Summary> Is the local player near the table? </Summary>
+        private bool isNearTable;
+        /// <Summary> Can the local player enter the desktop top-down view?
+        private bool canEnterDesktopTopDownView;
+
+        [HideInInspector]
+        public ushort numberOfCuesHeldByLocalPlayer;
+
+        public void LocalPlayerEnteredAreaNearTable()
+        {
+            if (logger)
+            {
+                logger.Log(name, "LocalPlayerEnteredAreaNearTable");
+            }
+
+            if (!isPlayerInVR)
+            {
+                isNearTable = true;
+                CheckIfCanEnterDesktopTopDownView();
+            }
+        }
+
+        /// <Summary> Is the local player near the table? </Summary>
+        public void LocalPlayerLeftAreaNearTable()
+        {
+            if (logger)
+            {
+                logger.Log(name, "LocalPlayerLeftAreaNearTable");
+            }
+
+            isNearTable = false;
+            CannotEnterDesktopTopDownView();
+        }
+
+        public void LocalPlayerPickedUpCue()
+        {
+            if (logger)
+            {
+                logger.Log(name, "LocalPlayerPickedUpCue");
+            }
+
+            numberOfCuesHeldByLocalPlayer++;
+            CheckIfCanEnterDesktopTopDownView();
+        }
+
+        public void LocalPlayerDroppedCue()
+        {
+            if (logger)
+            {
+                logger.Log(name, "LocalPlayerDroppedCue");
+            }
+
+            numberOfCuesHeldByLocalPlayer--;
+            if (numberOfCuesHeldByLocalPlayer == 0)
+            {
+                CannotEnterDesktopTopDownView();
+            }
+        }
+
+        private void CheckIfCanEnterDesktopTopDownView()
+        {
+            if (logger)
+            {
+                logger.Log(name, "CheckIfCanEnterDesktopTopDownView");
+            }
+
+            if (isNearTable && numberOfCuesHeldByLocalPlayer > 0)
+            {
+                canEnterDesktopTopDownView = true;
+                pressE.SetActive(true);
+            }
+        }
+
+        private void CannotEnterDesktopTopDownView()
+        {
+            if (logger)
+            {
+                logger.Log(name, "CannotEnterDesktopTopDownView");
+            }
+
+            canEnterDesktopTopDownView = false;
+            pressE.SetActive(false);
+        }
+
+        private void HandleUpdatingCanEnterDestopViewUI()
+        {
+            VRCPlayerApi.TrackingData hmd = Networking.LocalPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
+            pressE.transform.position = hmd.position + (hmd.rotation * Vector3.forward);
         }
     }
 }
