@@ -272,11 +272,6 @@ namespace VRCBilliards
         private AudioSource[] ballPool;
         private AudioSource mainSrc;
 
-        //[UdonSynced]
-        //private string base64NetworkData;
-        //private byte[] newNetworkData = new byte[0x52];
-
-
         /// <summary>
         /// 18:0 (0xffff)	Each bit represents each ball, if it has been pocketed or not
         /// </summary>
@@ -507,8 +502,8 @@ namespace VRCBilliards
 
             CopyGameStateToOldState();
 
-            cueRenderObjs[0].GetComponent<MeshRenderer>().materials[0].SetColor(uniformCueColour, tableBlack);
-            cueRenderObjs[1].GetComponent<MeshRenderer>().materials[0].SetColor(uniformCueColour, tableBlack);
+            cueRenderObjs[0].GetComponent<MeshRenderer>().material.SetColor(uniformCueColour, tableBlack);
+            cueRenderObjs[1].GetComponent<MeshRenderer>().material.SetColor(uniformCueColour, tableBlack);
 
             if (tableReflection != null)
             {
