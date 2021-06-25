@@ -61,6 +61,8 @@ namespace VRCBilliards
         public TextMeshProUGUI player2MenuText;
         public TextMeshProUGUI player3MenuText;
         public TextMeshProUGUI player4MenuText;
+        public bool instanceOwnerCanReset = true;
+        public bool masterCanReset = false;
 
         [Header("Score")]
         public TextMeshProUGUI player1ScoreText;
@@ -76,6 +78,7 @@ namespace VRCBilliards
         private bool isTeams;
         private bool isSignedUpToPlay;
         private bool canStartGame;
+        private bool canBypass;
 
         // TODO: This all needs to be secured.
         public void UnlockTable()
@@ -185,9 +188,10 @@ namespace VRCBilliards
 
         public void EndGame()
         {
-            if (isSignedUpToPlay)
+            if (isSignedUpToPlay || canBypass)
             {
                 manager.ForceReset();
+                return;
             }
         }
 
@@ -365,10 +369,12 @@ namespace VRCBilliards
                 player4ScoreText.text = "";
             }
 
-            int id = Networking.LocalPlayer.playerId;
+            VRCPlayerApi networkPlayer = Networking.LocalPlayer;
+            int id = networkPlayer.playerId;
             if (id == player1ID || id == player2ID || id == player3ID || id == player4ID)
             {
                 isSignedUpToPlay = true;
+                canBypass = false;
 
                 if (id == player1ID)
                 {
@@ -383,6 +389,16 @@ namespace VRCBilliards
             }
             else
             {
+                if (networkPlayer.isInstanceOwner && instanceOwnerCanReset || networkPlayer.isMaster && masterCanReset)
+                {
+                    canBypass = true;
+                    isSignedUpToPlay = false;
+                    canStartGame = false;
+                    startGameButton.SetActive(false);
+                    return;
+                }
+
+                canBypass = false;
                 isSignedUpToPlay = false;
                 canStartGame = false;
                 startGameButton.SetActive(false);
