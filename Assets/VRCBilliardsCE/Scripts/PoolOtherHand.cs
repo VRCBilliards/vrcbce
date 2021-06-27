@@ -1,6 +1,7 @@
 
 using UdonSharp;
 using UnityEngine;
+using VRC.SDKBase;
 
 namespace VRCBilliards
 {
@@ -9,51 +10,48 @@ namespace VRCBilliards
         public GameObject objPrimary;
         private PoolCue cue;
 
-        private Vector3 originalDelta;
         private bool isHolding;
         public bool isOtherBeingHeld;
 
+        private Vector3 originalOffset;
+        private Transform originalParent;
+
         public void Start()
         {
+            originalOffset = transform.localPosition;
+            originalParent = transform.parent;
+
             cue = objPrimary.GetComponent<PoolCue>();
             OnDrop();
-        }
-
-        public void Update()
-        {
-            if (!isHolding && isOtherBeingHeld)
-            {
-                gameObject.transform.position = objPrimary.transform.TransformPoint(originalDelta);
-            }
-        }
-
-        public override void OnPickupUseDown()
-        {
-            //cue.Lock();
-        }
-
-        public override void OnPickupUseUp()
-        {
-            //cue.Unlock();
         }
 
         public override void OnPickup()
         {
             isHolding = true;
+
+            if (Networking.LocalPlayer.IsUserInVR())
+            {
+                originalParent = transform.parent;
+                transform.parent = transform.parent.parent;
+            }
         }
 
         public override void OnDrop()
         {
-            originalDelta = objPrimary.transform.InverseTransformPoint(gameObject.transform.position);
-
-            // Clamp within 1 meters in case something got messed up
-            if (originalDelta.sqrMagnitude > 0.6084f)
-            {
-                originalDelta = originalDelta.normalized * 0.78f;
-            }
-
             isHolding = false;
-            //cue.Unlock();
+
+            if (Networking.LocalPlayer.IsUserInVR())
+            {
+                transform.parent = originalParent;
+            }
+        }
+
+        public void Respawn()
+        {
+            if (originalOffset != new Vector3())
+            {
+                transform.localPosition = originalOffset;
+            }
         }
     }
 }

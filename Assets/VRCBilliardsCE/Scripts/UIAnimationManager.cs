@@ -1,4 +1,5 @@
 ﻿
+using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Ocsp;
 using TMPro;
 using UdonSharp;
 using UnityEngine;
@@ -18,19 +19,88 @@ public class UIAnimationManager : UdonSharpBehaviour
     public TextMeshProUGUI modeLeft;
     public TextMeshProUGUI modeRight;
 
+    public FairlySadPanda.Utilities.Logger logger;
+
+    [UdonSynced]
     [HideInInspector]
     public bool isGamemodeMenuSwitched;
 
-    public FairlySadPanda.Utilities.Logger logger;
+    [UdonSynced]
+    private bool modeSelect = true;
+    [UdonSynced]
+    private bool isGuide = true;
+    [UdonSynced]
+    private bool isTeams = true;
+
+    private void UpdateSyncedVariables()
+    {
+        Networking.SetOwner(Networking.LocalPlayer, gameObject);
+        RequestSerialization();
+        OnDeserialization();
+    }
 
     public void SwitchGamemodeState()
     {
-        //Switches the Animation of the Toggle Slider thingy.
-        uiGamemodeToggle.SetBool("Toggle", !uiGamemodeToggle.GetBool("Toggle"));
+        modeSelect = !modeSelect;
+        UpdateSyncedVariables();
+    }
 
-        bool ModeSelect = uiGamemodeToggle.GetBool("Toggle");
+    public void SwitchGamemodeMenu()
+    {
+        isGamemodeMenuSwitched = !isGamemodeMenuSwitched;
+        UpdateSyncedVariables();
+    }
 
-        if (ModeSelect)
+    public void SwitchGuideMode()
+    {
+        isGuide = !isGuide;
+        UpdateSyncedVariables();
+    }
+
+    public void SwitchTeams()
+    {
+        isTeams = !isTeams;
+        UpdateSyncedVariables();
+    }
+
+    public override void OnDeserialization()
+    {
+        uiGamemodeToggle.SetBool("Toggle", modeSelect);
+        uiGuideToggle.SetBool("Toggle", isGuide);
+        uiTeamToggle.SetBool("Toggle", isTeams);
+
+        if (isGamemodeMenuSwitched)
+        {
+            modeButtonText.text = "Switch to Traditional Menu";
+            modeLeft.text = "Japanese";
+            modeRight.text = "Korean";
+        }
+        else
+        {
+            modeButtonText.text = "Switch to 4 Ball Menu";
+            modeLeft.text = "9 Ball";
+            modeRight.text = "8 Ball";
+        }
+
+        if (isGuide)
+        {
+            poolMenu.EnableGuideline();
+        }
+        else
+        {
+            poolMenu.DisableGuideline();
+        }
+
+        if (isTeams)
+        {
+            poolMenu.DeselectTeams();
+        }
+        else
+        {
+            poolMenu.SelectTeams();
+        }
+
+        if (modeSelect)
         {
             if (isGamemodeMenuSwitched)
             {
@@ -58,57 +128,6 @@ public class UIAnimationManager : UdonSharpBehaviour
                 poolMenu.Select9Ball();
                 if (logger) logger.Log(name, "Switched to 9Ball");
             }
-        }
-    }
-
-    public void SwitchGamemodeMenu()
-    {
-        isGamemodeMenuSwitched = !isGamemodeMenuSwitched;
-
-        if (isGamemodeMenuSwitched)
-        {
-            modeButtonText.text = "Switch to Traditional Menu";
-            modeLeft.text = "Japanese";
-            modeRight.text = "Korean";
-        }
-        else
-        {
-            modeButtonText.text = "Switch to 4 Ball Menu";
-            modeLeft.text = "9 Ball";
-            modeRight.text = "8 Ball";
-        }
-
-    }
-
-    public void SwitchGuideMode()
-    {
-        uiGuideToggle.SetBool("Toggle", !uiGuideToggle.GetBool("Toggle"));
-
-        bool isGuide = uiGuideToggle.GetBool("Toggle");
-
-        if (isGuide)
-        {
-            poolMenu.EnableGuideline();
-        }
-        else
-        {
-            poolMenu.DisableGuideline();
-        }
-    }
-
-    public void SwitchTeams()
-    {
-        uiTeamToggle.SetBool("Toggle", !uiTeamToggle.GetBool("Toggle"));
-
-        bool isGuide = uiTeamToggle.GetBool("Toggle");
-
-        if (isGuide)
-        {
-            poolMenu.DeselectTeams();
-        }
-        else
-        {
-            poolMenu.SelectTeams();
         }
     }
 }

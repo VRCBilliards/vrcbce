@@ -443,6 +443,11 @@ namespace VRCBilliards
 
         private bool HandlePlayerState(TextMeshProUGUI menuText, TextMeshProUGUI scoreText, VRCPlayerApi player)
         {
+            if (!Utilities.IsValid(player))
+            {
+                return false;
+            }
+
             menuText.text = player.displayName;
             scoreText.text = player.displayName;
 

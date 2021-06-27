@@ -272,11 +272,6 @@ namespace VRCBilliards
         private AudioSource[] ballPool;
         private AudioSource mainSrc;
 
-        //[UdonSynced]
-        //private string base64NetworkData;
-        //private byte[] newNetworkData = new byte[0x52];
-
-
         /// <summary>
         /// 18:0 (0xffff)	Each bit represents each ball, if it has been pocketed or not
         /// </summary>
@@ -485,10 +480,16 @@ namespace VRCBilliards
         private MeshRenderer[] shadowRenders;
 
         private bool isPlayerInVR;
+        private VRCPlayerApi localPlayer;
 
         public void Start()
         {
-            isPlayerInVR = Networking.LocalPlayer.IsUserInVR();
+            localPlayer = Networking.LocalPlayer;
+
+            if (Utilities.IsValid(localPlayer))
+            {
+                isPlayerInVR = localPlayer.IsUserInVR();
+            }
 
             // Disable the reflection probe on Quest.
 #if UNITY_ANDROID
@@ -500,17 +501,17 @@ namespace VRCBilliards
 
             mainSrc = GetComponent<AudioSource>();
 
-            if (audioSourcePoolContainer != null) // Xiexe: Use a pool for audio instead of using the PlayClipAtPoint method because PlayClipAtPoint is buggy and VRC audio controls do not modify it.
+            if (audioSourcePoolContainer) // Xiexe: Use a pool for audio instead of using the PlayClipAtPoint method because PlayClipAtPoint is buggy and VRC audio controls do not modify it.
             {
                 ballPool = audioSourcePoolContainer.GetComponentsInChildren<AudioSource>();
             }
 
             CopyGameStateToOldState();
 
-            cueRenderObjs[0].GetComponent<MeshRenderer>().materials[0].SetColor(uniformCueColour, tableBlack);
-            cueRenderObjs[1].GetComponent<MeshRenderer>().materials[0].SetColor(uniformCueColour, tableBlack);
+            cueRenderObjs[0].GetComponent<MeshRenderer>().material.SetColor(uniformCueColour, tableBlack);
+            cueRenderObjs[1].GetComponent<MeshRenderer>().material.SetColor(uniformCueColour, tableBlack);
 
-            if (tableReflection != null)
+            if (tableReflection)
             {
                 tableReflection.gameObject.SetActive(true);
                 tableReflection.mode = ReflectionProbeMode.Realtime;
@@ -519,13 +520,36 @@ namespace VRCBilliards
                 tableReflection.RenderProbe();
             }
 
-            guideline.SetActive(false);
-            devhit.SetActive(false);
-            marker.SetActive(false);
-            marker9ball.SetActive(false);
-            point4Ball.SetActive(false);
+            if (guideline)
+            {
+                guideline.SetActive(false);
+            }
 
-            shadows.SetActive(fakeBallShadows);
+            if (devhit)
+            {
+                devhit.SetActive(false);
+            }
+
+            if (marker)
+            {
+                marker.SetActive(false);
+            }
+
+            if (marker9ball)
+            {
+                marker9ball.SetActive(false);
+            }
+
+            if (point4Ball)
+            {
+                point4Ball.SetActive(false);
+            }
+
+            if (shadows)
+            {
+                shadows.SetActive(fakeBallShadows);
+            }
+
             ballShadowOffset = balls[0].transform.position.y - ballShadowPosConstraints[0].gameObject.transform.position.y;
             if (logger)
             {
@@ -598,7 +622,11 @@ namespace VRCBilliards
                 if (particleTime > 2.0f)
                 {
                     isParticleAlive = false;
-                    point4Ball.SetActive(false);
+
+                    if (point4Ball)
+                    {
+                        point4Ball.SetActive(false);
+                    }
                 }
             }
 
@@ -724,13 +752,16 @@ namespace VRCBilliards
                     // Get where the cue will strike the ball
                     if (IsIntersectiNgWithSphere(copyOfLocalSpacePositionOfCueTip, cueLocalForwardDirection, cueballPosition))
                     {
-                        if (guideLineEnabled)
+                        if (guideLineEnabled && guideline)
                         {
                             guideline.SetActive(true);
                         }
 
-                        devhit.SetActive(true);
-                        devhit.transform.localPosition = raySphereOutput;
+                        if (devhit)
+                        {
+                            devhit.SetActive(true);
+                            devhit.transform.localPosition = raySphereOutput;
+                        }
 
                         cueArmedShotDirection = cueLocalForwardDirection;
                         cueArmedShotDirection.y = 0.0f;
@@ -751,8 +782,15 @@ namespace VRCBilliards
                     }
                     else
                     {
-                        devhit.SetActive(false);
-                        guideline.SetActive(false);
+                        if (devhit)
+                        {
+                            devhit.SetActive(false);
+                        }
+
+                        if (guideline)
+                        {
+                            guideline.SetActive(false);
+                        }
                     }
                 }
             }
@@ -781,9 +819,9 @@ namespace VRCBilliards
                     isTimerRunning = false;
 
                     // We are holding the stick so propogate the change
-                    if (Networking.GetOwner(playerTotems[Convert.ToInt32(newIsTeam2Turn)]) == Networking.LocalPlayer)
+                    if (Networking.GetOwner(playerTotems[Convert.ToInt32(newIsTeam2Turn)]) == localPlayer)
                     {
-                        Networking.SetOwner(Networking.LocalPlayer, gameObject);
+                        Networking.SetOwner(localPlayer, gameObject);
                         OnTurnOverFoul();
                     }
                     else
@@ -905,7 +943,7 @@ namespace VRCBilliards
                 logger.Log(name, "UnlockTable");
             }
 
-            Networking.SetOwner(Networking.LocalPlayer, gameObject);
+            Networking.SetOwner(localPlayer, gameObject);
 
             isTableLocked = false;
             RefreshNetworkData(false);
@@ -918,7 +956,7 @@ namespace VRCBilliards
                 logger.Log(name, "LockTable");
             }
 
-            Networking.SetOwner(Networking.LocalPlayer, gameObject);
+            Networking.SetOwner(localPlayer, gameObject);
 
             isTableLocked = true;
             RefreshNetworkData(false);
@@ -931,22 +969,22 @@ namespace VRCBilliards
                 logger.Log(name, $"JoinGame: {playerNumber}");
             }
 
-            Networking.SetOwner(Networking.LocalPlayer, gameObject);
+            Networking.SetOwner(localPlayer, gameObject);
             localPlayerID = playerNumber;
 
             switch (playerNumber)
             {
                 case 0:
-                    player1ID = Networking.LocalPlayer.playerId;
+                    player1ID = localPlayer.playerId;
                     break;
                 case 1:
-                    player2ID = Networking.LocalPlayer.playerId;
+                    player2ID = localPlayer.playerId;
                     break;
                 case 2:
-                    player3ID = Networking.LocalPlayer.playerId;
+                    player3ID = localPlayer.playerId;
                     break;
                 case 3:
-                    player4ID = Networking.LocalPlayer.playerId;
+                    player4ID = localPlayer.playerId;
                     break;
                 default:
                     return;
@@ -962,7 +1000,7 @@ namespace VRCBilliards
                 logger.Log(name, "LeaveGame");
             }
 
-            Networking.SetOwner(Networking.LocalPlayer, gameObject);
+            Networking.SetOwner(localPlayer, gameObject);
 
             switch (localPlayerID)
             {
@@ -989,7 +1027,7 @@ namespace VRCBilliards
 
         private void RemovePlayerFromGame(int playerID)
         {
-            Networking.SetOwner(Networking.LocalPlayer, gameObject);
+            Networking.SetOwner(localPlayer, gameObject);
 
             switch (playerID)
             {
@@ -1019,7 +1057,7 @@ namespace VRCBilliards
                 logger.Log(name, "IncreaseTimer");
             }
 
-            Networking.SetOwner(Networking.LocalPlayer, gameObject);
+            Networking.SetOwner(localPlayer, gameObject);
 
             if (timerType < 4)
             {
@@ -1035,7 +1073,7 @@ namespace VRCBilliards
                 logger.Log(name, "DecreaseTimer");
             }
 
-            Networking.SetOwner(Networking.LocalPlayer, gameObject);
+            Networking.SetOwner(localPlayer, gameObject);
 
             if (timerType > 0)
             {
@@ -1051,7 +1089,7 @@ namespace VRCBilliards
                 logger.Log(name, "SelectTeams");
             }
 
-            Networking.SetOwner(Networking.LocalPlayer, gameObject);
+            Networking.SetOwner(localPlayer, gameObject);
 
             isTeams = true;
             RefreshNetworkData(false);
@@ -1064,7 +1102,7 @@ namespace VRCBilliards
                 logger.Log(name, "DeselectTeams");
             }
 
-            Networking.SetOwner(Networking.LocalPlayer, gameObject);
+            Networking.SetOwner(localPlayer, gameObject);
 
             isTeams = false;
             RefreshNetworkData(false);
@@ -1077,7 +1115,7 @@ namespace VRCBilliards
                 logger.Log(name, "EnableGuideline");
             }
 
-            Networking.SetOwner(Networking.LocalPlayer, gameObject);
+            Networking.SetOwner(localPlayer, gameObject);
             guideLineEnabled = true;
             RefreshNetworkData(false);
         }
@@ -1089,7 +1127,7 @@ namespace VRCBilliards
                 logger.Log(name, "DisableGuideline");
             }
 
-            Networking.SetOwner(Networking.LocalPlayer, gameObject);
+            Networking.SetOwner(localPlayer, gameObject);
             guideLineEnabled = false;
             RefreshNetworkData(false);
         }
@@ -1134,72 +1172,87 @@ namespace VRCBilliards
 
             if (isNineBall) // 9 ball
             {
-                ballPocketedState = 0xFC00u;
-
-                for (int i = 0, k = 0; i < 5; i++)
-                {
-                    int rown = brearows_9ball[i];
-                    for (int j = 0; j <= rown; j++)
-                    {
-                        currentBallPositions[rackOrder9Ball[k++]] = new Vector3
-                        (
-                            SPOT_POSITION_X + (i * BALL_PL_Y) + UnityEngine.Random.Range(-RANDOMIZE_F, RANDOMIZE_F),
-                            0.0f,
-                            ((-rown + (j * 2)) * BALL_PL_X) + UnityEngine.Random.Range(-RANDOMIZE_F, RANDOMIZE_F)
-                        );
-
-                        currentBallVelocities[k] = Vector3.zero;
-                        currentAngularVelocities[k] = Vector3.zero;
-                    }
-                }
+                Initialize9Ball();
             }
             else if (isFourBall) // 4 ball
             {
-                ballPocketedState = 0xFDF2u;
-
-                currentBallPositions[0] = new Vector3(-SPOT_CAROM_X, 0.0f, 0.0f);
-                currentBallPositions[9] = new Vector3(SPOT_CAROM_X, 0.0f, 0.0f);
-                currentBallPositions[2] = new Vector3(SPOT_POSITION_X, 0.0f, 0.0f);
-                currentBallPositions[3] = new Vector3(-SPOT_POSITION_X, 0.0f, 0.0f);
-
-                currentBallVelocities[0] = Vector3.zero;
-                currentBallVelocities[9] = Vector3.zero;
-                currentBallVelocities[2] = Vector3.zero;
-                currentBallVelocities[3] = Vector3.zero;
-
-                currentAngularVelocities[0] = Vector3.zero;
-                currentAngularVelocities[9] = Vector3.zero;
-                currentAngularVelocities[2] = Vector3.zero;
-                currentAngularVelocities[3] = Vector3.zero;
+                Initialize4Ball();
             }
             else // Normal 8 ball modes
             {
-                ballPocketedState = 0x00u; // No balls are pocketed.
-
-                for (int i = 0, k = 0; i < 5; i++)
-                {
-                    for (int j = 0; j <= i; j++)
-                    {
-                        currentBallPositions[rackOrder8Ball[k++]] = new Vector3
-                        (
-                            SPOT_POSITION_X + (i * BALL_PL_Y) + UnityEngine.Random.Range(-RANDOMIZE_F, RANDOMIZE_F),
-                            0.0f,
-                            ((-i + (j * 2)) * BALL_PL_X) + UnityEngine.Random.Range(-RANDOMIZE_F, RANDOMIZE_F)
-                        );
-
-                        currentBallVelocities[k] = Vector3.zero;
-                        currentAngularVelocities[k] = Vector3.zero;
-                    }
-                }
+                Initialize8Ball();
             }
 
             oldPocketed = ballPocketedState;
 
             ApplyTableColour(false);
 
-            Networking.SetOwner(Networking.LocalPlayer, gameObject);
+            Networking.SetOwner(localPlayer, gameObject);
 
             RefreshNetworkData(false);
+        }
+
+        private void Initialize9Ball()
+        {
+            ballPocketedState = 0xFC00u;
+
+            for (int i = 0, k = 0; i < 5; i++)
+            {
+                int rown = brearows_9ball[i];
+                for (int j = 0; j <= rown; j++)
+                {
+                    currentBallPositions[rackOrder9Ball[k++]] = new Vector3
+                    (
+                        SPOT_POSITION_X + (i * BALL_PL_Y) + UnityEngine.Random.Range(-RANDOMIZE_F, RANDOMIZE_F),
+                        0.0f,
+                        ((-rown + (j * 2)) * BALL_PL_X) + UnityEngine.Random.Range(-RANDOMIZE_F, RANDOMIZE_F)
+                    );
+
+                    currentBallVelocities[k] = Vector3.zero;
+                    currentAngularVelocities[k] = Vector3.zero;
+                }
+            }
+        }
+
+        private void Initialize4Ball()
+        {
+            ballPocketedState = 0xFDF2u;
+
+            currentBallPositions[0] = new Vector3(-SPOT_CAROM_X, 0.0f, 0.0f);
+            currentBallPositions[9] = new Vector3(SPOT_CAROM_X, 0.0f, 0.0f);
+            currentBallPositions[2] = new Vector3(SPOT_POSITION_X, 0.0f, 0.0f);
+            currentBallPositions[3] = new Vector3(-SPOT_POSITION_X, 0.0f, 0.0f);
+
+            currentBallVelocities[0] = Vector3.zero;
+            currentBallVelocities[9] = Vector3.zero;
+            currentBallVelocities[2] = Vector3.zero;
+            currentBallVelocities[3] = Vector3.zero;
+
+            currentAngularVelocities[0] = Vector3.zero;
+            currentAngularVelocities[9] = Vector3.zero;
+            currentAngularVelocities[2] = Vector3.zero;
+            currentAngularVelocities[3] = Vector3.zero;
+        }
+
+        private void Initialize8Ball()
+        {
+            ballPocketedState = 0x00u; // No balls are pocketed.
+
+            for (int i = 0, k = 0; i < 5; i++)
+            {
+                for (int j = 0; j <= i; j++)
+                {
+                    currentBallPositions[rackOrder8Ball[k++]] = new Vector3
+                    (
+                        SPOT_POSITION_X + (i * BALL_PL_Y) + UnityEngine.Random.Range(-RANDOMIZE_F, RANDOMIZE_F),
+                        0.0f,
+                        ((-i + (j * 2)) * BALL_PL_X) + UnityEngine.Random.Range(-RANDOMIZE_F, RANDOMIZE_F)
+                    );
+
+                    currentBallVelocities[k] = Vector3.zero;
+                    currentAngularVelocities[k] = Vector3.zero;
+                }
+            }
         }
 
         public void Select8Ball()
@@ -1209,7 +1262,7 @@ namespace VRCBilliards
                 logger.Log(name, "Select8Ball");
             }
 
-            Networking.SetOwner(Networking.LocalPlayer, gameObject);
+            Networking.SetOwner(localPlayer, gameObject);
 
             gameMode = 0u;
             RefreshNetworkData(false);
@@ -1222,7 +1275,7 @@ namespace VRCBilliards
                 logger.Log(name, "Select9Ball");
             }
 
-            Networking.SetOwner(Networking.LocalPlayer, gameObject);
+            Networking.SetOwner(localPlayer, gameObject);
 
             gameMode = 1u;
             RefreshNetworkData(false);
@@ -1238,7 +1291,7 @@ namespace VRCBilliards
                 logger.Log(name, "Select4BallJapanese");
             }
 
-            Networking.SetOwner(Networking.LocalPlayer, gameObject);
+            Networking.SetOwner(localPlayer, gameObject);
 
             isKorean = false;
 
@@ -1256,7 +1309,7 @@ namespace VRCBilliards
                 logger.Log(name, "Select4BallKorean");
             }
 
-            Networking.SetOwner(Networking.LocalPlayer, gameObject);
+            Networking.SetOwner(localPlayer, gameObject);
 
             isKorean = true;
 
@@ -1317,12 +1370,16 @@ namespace VRCBilliards
                 }
 
                 isRepositioningCueBall = false;
-                marker.SetActive(false);
+
+                if (marker)
+                {
+                    marker.SetActive(false);
+                }
 
                 isPlayerAllowedToPlay = true;
                 isFoul = false;
 
-                Networking.SetOwner(Networking.LocalPlayer, gameObject);
+                Networking.SetOwner(localPlayer, gameObject);
 
                 // Save out position to remote clients
                 RefreshNetworkData(newIsTeam2Turn);
@@ -1339,14 +1396,14 @@ namespace VRCBilliards
                 logger.Log(name, "ForceReset");
             }
 
-            if (Networking.LocalPlayer == Networking.GetOwner(playerTotems[0]) || Networking.LocalPlayer == Networking.GetOwner(playerTotems[1]) || isGameInMenus)
+            if (localPlayer == Networking.GetOwner(playerTotems[0]) || localPlayer == Networking.GetOwner(playerTotems[1]) || isGameInMenus)
             {
                 isGameInMenus = true;
                 isPlayerAllowedToPlay = false;
                 gameIsSimulating = false;
                 newIsTeam2Turn = false;
 
-                Networking.SetOwner(Networking.LocalPlayer, gameObject);
+                Networking.SetOwner(localPlayer, gameObject);
 
                 RefreshNetworkData(newIsTeam2Turn);
             }
@@ -1361,13 +1418,17 @@ namespace VRCBilliards
 
             isInDesktopTopDownView = true;
             isEntertingDesktopModeThisFrame = true;
-            desktopBase.SetActive(true);
+
+            if (desktopBase)
+            {
+                desktopBase.SetActive(true);
+            }
 
             // Lock player in place
-            Networking.LocalPlayer.Immobilize(true);
+            localPlayer.Immobilize(true);
 
-            gripControllers[0].DisableConstraints();
-            gripControllers[1].DisableConstraints();
+            gripControllers[0].localPlayerIsInDesktopTopDownView = true;
+            gripControllers[1].localPlayerIsInDesktopTopDownView = true;
         }
 
         /// <summary>
@@ -1422,183 +1483,7 @@ namespace VRCBilliards
                 // Make sure we only run this from the client who initiated the move
                 if (isSimulatedByUs)
                 {
-                    isSimulatedByUs = false;
-
-                    // We are updating the game state so make sure we are network owner
-                    Networking.SetOwner(Networking.LocalPlayer, gameObject);
-
-                    // Owner state checks
-
-                    /*
-                    FSP note: For clarity, I've moved Harry's bitmasking here to use binary notation (0b) rather than hex (0x).
-
-                    Some notes on what's going on below:
-                    &= is bitwise AND. 0b0101 &= 0b0100 is 0b0100
-                    |= is bitwise OR. 0b0101 |= 0b0100 is 0b0101
-                    << is a bitshift leftwards.
-                    */
-
-                    uint bmask = 0b1111111111111100;
-                    uint emask = 0b0000000000000000;
-
-                    // Quash down the mask if table has closed
-                    if (!isOpen)
-                    {
-                        bmask &= 0x1FCu << ((int)(Convert.ToUInt32(isPlayer2Blue) ^ Convert.ToUInt32(newIsTeam2Turn)) * 7);
-                        emask = 0x1FCu << ((int)(Convert.ToUInt32(isPlayer2Blue) ^ Convert.ToUInt32(!newIsTeam2Turn)) * 7);
-                    }
-
-                    // Common informations
-                    bool isSetComplete = (ballPocketedState & bmask) == bmask;
-
-                    bool isScratch = (ballPocketedState & 0x1U) == 0x1U;
-
-                    // Append black to mask if set is done
-                    if (isSetComplete)
-                    {
-                        bmask |= 0x2U;
-                    }
-
-                    // These are the resultant states we can set for each mode
-                    // then the rest is taken care of
-                    bool
-                        isObjectiveSink,
-                        isOpponentSink,
-                        winCondition,
-                        foulCondition,
-                        deferLossCondition
-                    ;
-
-                    if (is8Ball)    // Standard 8 ball
-                    {
-                        isObjectiveSink = (ballPocketedState & bmask) > (oldPocketed & bmask);
-                        isOpponentSink = (ballPocketedState & emask) > (oldPocketed & emask);
-                        // Calculate if objective was not hit first
-                        bool isWrongHit = ((0x1U << isFirstHit) & bmask) == 0;
-                        bool is8Sink = (ballPocketedState & 0x2U) == 0x2U;
-                        winCondition = isSetComplete && is8Sink;
-                        foulCondition = isScratch || isWrongHit;
-                        deferLossCondition = is8Sink;
-                    }
-                    else if (isNineBall)   // 9 ball
-                    {
-                        // Rules are from: https://www.youtube.com/watch?v=U0SbHOXCtFw
-
-                        // Rule #1: Cueball must strike the lowest number ball, first
-                        bool isWrongHit = GetLowestNumberedBall(oldPocketed) != isFirstHit;
-
-                        // Rule #2: Pocketing cueball, is a foul
-
-                        // Win condition: Pocket 9 ball ( at anytime )
-                        winCondition = (ballPocketedState & 0x200u) == 0x200u;
-
-                        // this video is hard to follow so im just gonna guess this is right
-                        isObjectiveSink = (ballPocketedState & 0x3FEu) > (oldPocketed & 0x3FEu);
-
-                        isOpponentSink = false;
-                        deferLossCondition = false;
-
-                        foulCondition = isWrongHit || isScratch;
-
-                        // TODO: Implement rail contact requirement
-                    }
-                    else if (isFourBall) // 4 ball
-                    {
-                        isObjectiveSink = isMadePoint;
-                        isOpponentSink = isMadeFoul;
-                        foulCondition = false;
-                        deferLossCondition = false;
-
-                        winCondition = scores[Convert.ToInt32(newIsTeam2Turn)] >= 10;
-                    }
-                    else // Unkown mode
-                    {
-                        isObjectiveSink = true;
-                        isOpponentSink = false;
-                        winCondition = false;
-                        foulCondition = false;
-                        deferLossCondition = false;
-
-                        if ((ballPocketedState & 0x1u) == 0x1u)
-                        {
-                            isFoul = true;
-                            OnRemoteTurnChange();
-                        }
-                    }
-
-                    if (winCondition)
-                    {
-                        if (foulCondition)
-                        {
-                            // Loss
-                            OnTurnOverGameWon(!newIsTeam2Turn);
-                        }
-                        else
-                        {
-                            // Win
-                            OnTurnOverGameWon(newIsTeam2Turn);
-                        }
-                    }
-                    else if (deferLossCondition)
-                    {
-                        // Loss
-                        OnTurnOverGameWon(!newIsTeam2Turn);
-                    }
-                    else if (foulCondition)
-                    {
-                        // Foul
-                        OnTurnOverFoul();
-                    }
-                    else if (isObjectiveSink && !isOpponentSink)
-                    {
-                        // Continue
-                        // Close table if it was open ( 8 ball specific )
-                        if (is8Ball && isOpen)
-                        {
-                            uint sunkOranges = 0;
-                            uint sunkBlues = 0;
-                            uint pmask = ballPocketedState >> 2;
-
-                            for (int i = 0; i < 7; i++)
-                            {
-                                if ((pmask & 0x1u) == 0x1u)
-                                {
-                                    sunkBlues++;
-                                }
-
-                                pmask >>= 1;
-                            }
-                            for (int i = 0; i < 7; i++)
-                            {
-                                if ((pmask & 0x1u) == 0x1u)
-                                {
-                                    sunkOranges++;
-                                }
-
-                                pmask >>= 1;
-                            }
-
-                            if (sunkBlues != sunkOranges)
-                            {
-                                isPlayer2Blue = (sunkBlues > sunkOranges) ? newIsTeam2Turn : !newIsTeam2Turn;
-
-                                isOpen = false;
-                                ApplyTableColour(newIsTeam2Turn);
-                            }
-                        }
-
-                        // Keep playing
-                        isPlayerAllowedToPlay = true;
-
-                        RefreshNetworkData(newIsTeam2Turn);
-                    }
-                    else
-                    {
-                        // Pass
-                        isPlayerAllowedToPlay = true;
-
-                        RefreshNetworkData(!newIsTeam2Turn);
-                    }
+                    HandleEndOfTurn();
                 }
 
                 // Check if there was a network update on hold
@@ -1614,10 +1499,10 @@ namespace VRCBilliards
 
             if (isFourBall)
             {
-                BallTableCarom(0);
-                BallTableCarom(2);
-                BallTableCarom(3);
-                BallTableCarom(9);
+                BounceBallOffCushionIfApplicable(0);
+                BounceBallOffCushionIfApplicable(2);
+                BounceBallOffCushionIfApplicable(3);
+                BounceBallOffCushionIfApplicable(9);
 
                 return;
             }
@@ -1778,6 +1663,199 @@ namespace VRCBilliards
             }
         }
 
+        private void HandleEndOfTurn()
+        {
+            isSimulatedByUs = false;
+
+            // We are updating the game state so make sure we are network owner
+            Networking.SetOwner(localPlayer, gameObject);
+
+            // Owner state checks
+
+            /*
+            FSP note: For clarity, I've moved Harry's bitmasking here to use binary notation (0b) rather than hex (0x).
+
+            Some notes on what's going on below:
+            &= is bitwise AND. 0b0101 &= 0b0100 is 0b0100
+            |= is bitwise OR. 0b0101 |= 0b0100 is 0b0101
+            << is a bitshift leftwards.
+            */
+
+            uint bmask = 0b1111111111111100;
+            uint emask = 0b0000000000000000;
+
+            // Quash down the mask if table has closed
+            if (!isOpen)
+            {
+                bmask &= 0x1FCu << ((int)(Convert.ToUInt32(isPlayer2Blue) ^ Convert.ToUInt32(newIsTeam2Turn)) * 7);
+                emask = 0x1FCu << ((int)(Convert.ToUInt32(isPlayer2Blue) ^ Convert.ToUInt32(!newIsTeam2Turn)) * 7);
+            }
+
+            // Common informations
+            bool isSetComplete = (ballPocketedState & bmask) == bmask;
+
+            bool isScratch = (ballPocketedState & 0x1U) == 0x1U;
+
+            // Append black to mask if set is done
+            if (isSetComplete)
+            {
+                bmask |= 0x2U;
+            }
+
+            // These are the resultant states we can set for each mode
+            // then the rest is taken care of
+            bool
+                isObjectiveSink,
+                isOpponentSink,
+                winCondition,
+                foulCondition,
+                deferLossCondition
+            ;
+
+            if (is8Ball)    // Standard 8 ball
+            {
+                isObjectiveSink = (ballPocketedState & bmask) > (oldPocketed & bmask);
+                isOpponentSink = (ballPocketedState & emask) > (oldPocketed & emask);
+                // Calculate if objective was not hit first
+                bool isWrongHit = ((0x1U << isFirstHit) & bmask) == 0;
+                bool is8Sink = (ballPocketedState & 0x2U) == 0x2U;
+                winCondition = isSetComplete && is8Sink;
+                foulCondition = isScratch || isWrongHit;
+                deferLossCondition = is8Sink;
+            }
+            else if (isNineBall)   // 9 ball
+            {
+                // Rules are from: https://www.youtube.com/watch?v=U0SbHOXCtFw
+
+                // Rule #1: Cueball must strike the lowest number ball, first
+                bool isWrongHit = GetLowestNumberedBall(oldPocketed) != isFirstHit;
+
+                // Rule #2: Pocketing cueball, is a foul
+
+                // Win condition: Pocket 9 ball ( at anytime )
+                winCondition = (ballPocketedState & 0x200u) == 0x200u;
+
+                // this video is hard to follow so im just gonna guess this is right
+                isObjectiveSink = (ballPocketedState & 0x3FEu) > (oldPocketed & 0x3FEu);
+
+                isOpponentSink = false;
+                deferLossCondition = false;
+
+                foulCondition = isWrongHit || isScratch;
+
+                // TODO: Implement rail contact requirement
+            }
+            else if (isFourBall) // 4 ball
+            {
+                isObjectiveSink = isMadePoint;
+                isOpponentSink = isMadeFoul;
+                foulCondition = false;
+                deferLossCondition = false;
+
+                winCondition = scores[Convert.ToInt32(newIsTeam2Turn)] >= 10;
+            }
+            else // Unkown mode
+            {
+                isObjectiveSink = true;
+                isOpponentSink = false;
+                winCondition = false;
+                foulCondition = false;
+                deferLossCondition = false;
+
+                if ((ballPocketedState & 0x1u) == 0x1u)
+                {
+                    isFoul = true;
+                    OnRemoteTurnChange();
+                }
+            }
+
+            HandleTableBallStateAtEndOfTurn(winCondition, foulCondition, deferLossCondition, isObjectiveSink, isOpponentSink);
+        }
+
+        private void HandleTableBallStateAtEndOfTurn(bool winCondition, bool foulCondition, bool deferLossCondition, bool isObjectiveSink, bool isOpponentSink)
+        {
+            if (winCondition)
+            {
+                if (foulCondition)
+                {
+                    // Loss
+                    OnTurnOverGameWon(!newIsTeam2Turn);
+                }
+                else
+                {
+                    // Win
+                    OnTurnOverGameWon(newIsTeam2Turn);
+                }
+            }
+            else if (deferLossCondition)
+            {
+                // Loss
+                OnTurnOverGameWon(!newIsTeam2Turn);
+            }
+            else if (foulCondition)
+            {
+                // Foul
+                OnTurnOverFoul();
+            }
+            else if (isObjectiveSink && !isOpponentSink)
+            {
+                // Continue
+                // Close table if it was open ( 8 ball specific )
+                if (is8Ball && isOpen)
+                {
+                    uint sunkOranges = 0;
+                    uint sunkBlues = 0;
+                    uint pmask = ballPocketedState >> 2;
+
+                    for (int i = 0; i < 7; i++)
+                    {
+                        if ((pmask & 0x1u) == 0x1u)
+                        {
+                            sunkBlues++;
+                        }
+
+                        pmask >>= 1;
+                    }
+                    for (int i = 0; i < 7; i++)
+                    {
+                        if ((pmask & 0x1u) == 0x1u)
+                        {
+                            sunkOranges++;
+                        }
+
+                        pmask >>= 1;
+                    }
+
+                    if (sunkBlues != sunkOranges)
+                    {
+                        isPlayer2Blue = (sunkBlues > sunkOranges) ? newIsTeam2Turn : !newIsTeam2Turn;
+
+                        isOpen = false;
+                        ApplyTableColour(newIsTeam2Turn);
+                    }
+                }
+
+                // Keep playing
+                isPlayerAllowedToPlay = true;
+
+                RefreshNetworkData(newIsTeam2Turn);
+            }
+            else
+            {
+                // Pass
+                isPlayerAllowedToPlay = true;
+
+                if (isFourBall)
+                {
+                    Vector3 temp = currentBallPositions[0];
+                    currentBallPositions[0] = currentBallPositions[9];
+                    currentBallPositions[9] = temp;
+                }
+
+                RefreshNetworkData(!newIsTeam2Turn);
+            }
+        }
+
         private void RefreshNetworkData(bool newIsTeam2Playing)
         {
             if (logger)
@@ -1787,7 +1865,7 @@ namespace VRCBilliards
 
             newIsTeam2Turn = newIsTeam2Playing;
 
-            Networking.SetOwner(Networking.LocalPlayer, gameObject);
+            Networking.SetOwner(localPlayer, gameObject);
             RequestSerialization();
             ReadNetworkData();
         }
@@ -1802,7 +1880,10 @@ namespace VRCBilliards
                 logger.Log(name, "ReadNetworkData");
             }
 
-            marker.SetActive(false);
+            if (marker)
+            {
+                marker.SetActive(false);
+            }
 
             // Events ==========================================================================================================
 
@@ -1819,8 +1900,27 @@ namespace VRCBilliards
 
                     isRepositioningCueBall = true;
                     repoMaxX = -SPOT_POSITION_X;
+
+                    if (marker)
+                    {
+                        marker.transform.localPosition = currentBallPositions[0];
+                        if (!isFourBall)
+                        {
+                            marker.SetActive(true);
+                        }
+                        ((VRC_Pickup)marker.gameObject.GetComponent(typeof(VRC_Pickup))).pickupable = true;
+                    }
+                }
+                else
+                {
                     marker.transform.localPosition = currentBallPositions[0];
-                    marker.SetActive(true);
+
+                    if (!isFourBall)
+                    {
+                        marker.SetActive(true);
+                    }
+
+                    ((VRC_Pickup)marker.gameObject.GetComponent(typeof(VRC_Pickup))).pickupable = false;
                 }
             }
 
@@ -1913,11 +2013,17 @@ namespace VRCBilliards
             // to improve pickups being glitchy
             if (gameIsSimulating)
             {
-                tableCollisionParent.SetActive(true);
+                if (tableCollisionParent)
+                {
+                    tableCollisionParent.SetActive(true);
+                }
             }
             else
             {
-                tableCollisionParent.SetActive(false);
+                if (tableCollisionParent)
+                {
+                    tableCollisionParent.SetActive(false);
+                }
             }
 
             if (isFourBall)
@@ -1946,8 +2052,11 @@ namespace VRCBilliards
                 {
                     int target = GetLowestNumberedBall(ballPocketedState);
 
-                    marker9ball.SetActive(true);
-                    marker9ball.transform.localPosition = currentBallPositions[target];
+                    if (marker9ball)
+                    {
+                        marker9ball.SetActive(true);
+                        marker9ball.transform.localPosition = currentBallPositions[target];
+                    }
                 }
 
                 RackBalls();
@@ -1959,7 +2068,11 @@ namespace VRCBilliards
             }
             else
             {
-                marker9ball.SetActive(false);
+                if (marker9ball)
+                {
+                    marker9ball.SetActive(false);
+                }
+
                 isTimerRunning = false;
                 isMadePoint = false;
                 isMadeFoul = false;
@@ -1967,8 +2080,15 @@ namespace VRCBilliards
                 isSecondHit = 0;
                 isThirdHit = 0;
 
-                devhit.SetActive(false);
-                guideline.SetActive(false);
+                if (devhit)
+                {
+                    devhit.SetActive(false);
+                }
+
+                if (guideline)
+                {
+                    guideline.SetActive(false);
+                }
             }
         }
 
@@ -2056,12 +2176,16 @@ namespace VRCBilliards
                 logger.Log(name, "SpawnFloaty");
             }
 
-            point4Ball.SetActive(true);
+            if (point4Ball)
+            {
+                point4Ball.SetActive(true);
+            }
+
             isParticleAlive = true;
             particleTime = 0.1f;
 
             // orient to be looking at player
-            Vector3 lpos = Networking.LocalPlayer.GetPosition();
+            Vector3 lpos = localPlayer.GetPosition();
             Vector3 delta = lpos - transform.TransformPoint(pos);
             float r = Mathf.Atan2(delta.x, delta.z);
             point4Ball.transform.localRotation = Quaternion.AngleAxis(r * Mathf.Rad2Deg, Vector3.up);
@@ -2132,10 +2256,15 @@ namespace VRCBilliards
                 poolMenu.TeamWins(isTeam2Winner);
             }
 
-            marker9ball.SetActive(false);
+            if (marker9ball)
+            {
+                marker9ball.SetActive(false);
+            }
 
-            // TODO: Replace this hack. This exists because for some reason a game over event may be called in such a way that the table is stuck in perma-simulating mode.
-            tableCollisionParent.SetActive(false);
+            if (tableCollisionParent)
+            {
+                tableCollisionParent.SetActive(false);
+            }
 
             RackBalls();   // To make sure rigidbodies are completely off
 
@@ -2143,8 +2272,13 @@ namespace VRCBilliards
             {
                 logger.Log(name, "disabling marker because the game is over");
             }
+
             isRepositioningCueBall = false;
-            marker.SetActive(false);
+
+            if (marker)
+            {
+                marker.SetActive(false);
+            }
 
             // Remove any access rights
             localPlayerID = -1;
@@ -2188,18 +2322,17 @@ namespace VRCBilliards
             bool isOurTurn = ((localPlayerID >= 0) && (playerIsTeam2 == newIsTeam2Turn)) || isGameModePractice;
             if (isFourBall) // 4 ball
             {
-                // Swap cue ball and opponent cue
-                Vector3 temp = currentBallPositions[0];
-                currentBallPositions[0] = currentBallPositions[9];
-                currentBallPositions[9] = temp;
-
                 if (!newIsTeam2Turn)
                 {
+                    logger.Log(name, "0 ball is 0 mesh, 9 ball is 1 mesh");
+
                     balls[0].GetComponent<MeshFilter>().sharedMesh = cueballMeshes[0];
                     balls[9].GetComponent<MeshFilter>().sharedMesh = cueballMeshes[1];
                 }
                 else
                 {
+                    logger.Log(name, "0 ball is 0 mesh, 9 ball is 1 mesh");
+
                     balls[9].GetComponent<MeshFilter>().sharedMesh = cueballMeshes[0];
                     balls[0].GetComponent<MeshFilter>().sharedMesh = cueballMeshes[1];
                 }
@@ -2217,17 +2350,31 @@ namespace VRCBilliards
                 }
             }
 
-            if (isOurTurn && isFoul)
+            if (isFoul)
             {
-                isRepositioningCueBall = true;
-                repoMaxX = TABLE_WIDTH;
-
-                if (logger)
+                if (isOurTurn)
                 {
-                    logger.Log(name, "enabling marker because it is our turn and there was a foul last turn");
+                    isRepositioningCueBall = true;
+                    repoMaxX = TABLE_WIDTH;
+
+                    if (logger)
+                    {
+                        logger.Log(name, "enabling marker because it is our turn and there was a foul last turn");
+                    }
+
+                    if (marker)
+                    {
+                        marker.SetActive(true);
+                        ((VRC_Pickup)marker.gameObject.GetComponent(typeof(VRC_Pickup))).pickupable = true;
+                        marker.transform.localPosition = currentBallPositions[0];
+                    }
                 }
-                marker.SetActive(true);
-                marker.transform.localPosition = currentBallPositions[0];
+                else
+                {
+                    marker.SetActive(true);
+                    marker.transform.localPosition = currentBallPositions[0];
+                    ((VRC_Pickup)marker.gameObject.GetComponent(typeof(VRC_Pickup))).pickupable = false;
+                }
             }
 
             // Force timer reset
@@ -2350,16 +2497,25 @@ namespace VRCBilliards
 
             if (isNineBall)    // 9 ball specific
             {
-                marker9ball.SetActive(true);
+                if (marker9ball)
+                {
+                    marker9ball.SetActive(true);
+                }
             }
             else
             {
-                marker9ball.SetActive(false);
+                if (marker9ball)
+                {
+                    marker9ball.SetActive(false);
+                }
             }
 
             if (isFourBall) // 4 ball specific
             {
-                pocketBlockers.SetActive(true);
+                if (pocketBlockers)
+                {
+                    pocketBlockers.SetActive(true);
+                }
 
                 scores[0] = 0;
                 scores[1] = 0;
@@ -2370,7 +2526,10 @@ namespace VRCBilliards
             }
             else
             {
-                pocketBlockers.SetActive(false);
+                if (pocketBlockers)
+                {
+                    pocketBlockers.SetActive(false);
+                }
 
                 // Reset mesh filters on balls that change them
                 balls[0].GetComponent<MeshFilter>().sharedMesh = cueballMeshes[0];
@@ -2381,41 +2540,98 @@ namespace VRCBilliards
             {
                 for (int i = 0; i <= 9; i++)
                 {
-                    balls[i].SetActive(true);
-                    ballShadowPosConstraints[i].gameObject.SetActive(true);
+                    if (balls[i])
+                    {
+                        balls[i].SetActive(true);
+                    }
+
+                    if (ballShadowPosConstraints[i])
+                    {
+                        ballShadowPosConstraints[i].gameObject.SetActive(true);
+                    }
                 }
 
                 for (int i = 10; i < 16; i++)
                 {
-                    balls[i].SetActive(false);
-                    ballShadowPosConstraints[i].gameObject.SetActive(false);
+                    if (balls[i])
+                    {
+                        balls[i].SetActive(false);
+                    }
+
+                    if (ballShadowPosConstraints[i])
+                    {
+                        ballShadowPosConstraints[i].gameObject.SetActive(false);
+                    }
                 }
             }
             else if (isFourBall)
             {
                 for (int i = 1; i < 16; i++)
                 {
-                    balls[i].SetActive(false);
-                    ballShadowPosConstraints[i].gameObject.SetActive(false);
+                    if (balls[i])
+                    {
+                        balls[i].SetActive(false);
+                    }
+
+                    if (ballShadowPosConstraints[i])
+                    {
+                        ballShadowPosConstraints[i].gameObject.SetActive(false);
+                    }
                 }
 
-                balls[0].gameObject.SetActive(true);
-                balls[2].gameObject.SetActive(true);
-                balls[3].gameObject.SetActive(true);
-                balls[9].gameObject.SetActive(true);
+                if (balls[0])
+                {
+                    balls[0].gameObject.SetActive(true);
+                }
 
-                ballShadowPosConstraints[0].gameObject.SetActive(true);
-                ballShadowPosConstraints[2].gameObject.SetActive(true);
-                ballShadowPosConstraints[3].gameObject.SetActive(true);
-                ballShadowPosConstraints[9].gameObject.SetActive(true);
+                if (balls[2])
+                {
+                    balls[2].gameObject.SetActive(true);
+                }
 
+                if (balls[3])
+                {
+                    balls[3].gameObject.SetActive(true);
+                }
+
+                if (balls[9])
+                {
+                    balls[9].gameObject.SetActive(true);
+                }
+
+                if (ballShadowPosConstraints[0])
+                {
+                    ballShadowPosConstraints[0].gameObject.SetActive(true);
+                }
+
+                if (ballShadowPosConstraints[2])
+                {
+                    ballShadowPosConstraints[2].gameObject.SetActive(true);
+                }
+
+                if (ballShadowPosConstraints[3])
+                {
+                    ballShadowPosConstraints[3].gameObject.SetActive(true);
+                }
+
+                if (ballShadowPosConstraints[9])
+                {
+                    ballShadowPosConstraints[9].gameObject.SetActive(true);
+                }
             }
             else
             {
                 for (int i = 0; i < 16; i++)
                 {
-                    balls[i].SetActive(true);
-                    ballShadowPosConstraints[i].gameObject.SetActive(true);
+                    if (balls[i])
+                    {
+                        balls[i].SetActive(true);
+                    }
+
+                    if (ballShadowPosConstraints[i])
+                    {
+                        ballShadowPosConstraints[i].gameObject.SetActive(true);
+                    }
                 }
             }
 
@@ -2432,7 +2648,7 @@ namespace VRCBilliards
             gripControllers[0].localPlayerIsInDesktopTopDownView = false;
             gripControllers[1].localPlayerIsInDesktopTopDownView = false;
 
-            if (!Networking.LocalPlayer.IsUserInVR())
+            if (!localPlayer.IsUserInVR())
             {
                 gripControllers[0].usingDesktop = true;
                 gripControllers[1].usingDesktop = true;
@@ -2596,7 +2812,7 @@ namespace VRCBilliards
         /// Pocketless table
         /// </summary>
         /// <param name="id"></param>
-        private void BallTableCarom(int id)
+        private void BounceBallOffCushionIfApplicable(int id)
         {
             float zz, zx;
             Vector3 A = currentBallPositions[id];
@@ -2987,7 +3203,11 @@ namespace VRCBilliards
             }
 
             isInDesktopTopDownView = false;
-            desktopBase.SetActive(false);
+
+            if (desktopBase)
+            {
+                desktopBase.SetActive(false);
+            }
 
             gripControllers[0].localPlayerIsInDesktopTopDownView = false;
             gripControllers[1].localPlayerIsInDesktopTopDownView = false;
@@ -3008,8 +3228,12 @@ namespace VRCBilliards
             }
 
             // Keep UI rendering
-            VRCPlayerApi.TrackingData hmd = Networking.LocalPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
-            desktopQuad.transform.position = hmd.position + (hmd.rotation * Vector3.forward);
+            if (Utilities.IsValid(localPlayer))
+            {
+                VRCPlayerApi.TrackingData hmd = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
+                desktopQuad.transform.position = hmd.position + (hmd.rotation * Vector3.forward);
+            }
+
             desktopEPopup.transform.position = desktopQuad.transform.position;
 
             deskTopCursor.x = Mathf.Clamp
@@ -3062,7 +3286,10 @@ namespace VRCBilliards
                     delta = desktopShootVector;
 
                     // Disable cursor in shooting mode
-                    desktopCursorObject.SetActive(false);
+                    if (desktopCursorObject)
+                    {
+                        desktopCursorObject.SetActive(false);
+                    }
                 }
                 else
                 {
@@ -3096,7 +3323,11 @@ namespace VRCBilliards
 
                     isDesktopShootingIn = false;
                     shootAmt = 0.0f;
-                    desktopCursorObject.SetActive(true);
+
+                    if (desktopCursorObject)
+                    {
+                        desktopCursorObject.SetActive(true);
+                    }
                 }
 
                 if (Input.GetKey(KeyCode.W))
@@ -3145,9 +3376,21 @@ namespace VRCBilliards
                 logger.Log(name, "disabling marker because the ball hase been hit");
             }
             isRepositioningCueBall = false;
-            marker.SetActive(false);
-            devhit.SetActive(false);
-            guideline.SetActive(false);
+
+            if (marker)
+            {
+                marker.SetActive(false);
+            }
+
+            if (devhit)
+            {
+                devhit.SetActive(false);
+            }
+
+            if (guideline)
+            {
+                guideline.SetActive(false);
+            }
 
             // Remove locks
             EndHit();
@@ -3159,7 +3402,7 @@ namespace VRCBilliards
             oldPocketed = ballPocketedState;
 
             // Make sure we definately are the network owner
-            Networking.SetOwner(Networking.LocalPlayer, gameObject);
+            Networking.SetOwner(localPlayer, gameObject);
 
             RefreshNetworkData(newIsTeam2Turn);
 
@@ -3228,7 +3471,7 @@ namespace VRCBilliards
 
         public override void OnPlayerLeft(VRCPlayerApi player)
         {
-            if (!Networking.IsInstanceOwner)
+            if (!Utilities.IsValid(player) || !Networking.IsOwner(player, gameObject))
             {
                 return;
             }
@@ -3262,11 +3505,6 @@ namespace VRCBilliards
 
         public void LocalPlayerEnteredAreaNearTable()
         {
-            if (logger)
-            {
-                logger.Log(name, "LocalPlayerEnteredAreaNearTable");
-            }
-
             if (!isPlayerInVR)
             {
                 isNearTable = true;
@@ -3277,33 +3515,18 @@ namespace VRCBilliards
         /// <Summary> Is the local player near the table? </Summary>
         public void LocalPlayerLeftAreaNearTable()
         {
-            if (logger)
-            {
-                logger.Log(name, "LocalPlayerLeftAreaNearTable");
-            }
-
             isNearTable = false;
             CannotEnterDesktopTopDownView();
         }
 
         public void LocalPlayerPickedUpCue()
         {
-            if (logger)
-            {
-                logger.Log(name, "LocalPlayerPickedUpCue");
-            }
-
             numberOfCuesHeldByLocalPlayer++;
             CheckIfCanEnterDesktopTopDownView();
         }
 
         public void LocalPlayerDroppedCue()
         {
-            if (logger)
-            {
-                logger.Log(name, "LocalPlayerDroppedCue");
-            }
-
             numberOfCuesHeldByLocalPlayer--;
             if (numberOfCuesHeldByLocalPlayer == 0)
             {
@@ -3313,33 +3536,39 @@ namespace VRCBilliards
 
         private void CheckIfCanEnterDesktopTopDownView()
         {
-            if (logger)
-            {
-                logger.Log(name, "CheckIfCanEnterDesktopTopDownView");
-            }
-
             if (isNearTable && numberOfCuesHeldByLocalPlayer > 0)
             {
                 canEnterDesktopTopDownView = true;
-                pressE.SetActive(true);
+
+                if (pressE)
+                {
+                    pressE.SetActive(true);
+                }
             }
         }
 
         private void CannotEnterDesktopTopDownView()
         {
-            if (logger)
-            {
-                logger.Log(name, "CannotEnterDesktopTopDownView");
-            }
-
             canEnterDesktopTopDownView = false;
-            pressE.SetActive(false);
+
+            if (pressE)
+            {
+                pressE.SetActive(false);
+            }
         }
 
         private void HandleUpdatingCanEnterDestopViewUI()
         {
-            VRCPlayerApi.TrackingData hmd = Networking.LocalPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
-            pressE.transform.position = hmd.position + (hmd.rotation * Vector3.forward);
+            if (Utilities.IsValid(localPlayer))
+            {
+                VRCPlayerApi.TrackingData hmd = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
+
+                if (pressE)
+                {
+                    pressE.transform.position = hmd.position + (hmd.rotation * Vector3.forward);
+                }
+            }
+
         }
     }
 }

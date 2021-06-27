@@ -50,9 +50,10 @@ namespace VRCBilliards
 
         [HideInInspector]
         public bool localPlayerIsInDesktopTopDownView;
+        private Vector3 oldTargePos;
 
-        public PositionConstraint cuePosConstraint;
-        public LookAtConstraint cueLookAtConstraint;
+        //public PositionConstraint cuePosConstraint;
+        //public LookAtConstraint cueLookAtConstraint;
 
         private VRCPlayerApi playerApi;
 
@@ -104,12 +105,20 @@ namespace VRCBilliards
                     // Pull the cue backwards or forwards on the locked cue's line based on how far away the locking cue handle has been moved since locking.
                     cueParent.transform.position = positionAtStartOfArming + (normalizedLineOfCueWhenArmed * Vector3.Dot(offsetBetweenArmedPositions, normalizedLineOfCueWhenArmed));
                 }
-                else if (usingDesktop && isPickedUp)
+                else
                 {
-                    var data = playerApi.GetTrackingData(VRCPlayerApi.TrackingDataType.RightHand);
-                    transform.position = data.position;
+                    if (usingDesktop && isPickedUp)
+                    {
+                        var data = playerApi.GetTrackingData(VRCPlayerApi.TrackingDataType.RightHand);
+                        transform.position = data.position;
+                    }
+
+                    cueParent.transform.position = Vector3.Lerp(cueParent.transform.position, transform.position, 0.25f);//transform.position;
+                    cueParent.transform.LookAt(Vector3.Lerp(oldTargePos, targetPickup.transform.position, 0.25f));
                 }
             }
+
+            oldTargePos = targetPickup.transform.position;
         }
 
         public override void OnPickupUseDown()
@@ -117,8 +126,8 @@ namespace VRCBilliards
             if (!usingDesktop)
             {
                 isArmed = true;
-                cuePosConstraint.enabled = false;
-                cueLookAtConstraint.enabled = false;
+                //cuePosConstraint.enabled = false;
+                //cueLookAtConstraint.enabled = false;
                 positionAtStartOfArming = transform.position;
                 normalizedLineOfCueWhenArmed = (target.transform.position - positionAtStartOfArming).normalized;
                 poolStateManager.StartHit();
@@ -129,8 +138,8 @@ namespace VRCBilliards
         {
             if (!usingDesktop)
             {
-                cuePosConstraint.enabled = true;
-                cueLookAtConstraint.enabled = true;
+                //cuePosConstraint.enabled = true;
+                //cueLookAtConstraint.enabled = true;
             }
 
             isArmed = false;
@@ -155,6 +164,8 @@ namespace VRCBilliards
             poolStateManager.LocalPlayerPickedUpCue();
 
             isPickedUp = true;
+
+            ((VRC_Pickup)targetController.gameObject.GetComponent(typeof(VRC_Pickup))).pickupable = true;
         }
 
         public override void OnDrop()
@@ -169,6 +180,8 @@ namespace VRCBilliards
 
             poolStateManager.LocalPlayerDroppedCue();
             isPickedUp = false;
+
+            ((VRC_Pickup)targetController.gameObject.GetComponent(typeof(VRC_Pickup))).pickupable = false;
         }
 
         /// <summary>
@@ -200,12 +213,15 @@ namespace VRCBilliards
 
         private void Respawn()
         {
+            targetController.Respawn();
             transform.SetPositionAndRotation(cueRespawnPosition.position, cueRespawnPosition.rotation);
 
             if (usingDesktop)
             {
                 poolStateManager.OnPutDownCueLocally();
             }
+
+            cueParent.transform.LookAt(targetPickup.transform, Vector3.up);
         }
 
         private void ResetTarget()
@@ -217,14 +233,14 @@ namespace VRCBilliards
 
         public void EnableConstraints()
         {
-            cuePosConstraint.enabled = true;
-            cueLookAtConstraint.enabled = true;
+            //cuePosConstraint.enabled = true;
+            //cueLookAtConstraint.enabled = true;
         }
 
         public void DisableConstraints()
         {
-            cuePosConstraint.enabled = false;
-            cueLookAtConstraint.enabled = false;
+            //cuePosConstraint.enabled = false;
+            //cueLookAtConstraint.enabled = false;
         }
     }
 }
