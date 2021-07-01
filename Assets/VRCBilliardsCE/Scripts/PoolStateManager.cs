@@ -3471,18 +3471,17 @@ namespace VRCBilliards
 
         public override void OnPlayerLeft(VRCPlayerApi player)
         {
-            if (!Utilities.IsValid(player) || !Networking.IsOwner(player, gameObject))
+            if (!Networking.IsOwner(Networking.LocalPlayer, gameObject) || !Utilities.IsValid(player))
             {
                 return;
             }
 
             int playerID = player.playerId;
-
             if (playerID == player1ID || playerID == player2ID || playerID == player3ID || playerID == player4ID)
             {
                 if (isGameInMenus)
                 {
-                    RemovePlayerFromGame(player.playerId);
+                    RemovePlayerFromGame(playerID);
                 }
                 else
                 {
