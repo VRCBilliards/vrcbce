@@ -19,7 +19,9 @@ MonoBehaviour:
   sourceCsScript: {fileID: 11500000, guid: b9a0b4ecc7e462540a168e304852a893, type: 3}
   behaviourSyncMode: 0
   behaviourIDHeapVarName: __refl_const_intnl_udonTypeID
-  compileErrors: []
+  compileErrors:
+  - '[<color=#FF00FF>UdonSharp</color>] Assets/VRCBilliardsCE/Scripts/PoolStateManager.cs(1414,60):
+    error CS1002: ; expected'
   hasInteractEvent: 0
   serializationData:
     SerializedFormat: 2
