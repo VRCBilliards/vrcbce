@@ -1411,7 +1411,7 @@ namespace VRCBilliards
                 (player4ID > 0 && VRCPlayerApi.GetPlayerById(player4ID) == null)
                 )
             {
-                Networking.SetOwner(localPlayer, gameObject)
+                Networking.SetOwner(localPlayer, gameObject);
 
                 Reset();
             }
