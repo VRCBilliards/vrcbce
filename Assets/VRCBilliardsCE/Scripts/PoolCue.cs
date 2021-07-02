@@ -50,12 +50,9 @@ namespace VRCBilliards
 
         [HideInInspector]
         public bool localPlayerIsInDesktopTopDownView;
-        private Vector3 oldTargePos;
-
-        //public PositionConstraint cuePosConstraint;
-        //public LookAtConstraint cueLookAtConstraint;
 
         private VRCPlayerApi playerApi;
+        private Vector3 oldTargetPos;
 
         public void Start()
         {
@@ -93,7 +90,7 @@ namespace VRCBilliards
             DenyAccess();
         }
 
-        public void LateUpdate()
+        public void Update()
         {
             // Put cue in hand
             if (!localPlayerIsInDesktopTopDownView)
@@ -113,12 +110,13 @@ namespace VRCBilliards
                         transform.position = data.position;
                     }
 
-                    cueParent.transform.position = Vector3.Lerp(cueParent.transform.position, transform.position, 0.25f);//transform.position;
-                    cueParent.transform.LookAt(Vector3.Lerp(oldTargePos, targetPickup.transform.position, 0.25f));
+                    var lerpPercent = Time.deltaTime * 16.0f;
+                    cueParent.transform.position = Vector3.Lerp(cueParent.transform.position, transform.position, lerpPercent);
+                    cueParent.transform.LookAt(Vector3.Lerp(oldTargetPos, targetPickup.transform.position, lerpPercent));
                 }
             }
 
-            oldTargePos = targetPickup.transform.position;
+            oldTargetPos = targetPickup.transform.position;
         }
 
         public override void OnPickupUseDown()
