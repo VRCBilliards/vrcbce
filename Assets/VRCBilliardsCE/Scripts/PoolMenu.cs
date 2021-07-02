@@ -183,11 +183,11 @@ namespace VRCBilliards
             }
         }
 
-        public void EndGame()
+        public void _EndGame()
         {
             if (isSignedUpToPlay)
             {
-                manager.ForceReset();
+                manager._ForceReset();
             }
         }
 

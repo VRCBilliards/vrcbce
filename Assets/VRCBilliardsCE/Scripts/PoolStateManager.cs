@@ -1389,23 +1389,50 @@ namespace VRCBilliards
         /// <summary>
         /// Completely reset state
         /// </summary>
-        public void ForceReset()
+        public void _ForceReset()
         {
             if (logger)
             {
                 logger.Log(name, "ForceReset");
             }
 
-            if (localPlayer == Networking.GetOwner(playerTotems[0]) || localPlayer == Networking.GetOwner(playerTotems[1]) || isGameInMenus)
+            if (
+                // If you are a player
+                Networking.LocalPlayer.playerId == player1ID ||
+                Networking.LocalPlayer.playerId == player2ID ||
+                Networking.LocalPlayer.playerId == player3ID ||
+                Networking.LocalPlayer.playerId == player4ID ||
+                // The game is in the menu so resetting doesn't matter much
+                isGameInMenus ||
+                // The game is in a running state, someone has left, and the table has entered an invalid state
+                (player1ID > 0 && VRCPlayerApi.GetPlayerById(player1ID) == null) ||
+                (player2ID > 0 && VRCPlayerApi.GetPlayerById(player2ID) == null) ||
+                (player3ID > 0 && VRCPlayerApi.GetPlayerById(player3ID) == null) ||
+                (player4ID > 0 && VRCPlayerApi.GetPlayerById(player4ID) == null)
+                )
             {
-                isGameInMenus = true;
-                isPlayerAllowedToPlay = false;
-                gameIsSimulating = false;
-                newIsTeam2Turn = false;
+                Networking.SetOwner(localPlayer, gameObject)
 
-                Networking.SetOwner(localPlayer, gameObject);
+                Reset();
+            }
+            else if (logger)
+            {
+                logger.Log(name, "Cannot reset table: You must be a player, or the table must be in an invalid state.");
+            }
+        }
 
-                RefreshNetworkData(newIsTeam2Turn);
+        private void Reset()
+        {
+            isGameInMenus = true;
+            isPlayerAllowedToPlay = false;
+            gameIsSimulating = false;
+            newIsTeam2Turn = false;
+
+            RefreshNetworkData(newIsTeam2Turn);
+
+            if (logger)
+            {
+                logger.Log(name, "Forcing a reset was successful.");
             }
         }
 
@@ -3486,7 +3513,7 @@ namespace VRCBilliards
                 else
                 {
                     gameWasReset = true;
-                    ForceReset();
+                    Reset();
                 }
             }
         }
