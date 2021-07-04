@@ -1743,7 +1743,7 @@ namespace VRCBilliards
             isSimulatedByUs = false;
 
             // We are updating the game state so make sure we are network owner
-            Networking.SetOwner(localPlayer, gameObject);
+            Networking.SetOwner(Networking.LocalPlayer, gameObject);
 
             // Owner state checks
 
