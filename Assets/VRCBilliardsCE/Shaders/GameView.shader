@@ -36,8 +36,7 @@
             v2f vert (appdata v)
             {
                 v2f o;
-
-					 float ratio = (_ScreenParams.x / _ScreenParams.y)*-0.56249999999;
+			    float ratio = (_ScreenParams.x / _ScreenParams.y)*-0.56249999999;
 
                 o.vertex = float4( v.vertex.x*2, v.vertex.y*2*ratio, UNITY_NEAR_CLIP_VALUE, 1.0 );
                 o.uv = v.uv;

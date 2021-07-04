@@ -120,6 +120,9 @@ namespace VRCBilliards
         private const float DEFAULT_FORCE_MULTIPLIER = 1.5f;
         private float forceMultiplier;
 
+        private Vector3 vectorZero = Vector3.zero;
+        private Quaternion quaternionIdentity = Quaternion.identity;
+
         /*
          * Public Variables
          */
@@ -175,21 +178,27 @@ namespace VRCBilliards
         /// </summary>
         [Header("Table Objects")]
         [Tooltip("The balls that are used by the table.\nThe order of the balls is as follows: cue, black, all blue in ascending order, then all orange in ascending order.\nIf the order of the balls is incorrect, gameplay will not proceed correctly.")]
-        public GameObject[] balls;
+        public Transform[] ballTransforms;
+        private Rigidbody[] ballRigidbodies;
         [Tooltip("The shadow object for each ball")]
         public PositionConstraint[] ballShadowPosConstraints;
+        private Transform[] ballShadowPosConstraintTransforms;
         public GameObject cueTip;
+        private Transform cueTipTransform;
         public GameObject guideline;
         public GameObject devhit;
         public GameObject[] playerTotems;
         public GameObject[] cueTips;
         public GameObject gameTable;
         public GameObject marker;
+        private Material markerMaterial;
         public GameObject marker9ball;
         public GameObject tableCollisionParent;
         public GameObject pocketBlockers;
         public GameObject point4Ball;
-        public GameObject[] cueRenderObjs;
+        private Transform point4BallTransform;
+        public MeshRenderer[] cueRenderObjs;
+        private Material[] cueMaterials = new Material[2];
 
         [Header("Materials")]
         public MeshRenderer[] ballRenderers;
@@ -270,6 +279,7 @@ namespace VRCBilliards
          */
 
         private AudioSource[] ballPool;
+        private Transform[] ballPoolTransforms;
         private AudioSource mainSrc;
 
         /// <summary>
@@ -481,10 +491,15 @@ namespace VRCBilliards
 
         private bool isPlayerInVR;
         private VRCPlayerApi localPlayer;
+        private int networkingLocalPlayerID;
+        private Transform markerTransform;
+
+        private Camera desktopCamera;
 
         public void Start()
         {
             localPlayer = Networking.LocalPlayer;
+            networkingLocalPlayerID = localPlayer.playerId;
 
             if (Utilities.IsValid(localPlayer))
             {
@@ -499,17 +514,47 @@ namespace VRCBilliards
             tableMaterial = tableRenderer.material;
             baseObjectRot = baseObject.transform.rotation;
 
+            ballRigidbodies = new Rigidbody[ballTransforms.Length];
+            for (int i = 0; i < ballRigidbodies.Length; i++)
+            {
+                ballRigidbodies[i] = ballTransforms[i].GetComponent<Rigidbody>();
+            }
+
+            ballShadowPosConstraintTransforms = new Transform[ballShadowPosConstraints.Length];
+            for (int i = 0; i < ballShadowPosConstraints.Length; i++)
+            {
+                ballShadowPosConstraintTransforms[i] = ballShadowPosConstraints[i].transform;
+            }
+
             mainSrc = GetComponent<AudioSource>();
 
             if (audioSourcePoolContainer) // Xiexe: Use a pool for audio instead of using the PlayClipAtPoint method because PlayClipAtPoint is buggy and VRC audio controls do not modify it.
             {
                 ballPool = audioSourcePoolContainer.GetComponentsInChildren<AudioSource>();
+                ballPoolTransforms = new Transform[ballPool.Length];
+
+                for (int i = 0; i < ballPool.Length; i++)
+                {
+                    ballPoolTransforms[i] = ballPool[i].transform;
+                }
             }
+
+            desktopCamera = desktopBase.GetComponentInChildren<Camera>();
+            desktopCamera.enabled = false;
+
+            point4BallTransform = point4Ball.transform;
+            markerTransform = marker.transform;
 
             CopyGameStateToOldState();
 
-            cueRenderObjs[0].GetComponent<MeshRenderer>().material.SetColor(uniformCueColour, tableBlack);
-            cueRenderObjs[1].GetComponent<MeshRenderer>().material.SetColor(uniformCueColour, tableBlack);
+            markerMaterial = marker.GetComponent<MeshRenderer>().material;
+            cueMaterials[0] = cueRenderObjs[0].material;
+            cueMaterials[1] = cueRenderObjs[1].material;
+
+            cueMaterials[0].SetColor(uniformCueColour, tableBlack);
+            cueMaterials[1].SetColor(uniformCueColour, tableBlack);
+
+            cueTipTransform = cueTip.transform;
 
             if (tableReflection)
             {
@@ -550,7 +595,7 @@ namespace VRCBilliards
                 shadows.SetActive(fakeBallShadows);
             }
 
-            ballShadowOffset = balls[0].transform.position.y - ballShadowPosConstraints[0].gameObject.transform.position.y;
+            ballShadowOffset = ballTransforms[0].position.y - ballShadowPosConstraintTransforms[0].position.y;
             if (logger)
             {
                 logger.Log(name, $"ball shadow offset is {ballShadowOffset}");
@@ -611,12 +656,12 @@ namespace VRCBilliards
                 scale = e * v * 2.0f;
 
                 // Set scale
-                point4Ball.transform.localScale = new Vector3(scale, scale, scale);
+                point4BallTransform.localScale = new Vector3(scale, scale, scale);
 
                 // Set position
-                Vector3 temp = point4Ball.transform.localPosition;
+                Vector3 temp = point4BallTransform.localPosition;
                 temp.y = particleTime * 0.5f;
-                point4Ball.transform.localPosition = temp;
+                point4BallTransform.localPosition = temp;
 
                 // Particle death
                 if (particleTime > 2.0f)
@@ -678,7 +723,7 @@ namespace VRCBilliards
             {
                 if ((ballBit & ballPocketedState) == 0x0u)
                 {
-                    balls[i].transform.localPosition = currentBallPositions[i];
+                    ballTransforms[i].localPosition = currentBallPositions[i];
                 }
 
                 ballBit <<= 1;
@@ -693,23 +738,23 @@ namespace VRCBilliards
                 if (isRepositioningCueBall)
                 {
                     // Clamp position to table / kitchen
-                    Vector3 temp = marker.transform.localPosition;
+                    Vector3 temp = markerTransform.localPosition;
                     temp.x = Mathf.Clamp(temp.x, -TABLE_WIDTH, repoMaxX);
                     temp.z = Mathf.Clamp(temp.z, -TABLE_HEIGHT, TABLE_HEIGHT);
                     temp.y = 0.0f;
-                    marker.transform.localPosition = temp;
-                    marker.transform.localRotation = Quaternion.identity;
+                    markerTransform.localPosition = temp;
+                    markerTransform.localRotation = quaternionIdentity;
 
                     currentBallPositions[0] = temp;
-                    balls[0].transform.localPosition = temp;
+                    ballTransforms[0].localPosition = temp;
 
                     if (IsCueContacting())
                     {
-                        marker.GetComponent<MeshRenderer>().material.SetColor(uniformMarkerColour, markerNotOK);
+                        markerMaterial.SetColor(uniformMarkerColour, markerNotOK);
                     }
                     else
                     {
-                        marker.GetComponent<MeshRenderer>().material.SetColor(uniformMarkerColour, markerOK);
+                        markerMaterial.SetColor(uniformMarkerColour, markerOK);
                     }
                 }
 
@@ -750,7 +795,7 @@ namespace VRCBilliards
                     cueLocalForwardDirection = transform.InverseTransformVector(cueTip.transform.forward);
 
                     // Get where the cue will strike the ball
-                    if (IsIntersectiNgWithSphere(copyOfLocalSpacePositionOfCueTip, cueLocalForwardDirection, cueballPosition))
+                    if (IsIntersectingWithSphere(copyOfLocalSpacePositionOfCueTip, cueLocalForwardDirection, cueballPosition))
                     {
                         if (guideLineEnabled && guideline)
                         {
@@ -860,22 +905,23 @@ namespace VRCBilliards
                 }
 
                 // Cueball drops late
-                GameObject ball = balls[0];
-                temp = ball.transform.localPosition;
-                float height = ball.transform.position.y - ballShadowOffset;
+                Transform ball = ballTransforms[0];
+                temp = ball.localPosition;
+                float height = ball.position.y - ballShadowOffset;
 
                 atime = Mathf.Clamp(introAminTimer - 0.33f, 0.0f, 1.0f);
                 aitime = 1.0f - atime;
                 temp.y = Mathf.Abs(Mathf.Cos(atime * 6.29f)) * atime * 0.5f;
-                ball.transform.localPosition = temp;
+                ball.localPosition = temp;
 
                 Vector3 scale = new Vector3(aitime, aitime, aitime);
-                ball.transform.localScale = scale;
+                ball.localScale = scale;
 
                 PositionConstraint posCon = ballShadowPosConstraints[0];
                 posCon.constraintActive = false;
-                posCon.gameObject.transform.position = new Vector3(ball.transform.position.x, height, ball.transform.position.z);
-                posCon.gameObject.transform.localScale = scale;
+                Transform posConTrans = ballShadowPosConstraintTransforms[0];
+                posConTrans.position = new Vector3(ball.position.x, height, ball.position.z);
+                posConTrans.localScale = scale;
 
                 MeshRenderer r = shadowRenders[0];
                 Color c = r.material.color;
@@ -883,24 +929,25 @@ namespace VRCBilliards
 
                 for (int i = 1; i < 16; i++)
                 {
-                    ball = balls[i];
+                    ball = ballTransforms[i];
 
-                    temp = ball.transform.localPosition;
-                    height = ball.transform.position.y - ballShadowOffset;
+                    temp = ball.localPosition;
+                    height = ball.position.y - ballShadowOffset;
 
                     atime = Mathf.Clamp(introAminTimer - 0.84f - (i * 0.03f), 0.0f, 1.0f);
                     aitime = 1.0f - atime;
 
                     temp.y = Mathf.Abs(Mathf.Cos(atime * 6.29f)) * atime * 0.5f;
-                    ball.transform.localPosition = temp;
+                    ball.localPosition = temp;
 
                     scale = new Vector3(aitime, aitime, aitime);
-                    ball.transform.localScale = scale;
+                    ball.localScale = scale;
 
                     posCon = ballShadowPosConstraints[i];
                     posCon.constraintActive = false;
-                    posCon.gameObject.transform.position = new Vector3(ball.transform.position.x, height, ball.transform.position.z);
-                    posCon.gameObject.transform.localScale = scale;
+                    posConTrans = ballShadowPosConstraintTransforms[i];
+                    posConTrans.position = new Vector3(ball.position.x, height, ball.position.z);
+                    posConTrans.localScale = scale;
 
                     r = shadowRenders[i];
                     c = r.material.color;
@@ -975,16 +1022,16 @@ namespace VRCBilliards
             switch (playerNumber)
             {
                 case 0:
-                    player1ID = localPlayer.playerId;
+                    player1ID = networkingLocalPlayerID;
                     break;
                 case 1:
-                    player2ID = localPlayer.playerId;
+                    player2ID = networkingLocalPlayerID;
                     break;
                 case 2:
-                    player3ID = localPlayer.playerId;
+                    player3ID = networkingLocalPlayerID;
                     break;
                 case 3:
-                    player4ID = localPlayer.playerId;
+                    player4ID = networkingLocalPlayerID;
                     break;
                 default:
                     return;
@@ -1166,7 +1213,7 @@ namespace VRCBilliards
 
             // Cue ball
             currentBallPositions[0] = new Vector3(-SPOT_POSITION_X, 0.0f, 0.0f);
-            currentBallVelocities[0] = Vector3.zero;
+            currentBallVelocities[0] = vectorZero;
 
             // Start at spot
 
@@ -1208,8 +1255,8 @@ namespace VRCBilliards
                         ((-rown + (j * 2)) * BALL_PL_X) + UnityEngine.Random.Range(-RANDOMIZE_F, RANDOMIZE_F)
                     );
 
-                    currentBallVelocities[k] = Vector3.zero;
-                    currentAngularVelocities[k] = Vector3.zero;
+                    currentBallVelocities[k] = vectorZero;
+                    currentAngularVelocities[k] = vectorZero;
                 }
             }
         }
@@ -1223,15 +1270,15 @@ namespace VRCBilliards
             currentBallPositions[2] = new Vector3(SPOT_POSITION_X, 0.0f, 0.0f);
             currentBallPositions[3] = new Vector3(-SPOT_POSITION_X, 0.0f, 0.0f);
 
-            currentBallVelocities[0] = Vector3.zero;
-            currentBallVelocities[9] = Vector3.zero;
-            currentBallVelocities[2] = Vector3.zero;
-            currentBallVelocities[3] = Vector3.zero;
+            currentBallVelocities[0] = vectorZero;
+            currentBallVelocities[9] = vectorZero;
+            currentBallVelocities[2] = vectorZero;
+            currentBallVelocities[3] = vectorZero;
 
-            currentAngularVelocities[0] = Vector3.zero;
-            currentAngularVelocities[9] = Vector3.zero;
-            currentAngularVelocities[2] = Vector3.zero;
-            currentAngularVelocities[3] = Vector3.zero;
+            currentAngularVelocities[0] = vectorZero;
+            currentAngularVelocities[9] = vectorZero;
+            currentAngularVelocities[2] = vectorZero;
+            currentAngularVelocities[3] = vectorZero;
         }
 
         private void Initialize8Ball()
@@ -1249,8 +1296,8 @@ namespace VRCBilliards
                         ((-i + (j * 2)) * BALL_PL_X) + UnityEngine.Random.Range(-RANDOMIZE_F, RANDOMIZE_F)
                     );
 
-                    currentBallVelocities[k] = Vector3.zero;
-                    currentAngularVelocities[k] = Vector3.zero;
+                    currentBallVelocities[k] = vectorZero;
+                    currentAngularVelocities[k] = vectorZero;
                 }
             }
         }
@@ -1398,10 +1445,10 @@ namespace VRCBilliards
 
             if (
                 // If you are a player
-                Networking.LocalPlayer.playerId == player1ID ||
-                Networking.LocalPlayer.playerId == player2ID ||
-                Networking.LocalPlayer.playerId == player3ID ||
-                Networking.LocalPlayer.playerId == player4ID ||
+                networkingLocalPlayerID == player1ID ||
+                networkingLocalPlayerID == player2ID ||
+                networkingLocalPlayerID == player3ID ||
+                networkingLocalPlayerID == player4ID ||
                 // The game is in the menu so resetting doesn't matter much
                 isGameInMenus ||
                 // The game is in a running state, someone has left, and the table has entered an invalid state
@@ -1449,6 +1496,7 @@ namespace VRCBilliards
             if (desktopBase)
             {
                 desktopBase.SetActive(true);
+                desktopCamera.enabled = true;
             }
 
             // Lock player in place
@@ -1676,7 +1724,7 @@ namespace VRCBilliards
                         }
 
                         // VFX ( make ball move )
-                        Rigidbody body = balls[i].GetComponent<Rigidbody>();
+                        Rigidbody body = ballTransforms[i].GetComponent<Rigidbody>();
                         body.isKinematic = false;
                         body.velocity = baseObjectRot * new Vector3(
                             currentBallVelocities[i].x,
@@ -1930,7 +1978,7 @@ namespace VRCBilliards
 
                     if (marker)
                     {
-                        marker.transform.localPosition = currentBallPositions[0];
+                        markerTransform.localPosition = currentBallPositions[0];
                         if (!isFourBall)
                         {
                             marker.SetActive(true);
@@ -1940,7 +1988,7 @@ namespace VRCBilliards
                 }
                 else
                 {
-                    marker.transform.localPosition = currentBallPositions[0];
+                    markerTransform.localPosition = currentBallPositions[0];
 
                     if (!isFourBall)
                     {
@@ -2068,7 +2116,7 @@ namespace VRCBilliards
                     isDesktopLocalTurn = true;
 
                     // Reset hit point
-                    desktopHitCursor = Vector3.zero;
+                    desktopHitCursor = vectorZero;
                 }
                 else
                 {
@@ -2133,21 +2181,21 @@ namespace VRCBilliards
             {
                 if (!newIsTeam2Turn)
                 {
-                    cueRenderObjs[0].GetComponent<MeshRenderer>().materials[0].SetColor(uniformCueColour, pointerColour0);
-                    cueRenderObjs[1].GetComponent<MeshRenderer>().materials[0].SetColor(uniformCueColour, pointerColour1 * 0.5f);
+                    cueRenderObjs[0].materials[0].SetColor(uniformCueColour, pointerColour0);
+                    cueRenderObjs[1].materials[0].SetColor(uniformCueColour, pointerColour1 * 0.5f);
                 }
                 else
                 {
-                    cueRenderObjs[0].GetComponent<MeshRenderer>().materials[0].SetColor(uniformCueColour, pointerColour0 * 0.5f);
-                    cueRenderObjs[1].GetComponent<MeshRenderer>().materials[0].SetColor(uniformCueColour, pointerColour1);
+                    cueRenderObjs[0].materials[0].SetColor(uniformCueColour, pointerColour0 * 0.5f);
+                    cueRenderObjs[1].materials[0].SetColor(uniformCueColour, pointerColour1);
                 }
 
                 tableSrcColour = tableBlack;
             }
             else if (isNineBall)
             {
-                cueRenderObjs[Convert.ToInt32(newIsTeam2Turn)].GetComponent<MeshRenderer>().materials[0].SetColor(uniformCueColour, tableWhite);
-                cueRenderObjs[Convert.ToInt32(!newIsTeam2Turn)].GetComponent<MeshRenderer>().materials[0].SetColor(uniformCueColour, tableBlack);
+                cueRenderObjs[Convert.ToInt32(newIsTeam2Turn)].materials[0].SetColor(uniformCueColour, tableWhite);
+                cueRenderObjs[Convert.ToInt32(!newIsTeam2Turn)].materials[0].SetColor(uniformCueColour, tableBlack);
 
                 tableSrcColour = pointerColour2;
             }
@@ -2158,14 +2206,14 @@ namespace VRCBilliards
                     if (isPlayer2Blue)
                     {
                         tableSrcColour = tableBlue;
-                        cueRenderObjs[0].GetComponent<MeshRenderer>().material.SetColor(uniformCueColour, tableOrange * 0.33f);
-                        cueRenderObjs[1].GetComponent<MeshRenderer>().material.SetColor(uniformCueColour, tableBlue);
+                        cueRenderObjs[0].material.SetColor(uniformCueColour, tableOrange * 0.33f);
+                        cueRenderObjs[1].material.SetColor(uniformCueColour, tableBlue);
                     }
                     else
                     {
                         tableSrcColour = tableOrange;
-                        cueRenderObjs[0].GetComponent<MeshRenderer>().material.SetColor(uniformCueColour, tableBlue * 0.33f);
-                        cueRenderObjs[1].GetComponent<MeshRenderer>().material.SetColor(uniformCueColour, tableOrange);
+                        cueRenderObjs[0].material.SetColor(uniformCueColour, tableBlue * 0.33f);
+                        cueRenderObjs[1].material.SetColor(uniformCueColour, tableOrange);
                     }
                 }
                 else
@@ -2173,14 +2221,14 @@ namespace VRCBilliards
                     if (isPlayer2Blue)
                     {
                         tableSrcColour = tableOrange;
-                        cueRenderObjs[0].GetComponent<MeshRenderer>().material.SetColor(uniformCueColour, tableOrange);
-                        cueRenderObjs[1].GetComponent<MeshRenderer>().material.SetColor(uniformCueColour, tableBlue * 0.33f);
+                        cueRenderObjs[0].material.SetColor(uniformCueColour, tableOrange);
+                        cueRenderObjs[1].material.SetColor(uniformCueColour, tableBlue * 0.33f);
                     }
                     else
                     {
                         tableSrcColour = tableBlue;
-                        cueRenderObjs[0].GetComponent<MeshRenderer>().material.SetColor(uniformCueColour, tableBlue);
-                        cueRenderObjs[1].GetComponent<MeshRenderer>().material.SetColor(uniformCueColour, tableOrange * 0.33f);
+                        cueRenderObjs[0].material.SetColor(uniformCueColour, tableBlue);
+                        cueRenderObjs[1].material.SetColor(uniformCueColour, tableOrange * 0.33f);
                     }
                 }
             }
@@ -2188,8 +2236,8 @@ namespace VRCBilliards
             {
                 tableSrcColour = pointerColour2;
 
-                cueRenderObjs[Convert.ToInt32(newIsTeam2Turn)].GetComponent<MeshRenderer>().materials[0].SetColor(uniformCueColour, tableWhite);
-                cueRenderObjs[Convert.ToInt32(!newIsTeam2Turn)].GetComponent<MeshRenderer>().materials[0].SetColor(uniformCueColour, tableBlack);
+                cueRenderObjs[Convert.ToInt32(newIsTeam2Turn)].materials[0].SetColor(uniformCueColour, tableWhite);
+                cueRenderObjs[Convert.ToInt32(!newIsTeam2Turn)].materials[0].SetColor(uniformCueColour, tableBlack);
             }
 
             cueGrips[Convert.ToInt32(newIsTeam2Turn)].SetColor(uniformMarkerColour, gripColourActive);
@@ -2215,13 +2263,13 @@ namespace VRCBilliards
             Vector3 lpos = localPlayer.GetPosition();
             Vector3 delta = lpos - transform.TransformPoint(pos);
             float r = Mathf.Atan2(delta.x, delta.z);
-            point4Ball.transform.localRotation = Quaternion.AngleAxis(r * Mathf.Rad2Deg, Vector3.up);
+            point4BallTransform.localRotation = Quaternion.AngleAxis(r * Mathf.Rad2Deg, Vector3.up);
 
             // set position
-            point4Ball.transform.localPosition = pos;
+            point4BallTransform.localPosition = pos;
 
             // Set scale
-            point4Ball.transform.localScale = Vector3.zero;
+            point4BallTransform.localScale = vectorZero;
 
             point4Ball.GetComponent<MeshFilter>().sharedMesh = m;
         }
@@ -2353,15 +2401,15 @@ namespace VRCBilliards
                 {
                     logger.Log(name, "0 ball is 0 mesh, 9 ball is 1 mesh");
 
-                    balls[0].GetComponent<MeshFilter>().sharedMesh = cueballMeshes[0];
-                    balls[9].GetComponent<MeshFilter>().sharedMesh = cueballMeshes[1];
+                    ballTransforms[0].GetComponent<MeshFilter>().sharedMesh = cueballMeshes[0];
+                    ballTransforms[9].GetComponent<MeshFilter>().sharedMesh = cueballMeshes[1];
                 }
                 else
                 {
                     logger.Log(name, "0 ball is 0 mesh, 9 ball is 1 mesh");
 
-                    balls[9].GetComponent<MeshFilter>().sharedMesh = cueballMeshes[0];
-                    balls[0].GetComponent<MeshFilter>().sharedMesh = cueballMeshes[1];
+                    ballTransforms[9].GetComponent<MeshFilter>().sharedMesh = cueballMeshes[0];
+                    ballTransforms[0].GetComponent<MeshFilter>().sharedMesh = cueballMeshes[1];
                 }
             }
             else
@@ -2369,9 +2417,9 @@ namespace VRCBilliards
                 // White was pocketed
                 if ((ballPocketedState & 0x1u) == 0x1u)
                 {
-                    currentBallPositions[0] = Vector3.zero;
-                    currentBallVelocities[0] = Vector3.zero;
-                    currentAngularVelocities[0] = Vector3.zero;
+                    currentBallPositions[0] = vectorZero;
+                    currentBallVelocities[0] = vectorZero;
+                    currentAngularVelocities[0] = vectorZero;
 
                     ballPocketedState &= 0xFFFFFFFEu;
                 }
@@ -2393,13 +2441,13 @@ namespace VRCBilliards
                     {
                         marker.SetActive(true);
                         ((VRC_Pickup)marker.gameObject.GetComponent(typeof(VRC_Pickup))).pickupable = true;
-                        marker.transform.localPosition = currentBallPositions[0];
+                        markerTransform.localPosition = currentBallPositions[0];
                     }
                 }
                 else
                 {
                     marker.SetActive(true);
-                    marker.transform.localPosition = currentBallPositions[0];
+                    markerTransform.localPosition = currentBallPositions[0];
                     ((VRC_Pickup)marker.gameObject.GetComponent(typeof(VRC_Pickup))).pickupable = false;
                 }
             }
@@ -2548,8 +2596,8 @@ namespace VRCBilliards
                 scores[1] = 0;
 
                 // Reset mesh filters on balls that change them
-                balls[0].GetComponent<MeshFilter>().sharedMesh = cueballMeshes[0];
-                balls[9].GetComponent<MeshFilter>().sharedMesh = cueballMeshes[1];
+                ballTransforms[0].GetComponent<MeshFilter>().sharedMesh = cueballMeshes[0];
+                ballTransforms[9].GetComponent<MeshFilter>().sharedMesh = cueballMeshes[1];
             }
             else
             {
@@ -2559,17 +2607,17 @@ namespace VRCBilliards
                 }
 
                 // Reset mesh filters on balls that change them
-                balls[0].GetComponent<MeshFilter>().sharedMesh = cueballMeshes[0];
-                balls[9].GetComponent<MeshFilter>().sharedMesh = nineBall;
+                ballTransforms[0].GetComponent<MeshFilter>().sharedMesh = cueballMeshes[0];
+                ballTransforms[9].GetComponent<MeshFilter>().sharedMesh = nineBall;
             }
 
             if (isNineBall)
             {
                 for (int i = 0; i <= 9; i++)
                 {
-                    if (balls[i])
+                    if (ballTransforms[i])
                     {
-                        balls[i].SetActive(true);
+                        ballTransforms[i].gameObject.SetActive(true);
                     }
 
                     if (ballShadowPosConstraints[i])
@@ -2580,9 +2628,9 @@ namespace VRCBilliards
 
                 for (int i = 10; i < 16; i++)
                 {
-                    if (balls[i])
+                    if (ballTransforms[i])
                     {
-                        balls[i].SetActive(false);
+                        ballTransforms[i].gameObject.SetActive(false);
                     }
 
                     if (ballShadowPosConstraints[i])
@@ -2595,9 +2643,9 @@ namespace VRCBilliards
             {
                 for (int i = 1; i < 16; i++)
                 {
-                    if (balls[i])
+                    if (ballTransforms[i])
                     {
-                        balls[i].SetActive(false);
+                        ballTransforms[i].gameObject.SetActive(false);
                     }
 
                     if (ballShadowPosConstraints[i])
@@ -2606,24 +2654,24 @@ namespace VRCBilliards
                     }
                 }
 
-                if (balls[0])
+                if (ballTransforms[0])
                 {
-                    balls[0].gameObject.SetActive(true);
+                    ballTransforms[0].gameObject.SetActive(true);
                 }
 
-                if (balls[2])
+                if (ballTransforms[2])
                 {
-                    balls[2].gameObject.SetActive(true);
+                    ballTransforms[2].gameObject.SetActive(true);
                 }
 
-                if (balls[3])
+                if (ballTransforms[3])
                 {
-                    balls[3].gameObject.SetActive(true);
+                    ballTransforms[3].gameObject.SetActive(true);
                 }
 
-                if (balls[9])
+                if (ballTransforms[9])
                 {
-                    balls[9].gameObject.SetActive(true);
+                    ballTransforms[9].gameObject.SetActive(true);
                 }
 
                 if (ballShadowPosConstraints[0])
@@ -2650,9 +2698,9 @@ namespace VRCBilliards
             {
                 for (int i = 0; i < 16; i++)
                 {
-                    if (balls[i])
+                    if (ballTransforms[i])
                     {
-                        balls[i].SetActive(true);
+                        ballTransforms[i].gameObject.SetActive(true);
                     }
 
                     if (ballShadowPosConstraints[i])
@@ -2701,11 +2749,11 @@ namespace VRCBilliards
 
             for (int i = 0; i < 16; i++)
             {
-                balls[i].GetComponent<Rigidbody>().isKinematic = true;
+                ballTransforms[i].GetComponent<Rigidbody>().isKinematic = true;
 
                 if ((ball_bit & ballPocketedState) == ball_bit)
                 {
-                    balls[i].transform.localPosition = new Vector3(
+                    ballTransforms[i].localPosition = new Vector3(
                         currentBallPositions[i].x,
                         RACHEIGHT,
                         currentBallPositions[i].z
@@ -2925,8 +2973,8 @@ namespace VRCBilliards
                 // Stopping scenario
                 if (V.magnitude < 0.01f && W.magnitude < 0.2f)
                 {
-                    W = Vector3.zero;
-                    V = Vector3.zero;
+                    W = vectorZero;
+                    V = vectorZero;
                 }
                 else
                 {
@@ -2950,7 +2998,7 @@ namespace VRCBilliards
             currentBallVelocities[ballID] = V;
 
             // FSP [22/03/21]: Use the base object's rotation as a factor in the axis. This stops the balls spinning incorrectly.
-            balls[ballID].transform.Rotate((baseObjectRot * W).normalized, W.magnitude * FIXED_TIME_STEP * -Mathf.Rad2Deg, Space.World);
+            ballTransforms[ballID].Rotate((baseObjectRot * W).normalized, W.magnitude * FIXED_TIME_STEP * -Mathf.Rad2Deg, Space.World);
 
             uint ball_bit = 0x1U << ballID;
 
@@ -2987,7 +3035,7 @@ namespace VRCBilliards
                         {
                             int clip = UnityEngine.Random.Range(0, hitsSfx.Length - 1);
                             float vol = Mathf.Clamp01(currentBallVelocities[ballID].magnitude * reflection.magnitude);
-                            ballPool[ballID].transform.position = balls[ballID].transform.position;
+                            ballPoolTransforms[ballID].position = ballTransforms[ballID].position;
                             ballPool[ballID].PlayOneShot(hitsSfx[clip], vol);
                         }
 
@@ -3123,7 +3171,7 @@ namespace VRCBilliards
 
         // TODO: This is a single-use function we can refactor. Note that its use is to equate a bool,
         //       so it's more acceptable to hold on to.
-        private bool IsIntersectiNgWithSphere(Vector3 start, Vector3 dir, Vector3 sphere)
+        private bool IsIntersectingWithSphere(Vector3 start, Vector3 dir, Vector3 sphere)
         {
             Vector3 nrm = dir.normalized;
             Vector3 h = sphere - start;
@@ -3234,6 +3282,13 @@ namespace VRCBilliards
             if (desktopBase)
             {
                 desktopBase.SetActive(false);
+
+                if (desktopCamera == null)
+                {
+                    desktopCamera = desktopBase.GetComponentInChildren<Camera>();
+                }
+
+                desktopCamera.enabled = false;
             }
 
             gripControllers[0].localPlayerIsInDesktopTopDownView = false;
@@ -3254,14 +3309,14 @@ namespace VRCBilliards
                 return;
             }
 
-            // Keep UI rendering
-            if (Utilities.IsValid(localPlayer))
-            {
-                VRCPlayerApi.TrackingData hmd = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
-                desktopQuad.transform.position = hmd.position + (hmd.rotation * Vector3.forward);
-            }
+            // // Keep UI rendering
+            // if (Utilities.IsValid(localPlayer))
+            // {
+            //     VRCPlayerApi.TrackingData hmd = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
+            //     desktopQuad.transform.position = hmd.position + (hmd.rotation * Vector3.forward);
+            // }
 
-            desktopEPopup.transform.position = desktopQuad.transform.position;
+            // desktopEPopup.transform.position = desktopQuad.transform.position;
 
             deskTopCursor.x = Mathf.Clamp
             (
@@ -3436,7 +3491,7 @@ namespace VRCBilliards
             isSimulatedByUs = true;
 
             float vol = Mathf.Clamp(currentBallVelocities[0].magnitude * 0.1f, 0f, 0.6f);
-            cueTipSrc.transform.position = cueTip.transform.position;
+            cueTipSrc.transform.position = cueTipTransform.position;
             cueTipSrc.PlayOneShot(hitBallSfx, vol);
         }
 
@@ -3498,7 +3553,7 @@ namespace VRCBilliards
 
         public override void OnPlayerLeft(VRCPlayerApi player)
         {
-            if (!Networking.IsOwner(Networking.LocalPlayer, gameObject) || !Utilities.IsValid(player))
+            if (!Networking.IsOwner(localPlayer, gameObject) || !Utilities.IsValid(player))
             {
                 return;
             }
