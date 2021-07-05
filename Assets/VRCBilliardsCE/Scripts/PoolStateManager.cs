@@ -686,7 +686,6 @@ namespace VRCBilliards
             }
             else if (canEnterDesktopTopDownView)
             {
-                HandleUpdatingCanEnterDestopViewUI();
 
                 if (Input.GetKeyDown(KeyCode.E))
                 {
@@ -3636,20 +3635,6 @@ namespace VRCBilliards
             {
                 pressE.SetActive(false);
             }
-        }
-
-        private void HandleUpdatingCanEnterDestopViewUI()
-        {
-            if (Utilities.IsValid(localPlayer))
-            {
-                VRCPlayerApi.TrackingData hmd = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
-
-                if (pressE)
-                {
-                    pressE.transform.position = hmd.position + (hmd.rotation * Vector3.forward);
-                }
-            }
-
         }
     }
 }
