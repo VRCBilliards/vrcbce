@@ -1,132 +1,134 @@
 ﻿
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.Ocsp;
 using TMPro;
 using UdonSharp;
 using UnityEngine;
-using UnityEngine.UI;
 using VRC.SDKBase;
-using VRC.Udon;
-using VRCBilliards;
 
-public class UIAnimationManager : UdonSharpBehaviour
+namespace VRCBilliards
 {
-    public PoolMenu poolMenu;
-    public Animator uiGamemodeToggle;
-    public Animator uiGuideToggle;
-    public Animator uiTeamToggle;
-
-    public TextMeshProUGUI modeButtonText;
-    public TextMeshProUGUI modeLeft;
-    public TextMeshProUGUI modeRight;
-
-    public FairlySadPanda.Utilities.Logger logger;
-
-    [UdonSynced]
-    [HideInInspector]
-    public bool isGamemodeMenuSwitched;
-
-    [UdonSynced]
-    private bool modeSelect = true;
-    [UdonSynced]
-    private bool isGuide = true;
-    [UdonSynced]
-    private bool isTeams = true;
-
-    private void UpdateSyncedVariables()
+    /// <summary>
+    /// Proprietary animation manager for M.O.O.N's UI
+    /// </summary>
+    public class UIAnimationManager : UdonSharpBehaviour
     {
-        Networking.SetOwner(Networking.LocalPlayer, gameObject);
-        RequestSerialization();
-        OnDeserialization();
-    }
+        public PoolMenu poolMenu;
+        public Animator uiGamemodeToggle;
+        public Animator uiGuideToggle;
+        public Animator uiTeamToggle;
 
-    public void SwitchGamemodeState()
-    {
-        modeSelect = !modeSelect;
-        UpdateSyncedVariables();
-    }
+        public TextMeshProUGUI modeButtonText;
+        public TextMeshProUGUI modeLeft;
+        public TextMeshProUGUI modeRight;
 
-    public void SwitchGamemodeMenu()
-    {
-        isGamemodeMenuSwitched = !isGamemodeMenuSwitched;
-        UpdateSyncedVariables();
-    }
+        public FairlySadPanda.Utilities.Logger logger;
 
-    public void SwitchGuideMode()
-    {
-        isGuide = !isGuide;
-        UpdateSyncedVariables();
-    }
+        [UdonSynced]
+        [HideInInspector]
+        public bool isGamemodeMenuSwitched;
 
-    public void SwitchTeams()
-    {
-        isTeams = !isTeams;
-        UpdateSyncedVariables();
-    }
+        [UdonSynced]
+        private bool modeSelect = true;
+        [UdonSynced]
+        private bool isGuide = true;
+        [UdonSynced]
+        private bool isTeams = true;
 
-    public override void OnDeserialization()
-    {
-        uiGamemodeToggle.SetBool("Toggle", modeSelect);
-        uiGuideToggle.SetBool("Toggle", isGuide);
-        uiTeamToggle.SetBool("Toggle", isTeams);
-
-        if (isGamemodeMenuSwitched)
+        private void UpdateSyncedVariables()
         {
-            modeButtonText.text = "Switch to Traditional Menu";
-            modeLeft.text = "Japanese";
-            modeRight.text = "Korean";
-        }
-        else
-        {
-            modeButtonText.text = "Switch to 4 Ball Menu";
-            modeLeft.text = "9 Ball";
-            modeRight.text = "8 Ball";
+            Networking.SetOwner(Networking.LocalPlayer, gameObject);
+            RequestSerialization();
+            OnDeserialization();
         }
 
-        if (isGuide)
+        public void SwitchGamemodeState()
         {
-            poolMenu.EnableGuideline();
-        }
-        else
-        {
-            poolMenu.DisableGuideline();
+            modeSelect = !modeSelect;
+            UpdateSyncedVariables();
         }
 
-        if (isTeams)
+        public void SwitchGamemodeMenu()
         {
-            poolMenu.DeselectTeams();
-        }
-        else
-        {
-            poolMenu.SelectTeams();
+            isGamemodeMenuSwitched = !isGamemodeMenuSwitched;
+            UpdateSyncedVariables();
         }
 
-        if (modeSelect)
+        public void SwitchGuideMode()
         {
+            isGuide = !isGuide;
+            UpdateSyncedVariables();
+        }
+
+        public void SwitchTeams()
+        {
+            isTeams = !isTeams;
+            UpdateSyncedVariables();
+        }
+
+        public override void OnDeserialization()
+        {
+            uiGamemodeToggle.SetBool("Toggle", modeSelect);
+            uiGuideToggle.SetBool("Toggle", isGuide);
+            uiTeamToggle.SetBool("Toggle", isTeams);
+
             if (isGamemodeMenuSwitched)
             {
-                //For 4 Ball Japanese
-                poolMenu.Select4BallJapanese();
-                if (logger) logger.Log(name, "Switched to 4Ball JPN");
+                modeButtonText.text = "Switch to Traditional Menu";
+                modeLeft.text = "Korean";
+                modeRight.text = "Japanese";
             }
             else
             {
-                //For 8Ball
-                poolMenu.Select8Ball();
-                if (logger) logger.Log(name, "Switched to 8Ball");
+                modeButtonText.text = "Switch to 4 Ball Menu";
+                modeLeft.text = "9 Ball";
+                modeRight.text = "8 Ball";
             }
-        }
-        else
-        {
-            if (isGamemodeMenuSwitched)
+
+            if (isGuide)
             {
-                poolMenu.Select4BallKorean();
-                if (logger) logger.Log(name, "Switched to 4Ball KOR");
+                poolMenu.EnableGuideline();
             }
             else
             {
-                //For 9Ball
-                poolMenu.Select9Ball();
-                if (logger) logger.Log(name, "Switched to 9Ball");
+                poolMenu.DisableGuideline();
+            }
+
+            if (isTeams)
+            {
+                poolMenu.DeselectTeams();
+            }
+            else
+            {
+                poolMenu.SelectTeams();
+            }
+
+            if (modeSelect)
+            {
+                if (isGamemodeMenuSwitched)
+                {
+                    //For 4 Ball Japanese
+                    poolMenu.Select4BallJapanese();
+                    if (logger) logger.Log(name, "Switched to 4Ball JPN");
+                }
+                else
+                {
+                    //For 8Ball
+                    poolMenu.Select8Ball();
+                    if (logger) logger.Log(name, "Switched to 8Ball");
+                }
+            }
+            else
+            {
+                if (isGamemodeMenuSwitched)
+                {
+                    poolMenu.Select4BallKorean();
+                    if (logger) logger.Log(name, "Switched to 4Ball KOR");
+                }
+                else
+                {
+                    //For 9Ball
+                    poolMenu.Select9Ball();
+                    if (logger) logger.Log(name, "Switched to 9Ball");
+                }
             }
         }
     }
