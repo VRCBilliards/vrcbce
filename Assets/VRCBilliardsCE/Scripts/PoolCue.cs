@@ -8,12 +8,12 @@ namespace VRCBilliards
     [RequireComponent(typeof(SphereCollider))]
     public class PoolCue : UdonSharpBehaviour
     {
-        public GameObject target;
         public PoolOtherHand targetController;
+        private Transform targetTransform;
 
         public Transform cueRespawnPosition;
 
-        public GameObject cueParent;
+        public Transform cueParent;
 
         public PoolStateManager poolStateManager;
 
@@ -41,6 +41,9 @@ namespace VRCBilliards
 
         private Vector3 offsetBetweenArmedPositions;
 
+        /// <summary>
+        /// Is cue ready for hit and rotation locked
+        /// </summary>
         private bool isArmed;
         private bool locked;
         private bool isPickedUp;
@@ -54,6 +57,10 @@ namespace VRCBilliards
         private VRCPlayerApi playerApi;
         private Vector3 oldTargetPos;
 
+        private Vector3 vectorOne = Vector3.one;
+        private Vector3 vectorZero = Vector3.zero;
+        private Vector3 vectorUp = Vector3.up;
+
         public void Start()
         {
             playerApi = Networking.LocalPlayer;
@@ -61,7 +68,9 @@ namespace VRCBilliards
 
             ownCollider = GetComponent<Collider>();
 
-            targetCollider = target.GetComponent<Collider>();
+            targetTransform = targetController.transform;
+
+            targetCollider = targetTransform.GetComponent<Collider>();
             if (!targetCollider)
             {
                 Debug.LogError("PoolCue: Start: target is missing a collider. Aborting cue setup.");
@@ -79,7 +88,7 @@ namespace VRCBilliards
                 return;
             }
 
-            targetPickup = (VRC_Pickup)target.GetComponent(typeof(VRC_Pickup));
+            targetPickup = (VRC_Pickup)targetTransform.GetComponent(typeof(VRC_Pickup));
             if (!targetPickup)
             {
                 Debug.LogError("PoolCue: Start: target object is missing a VRC_Pickup script. Aborting cue setup.");
@@ -92,6 +101,8 @@ namespace VRCBilliards
 
         public void Update()
         {
+            // TODO: Add early return here if pool table is idle
+
             // Put cue in hand
             if (!localPlayerIsInDesktopTopDownView)
             {
@@ -100,7 +111,7 @@ namespace VRCBilliards
                     offsetBetweenArmedPositions = transform.position - positionAtStartOfArming; //cueMainGripOriginalPosition - positionAtStartOfArming;
 
                     // Pull the cue backwards or forwards on the locked cue's line based on how far away the locking cue handle has been moved since locking.
-                    cueParent.transform.position = positionAtStartOfArming + (normalizedLineOfCueWhenArmed * Vector3.Dot(offsetBetweenArmedPositions, normalizedLineOfCueWhenArmed));
+                    cueParent.position = positionAtStartOfArming + (normalizedLineOfCueWhenArmed * Vector3.Dot(offsetBetweenArmedPositions, normalizedLineOfCueWhenArmed));
                 }
                 else
                 {
@@ -111,12 +122,12 @@ namespace VRCBilliards
                     }
 
                     var lerpPercent = Time.deltaTime * 16.0f;
-                    cueParent.transform.position = Vector3.Lerp(cueParent.transform.position, transform.position, lerpPercent);
-                    cueParent.transform.LookAt(Vector3.Lerp(oldTargetPos, targetPickup.transform.position, lerpPercent));
+                    cueParent.position = Vector3.Lerp(cueParent.position, transform.position, lerpPercent);
+                    cueParent.LookAt(Vector3.Lerp(oldTargetPos, targetTransform.position, lerpPercent));
                 }
-            }
 
-            oldTargetPos = targetPickup.transform.position;
+                oldTargetPos = targetTransform.position;
+            }
         }
 
         public override void OnPickupUseDown()
@@ -127,7 +138,7 @@ namespace VRCBilliards
                 //cuePosConstraint.enabled = false;
                 //cueLookAtConstraint.enabled = false;
                 positionAtStartOfArming = transform.position;
-                normalizedLineOfCueWhenArmed = (target.transform.position - positionAtStartOfArming).normalized;
+                normalizedLineOfCueWhenArmed = (targetTransform.position - positionAtStartOfArming).normalized;
                 poolStateManager.StartHit();
             }
         }
@@ -148,14 +159,14 @@ namespace VRCBilliards
         {
             if (!usingDesktop)    // We dont need other hand to be availible for desktop player
             {
-                target.transform.localScale = Vector3.one;
+                targetTransform.localScale = vectorOne;
             }
 
-            target.transform.localScale = Vector3.one; //TODO: This code is defective.
+            targetTransform.localScale = vectorOne; //TODO: This code is defective.
 
             // Not sure if this is necessary to do both since we pickup this one, but just to be safe
             Networking.SetOwner(Networking.LocalPlayer, gameObject);
-            Networking.SetOwner(Networking.LocalPlayer, target);
+            Networking.SetOwner(Networking.LocalPlayer, targetTransform.gameObject); // Varneon: One .gameObject is fine during pickup event
             targetController.isOtherBeingHeld = true;
             targetCollider.enabled = true;
 
@@ -163,7 +174,7 @@ namespace VRCBilliards
 
             isPickedUp = true;
 
-            ((VRC_Pickup)targetController.gameObject.GetComponent(typeof(VRC_Pickup))).pickupable = true;
+            targetPickup.pickupable = true;
         }
 
         public override void OnDrop()
@@ -179,7 +190,7 @@ namespace VRCBilliards
             poolStateManager.LocalPlayerDroppedCue();
             isPickedUp = false;
 
-            ((VRC_Pickup)targetController.gameObject.GetComponent(typeof(VRC_Pickup))).pickupable = false;
+            targetPickup.pickupable = false;
         }
 
         /// <summary>
@@ -209,6 +220,9 @@ namespace VRCBilliards
             targetPickup.Drop();
         }
 
+        /// <summary>
+        /// Returns the cue back to the table
+        /// </summary>
         private void Respawn()
         {
             targetController.Respawn();
@@ -219,12 +233,12 @@ namespace VRCBilliards
                 poolStateManager.OnPutDownCueLocally();
             }
 
-            cueParent.transform.LookAt(targetPickup.transform, Vector3.up);
+            cueParent.LookAt(targetTransform, vectorUp);
         }
 
         private void ResetTarget()
         {
-            target.transform.localScale = Vector3.zero;
+            targetTransform.localScale = vectorZero;
             targetController.isOtherBeingHeld = false;
             targetCollider.enabled = false;
         }
