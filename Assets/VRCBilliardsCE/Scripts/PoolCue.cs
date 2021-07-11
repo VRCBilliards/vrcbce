@@ -57,10 +57,9 @@ namespace VRCBilliards
         private VRCPlayerApi playerApi;
         private Vector3 oldTargetPos;
 
-        private Vector3
-            vectorOne = Vector3.one,
-            vectorZero = Vector3.zero,
-            vectorUp = Vector3.up;
+        private Vector3 vectorOne = Vector3.one;
+        private Vector3 vectorZero = Vector3.zero;
+        private Vector3 vectorUp = Vector3.up;
 
         public void Start()
         {
