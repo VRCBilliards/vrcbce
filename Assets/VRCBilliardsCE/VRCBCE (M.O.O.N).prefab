@@ -24,7 +24,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3004923514902277405}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.074967384, y: -3.1344686, z: 1.6085691}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 2085185103513963708}
@@ -42,7 +42,7 @@ PrefabInstance:
     - target: {fileID: 3805221873280214327, guid: d33826510185c7141b6eeba4cfeb451e,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.21999994
+      value: -0.22
       objectReference: {fileID: 0}
     - target: {fileID: 3805221873302763410, guid: d33826510185c7141b6eeba4cfeb451e,
         type: 3}
@@ -122,42 +122,52 @@ PrefabInstance:
     - target: {fileID: 3805221873923289656, guid: d33826510185c7141b6eeba4cfeb451e,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.75999975
+      value: -0.76
       objectReference: {fileID: 0}
     - target: {fileID: 3805221874139475437, guid: d33826510185c7141b6eeba4cfeb451e,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 1.8133337
+      value: 1.8133334
       objectReference: {fileID: 0}
     - target: {fileID: 3805221874228957529, guid: d33826510185c7141b6eeba4cfeb451e,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.006666978
+      value: 0.006666667
       objectReference: {fileID: 0}
     - target: {fileID: 3805221874713824604, guid: d33826510185c7141b6eeba4cfeb451e,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -2.736667
+      value: -2.7366664
       objectReference: {fileID: 0}
     - target: {fileID: 3805221875064647157, guid: d33826510185c7141b6eeba4cfeb451e,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -1.1199999
+      value: -1.12
       objectReference: {fileID: 0}
     - target: {fileID: 3805221875170446091, guid: d33826510185c7141b6eeba4cfeb451e,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -2.3200002
+      value: -2.32
       objectReference: {fileID: 0}
     - target: {fileID: 3805221875352447111, guid: d33826510185c7141b6eeba4cfeb451e,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 1.2533331
+      value: 1.2533332
       objectReference: {fileID: 0}
     - target: {fileID: 3805221875384381158, guid: d33826510185c7141b6eeba4cfeb451e,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -2.7666664
+      value: -2.7666667
+      objectReference: {fileID: 0}
+    - target: {fileID: 8658868485224426084, guid: d33826510185c7141b6eeba4cfeb451e,
+        type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8658868485224426084, guid: d33826510185c7141b6eeba4cfeb451e,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d33826510185c7141b6eeba4cfeb451e, type: 3}
@@ -260,6 +270,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: VRCBCE Menu (M.O.O.N)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3492924436644227320, guid: ee9f4e835544408469fb94985a04b320,
+        type: 3}
+      propertyPath: m_text
+      value: VRCBilliards Community Edition (v1.2.0 M.O.O.N UI)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ee9f4e835544408469fb94985a04b320, type: 3}
