@@ -5,6 +5,7 @@ using UnityEngine.Animations;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
 using VRC.SDKBase;
+using VRC.Udon;
 
 namespace VRCBilliards
 {
@@ -281,6 +282,7 @@ namespace VRCBilliards
         private AudioSource[] ballPool;
         private Transform[] ballPoolTransforms;
         private AudioSource mainSrc;
+        private UdonBehaviour udonChips;
 
         /// <summary>
         /// 18:0 (0xffff)	Each bit represents each ball, if it has been pocketed or not
@@ -628,6 +630,11 @@ namespace VRCBilliards
             else
             {
                 forceMultiplier = DEFAULT_FORCE_MULTIPLIER;
+            }
+
+            if (enableUdonChips)
+            {
+                udonChips = (UdonBehaviour)GameObject.Find("UdonChips").GetComponent(typeof(UdonBehaviour));
             }
         }
 
@@ -1015,6 +1022,8 @@ namespace VRCBilliards
                 logger.Log(name, $"JoinGame: {playerNumber}");
             }
 
+            if (!Pay(TotalPrice)) return;
+
             Networking.SetOwner(localPlayer, gameObject);
             localPlayerID = playerNumber;
 
@@ -1065,6 +1074,8 @@ namespace VRCBilliards
                 default:
                     return;
             }
+
+            PayBack(TotalPrice);
 
             localPlayerID = -1;
 
@@ -2321,6 +2332,8 @@ namespace VRCBilliards
 
             ApplyTableColour(isTeam2Winner);
 
+            GiveRewards();
+
             if (gameWasReset)
             {
                 poolMenu.GameWasReset();
@@ -2362,6 +2375,8 @@ namespace VRCBilliards
             player2ID = 0;
             player3ID = 0;
             player4ID = 0;
+
+            raiseCount = 1;
 
             poolMenu.UpdateMainMenuView(
                 isTeams,
@@ -2732,6 +2747,8 @@ namespace VRCBilliards
                 gripControllers[0].usingDesktop = false;
                 gripControllers[1].usingDesktop = false;
             }
+
+            if (IsSinglePlayer) PayBack(price * (raiseCount - 1));
         }
 
         /// <summary>
@@ -3636,5 +3653,108 @@ namespace VRCBilliards
                 pressE.SetActive(false);
             }
         }
+
+#region UdonChips
+
+        [Header("UdonChips")]
+        public bool enableUdonChips = false;
+        public float price = 150.0f;
+        public bool raise = true;
+        public float prize = 300.0f;
+        public float singlePlayPrize = 200.0f;
+        public AudioClip paySound, insufficientFundsSound;
+        [UdonSynced][HideInInspector] public int raiseCount = 1;
+
+        private float Money
+        {
+            get => (float)udonChips.GetProgramVariable("money");
+            set => udonChips.SetProgramVariable("money", value);
+        }
+
+        private int PlayerCount
+        {
+            get {
+                int count = 0;
+                if (player1ID > 0) count++;
+                if (player2ID > 0) count++;
+                if (player3ID > 0) count++;
+                if (player4ID > 0) count++;
+                return count;
+            }
+        }
+
+        private bool IsSinglePlayer => !playerIsTeam2 && PlayerCount == 0;
+
+        private float TotalPrice  => price * raiseCount;
+
+        public void Raise()
+        {
+            if (!enableUdonChips || PlayerCount != 1) return;
+
+            if (logger)
+            {
+                logger.Log(name, $"Raise to {price * (raiseCount + 1)}");
+            }
+            if (!Pay(price)) return;
+
+            Networking.SetOwner(localPlayer, gameObject);
+            raiseCount++;
+            RefreshNetworkData(false);
+        }
+
+        private void PlayAudioClip(AudioClip clip)
+        {
+            if (clip == null) return;
+            mainSrc.PlayOneShot(clip);
+        }
+
+        private void PayBack(float value)
+        {
+            if (!enableUdonChips) return;
+
+            if (logger)
+            {
+                logger.Log(name, $"Payback {value}");
+            }
+            PlayAudioClip(paySound);
+            Money += value;
+
+            if (localPlayerID == 0) raiseCount = 1;
+        }
+
+        private bool Pay(float value)
+        {
+            if (!enableUdonChips) return true;
+
+            if (Money < value)
+            {
+                if (logger) logger.Log(name, "Insufficient funds");
+                PlayAudioClip(insufficientFundsSound);
+                return false;
+            }
+
+            if (logger) logger.Log(name, $"Pay {value}");
+
+            PlayAudioClip(paySound);
+            Money -= value;
+
+            return true;
+        }
+
+        private void GiveRewards()
+        {
+            if (!enableUdonChips) return;
+
+            var isSinglePlayer = PlayerCount == 1;
+            var isWinner = playerIsTeam2 && isTeam2Winner || !playerIsTeam2 &&!isTeam2Winner;
+            if (!isSinglePlayer && !isWinner) return;
+
+            var total = isSinglePlayer ? singlePlayPrize : prize * raiseCount;
+            if (logger) logger.Log(name, $"Give rewards {total}");
+
+            PlayAudioClip(paySound);
+            Money += total;
+        }
+#endregion
     }
 }
