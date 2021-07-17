@@ -21,7 +21,7 @@ namespace VRCBilliards
 
         public void Update()
         {
-            float newSize = oldSize + Input.GetAxisRaw("Mouse ScrollWheel") * sensitivity;
+            float newSize = oldSize - Input.GetAxisRaw("Mouse ScrollWheel") * sensitivity;
             if (newSize > upperBound || newSize < lowerBound)
             {
                 return;
