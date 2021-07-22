@@ -1,12 +1,10 @@
-![Prefabs Logo](https://avatars.githubusercontent.com/u/50210138?s=200&v=4)
+<p align="center"><img src="https://avatars.githubusercontent.com/u/50210138?s=200&v=4" alt="Prefabs Logo"></p>
 
-_This prefab could not have been constructed without the kind support of the Prefabs community. <3_
+<p align="center"><i>This prefab could not have been constructed without the kind support of the Prefabs community. <3</i></p>
 
-# VRCBilliards: Community Edition
+![Header](https://user-images.githubusercontent.com/6299186/126218956-e69d3f75-22ab-4dd8-aee3-ad1aaa4c9f97.png)
 
-![Image of the table](https://i.imgur.com/cLoMK2p.png)
-
-A pool table for VRChat SDK3 worlds. Want to play 8 Ball, 9 Ball, or Japanese or Korean 4 Ball? This is the prefab for you! With the power of the Udon Networking Update, you can even have several tables in the same world without issue!
+A pool table for VRChat SDK3 worlds. Want to play 8 Ball, 9 Ball, or Japanese / Korean 4 Ball? This is the prefab for you! With the power of the Udon Networking Update, you can even have several tables in the same world without issue!
 
 This prefab has no limitations in terms of its use. It can be:
 
@@ -35,7 +33,7 @@ Requirements:
 Recommended:
 
 1. CyanEmu for emulating locally (https://github.com/CyanLaser/CyanEmu)
-2. VR World Toolkit for general world development assistance (https://github.com/oneVR/VRWorldToolkit)
+2. VRWorldToolkit for general world development assistance (https://github.com/oneVR/VRWorldToolkit)
 
 Installation Steps:
 
@@ -43,20 +41,6 @@ Installation Steps:
 2. Open the unitypackage in your VRChat world's scene.
 3. Import all the assets.
 4. In your Project folder, find "PoolTable" inside the VRCBilliards folder and drag-and-drop it into the scene.
-
-# Layer Requirements
-
-This prefab currently expects to be able to use Layer 23 for its desktop top-down camera! Layer 23 is unused by VRChat, but a Unity quirk means that this layer will not show up in your list of layers AND you'll need to manage this layer's collisions yourself.
-
-In the layers drop-down on the top right of your Unity window, select add layer, then name Layer 23 something.
-
-![Layer setup](https://i.imgur.com/1NDVoEV.png)
-
-Afterwards, go to your physics settings inside Project Settings in the Edit menu at the top of the screen, and make sure Layer 23 only collides with itself:
-
-![Physics setup](https://i.imgur.com/3ee8eVd.png)
-
-(This reminder was brought to you by Orels1 bugging me on the Prefabs Discord. Check our their [toolkit!](https://github.com/orels1/UdonToolkit))
 
 # Known Unity-Related Bugs
 
@@ -72,7 +56,12 @@ We encourage anyone to have a go modifying this prefab.
 
 # Note on Pull Requests to this repo
 
-The code in this project is written to look like normal Unity/C# code. C# has several standards (and teams tend to set their own) but for reference, refer to the Unity documentation, Unity example scripts, and Microsoft's best practice [https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/inside-a-program/coding-conventions](here). Generally, put variables at the top of the behaviour, avoid using underscore ahead of properties and methods unless it's a public method that needs to be non-RPCable for security reasons (a Udon-specific use of the underscore)), use camelCase for properties and arguments, and use PascalCase for everything else.
+The code in this project is written to look like normal Unity/C# code. C# has several standards (and teams tend to set their own) but for reference, refer to the Unity documentation, Unity example scripts, and Microsoft's best practice [https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/inside-a-program/coding-conventions](here).
+  
+  Generally: 
+  - Put variables at the top of the behaviour.
+  - Avoid using underscore ahead of properties and methods unless it's a public method that needs to be non-RPCable for security reasons (an Udon-specific use of the underscore).
+  - Use camelCase for properties and arguments, and use PascalCase for everything else.
 
 # Original Creator
 
