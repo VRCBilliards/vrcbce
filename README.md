@@ -66,3 +66,20 @@ The code in this project is written to look like normal Unity/C# code. C# has se
 # Original Creator
 
 The original creator of this prefab was Harry_T. Harry_T did (unsuccessfully) attempt to DMCA this repo off of Github, but didn't realize that they were releasing the exact same assets on their own Github as public domain. They are currently MIA after nuking their Github/Twitter. Despite this, it's only fair to cite them as the original source, and pay credit to the impressive bit of physics code that drives this entire prefab. They also made a small contribution directly to this repo.
+  
+# UdonChips Integration
+  
+With 1.2.1, VRCBCE supports [UdonChips](https://lura.booth.pm/items/3060394)!
+
+To enable UdonChips support, you need to do two things:
+  
+  1. Have the UdonChips UdonBehaviour in the project, with the object it's on called "UdonChips".
+  2. Tick the "Enable UdonChips" option on your pool table's VRCBilliards object.
+  
+The VRCBilliards object, which contains the core PoolStateManager script, contains a number of options. At the moment, the following is supported:
+  
+  1. Paying UC to join a game of pool.
+  2. If Allow Raising is enabled, you can pay to join multiple times - the more you pay in, the more the table can pay out!
+  3. You can also earn UC for winning versus yourself.
+  4. All costs and rewards are modifiable via the PoolStateManager script.
+  5. The exact message to display on each join button is customizable in the PoolMenu script.
