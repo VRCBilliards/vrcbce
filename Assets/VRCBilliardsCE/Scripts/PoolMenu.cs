@@ -73,6 +73,9 @@ namespace VRCBilliards
 
         public TextMeshProUGUI winnerText;
 
+        [Header("UdonChips Integration")]
+        public string defaultEmptyplayerSlotTextWithUdonChips = "{}uc to play";
+
         private bool isTeams;
         private bool isSignedUpToPlay;
         private bool canStartGame;
@@ -143,6 +146,10 @@ namespace VRCBilliards
             if (!isSignedUpToPlay)
             {
                 manager.JoinGame(0);
+            }
+            else
+            {
+                manager.Raise();
             }
         }
 
@@ -325,13 +332,17 @@ namespace VRCBilliards
 
             bool found = false;
 
+            var defaultText = manager.enableUdonChips
+                ? defaultEmptyplayerSlotTextWithUdonChips.Replace("{}", (manager.price * manager.raiseCount).ToString())
+                : defaultEmptyPlayerSlotText;
+
             if (player1ID > 0)
             {
                 found = HandlePlayerState(player1MenuText, player1ScoreText, VRCPlayerApi.GetPlayerById(player1ID));
             }
             else
             {
-                player1MenuText.text = defaultEmptyPlayerSlotText.Replace("{}", "1");
+                player1MenuText.text = defaultText.Replace("{}", "1");
                 player1ScoreText.text = "";
             }
 
@@ -341,7 +352,7 @@ namespace VRCBilliards
             }
             else
             {
-                player2MenuText.text = defaultEmptyPlayerSlotText.Replace("{}", "2");
+                player2MenuText.text = defaultText.Replace("{}", "2");
                 player2ScoreText.text = "";
             }
 
@@ -351,7 +362,7 @@ namespace VRCBilliards
             }
             else
             {
-                player3MenuText.text = newIsTeams ? defaultEmptyPlayerSlotText.Replace("{}", "3") : "";
+                player3MenuText.text = newIsTeams ? defaultText.Replace("{}", "3") : "";
                 player3ScoreText.text = "";
             }
 
@@ -361,7 +372,7 @@ namespace VRCBilliards
             }
             else
             {
-                player4MenuText.text = newIsTeams ? defaultEmptyPlayerSlotText.Replace("{}", "4") : "";
+                player4MenuText.text = newIsTeams ? defaultText.Replace("{}", "4") : "";
                 player4ScoreText.text = "";
             }
 
@@ -464,7 +475,7 @@ namespace VRCBilliards
                 }
                 else
                 {
-                    player1Button.SetActive(false);
+                    player1Button.SetActive(manager.enableUdonChips && manager.allowRaising);
                     player2Button.SetActive(false);
                     player3Button.SetActive(false);
                     player4Button.SetActive(false);
