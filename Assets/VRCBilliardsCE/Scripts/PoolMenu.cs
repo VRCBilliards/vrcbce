@@ -74,7 +74,7 @@ namespace VRCBilliards
         public TextMeshProUGUI winnerText;
 
         [Header("UdonChips Integration")]
-        public string defaultEmptyplayerSlotTextWithUdonChips = "{} uc to play";
+        public string defaultEmptyplayerSlotTextWithUdonChips = "{}uc to play";
 
         private bool isTeams;
         private bool isSignedUpToPlay;
@@ -339,7 +339,6 @@ namespace VRCBilliards
             if (player1ID > 0)
             {
                 found = HandlePlayerState(player1MenuText, player1ScoreText, VRCPlayerApi.GetPlayerById(player1ID));
-                // if (manager.enableUdonChips) player1MenuText.text += " (Interact to bet more)";
             }
             else
             {
@@ -476,7 +475,7 @@ namespace VRCBilliards
                 }
                 else
                 {
-                    player1Button.SetActive(manager.enableUdonChips && manager.raise);
+                    player1Button.SetActive(manager.enableUdonChips && manager.allowRaising);
                     player2Button.SetActive(false);
                     player3Button.SetActive(false);
                     player4Button.SetActive(false);
@@ -552,8 +551,5 @@ namespace VRCBilliards
 
             winnerText.text = "";
         }
-
-#region UdonChips Integration
-#endregion
     }
 }
