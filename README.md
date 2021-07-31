@@ -42,17 +42,41 @@ Installation Steps:
 3. Import all the assets.
 4. In your Project folder, find "PoolTable" inside the VRCBilliards folder and drag-and-drop it into the scene.
 
+# Getting Support
+
+Unless it's urgent, please don't DM VRCBCE contributers asking for help!
+
+The best way to get support is to create an Issue. You'll need a Github account for this, which takes less than a minute to set up.
+
+Afterwards, click Issues at the top of this page:
+  
+![image](https://user-images.githubusercontent.com/732532/127752254-37061d3a-c13e-4de7-9212-792e17fe6472.png)
+
+Then click Create Issue.
+  
+![image](https://user-images.githubusercontent.com/732532/127752268-c46fca03-72cf-4712-96b9-24e47764d791.png)
+
+Afterwards, add your bug report or issue into the box and click Submit New Issue.
+  
+![image](https://user-images.githubusercontent.com/732532/127752457-03751bba-df2b-48f0-a220-a9cd699d9974.png)
+
+DMing a contributor might get you a faster response, but writing an issue means that all contriutors can see the issue, bugs can be tracked and referenced, and overall it's a lot easier to fix things!
+  
 # Known Unity-Related Bugs
 
 Problem: The prefab has giant text!
 
 Solution: Go into the TextMeshPro text component on each of the objects with giant text and scale down the text size (which has likely been reset to TMP's default of 36) to about 3. This will be fixed via not changing text size from the default in a future patch.
 
+Problem: I upgraded to a newer version and players now collide with the table (or other "I upgraded and something broke!" issues)
+
+Solution: Delete the version of the table in the scene and replace it with one of the prefab versions. Unity can be quite messy when upgrading prefabs - if you've recently updated, and something has broken, always see if it's an issue on a fresh version of the table first. Obviously, this is a little annoying to do if you've modified the prefab a lot: let us know if this is the case!
+
 # Notes on "Community"
 
-This is a full, history-free fork of the Harry_T 8Ball prefab. This project is an alternative to that prefab, but is not a competitor. This prefab exists as a Community Edition which simplifies the code a lot and makes it easier to edit. It is also provided under MIT, and the maintainers of this codebase commit to being open and inclusive to anyone who would like to modify the prefab, add additional modes, fix bugs, and use the prefab as a learning tool.
+This prefab exists as a "Community Edition" of the original ht8b pool table. It simplifies the code a lot and makes it easier to edit. It is also provided under MIT, and the maintainers of this codebase commit to being open and inclusive to anyone who would like to modify the prefab, add additional modes, fix bugs, and use the prefab as a learning tool.
 
-We encourage anyone to have a go modifying this prefab.
+We encourage anyone to have a go modifying this prefab!
 
 # Note on Pull Requests to this repo
 
