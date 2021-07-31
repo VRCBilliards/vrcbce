@@ -40,25 +40,25 @@ namespace VRCBilliards
             OnDeserialization();
         }
 
-        public void SwitchGamemodeState()
+        public void _SwitchGamemodeState()
         {
             modeSelect = !modeSelect;
             UpdateSyncedVariables();
         }
 
-        public void SwitchGamemodeMenu()
+        public void _SwitchGamemodeMenu()
         {
             isGamemodeMenuSwitched = !isGamemodeMenuSwitched;
             UpdateSyncedVariables();
         }
 
-        public void SwitchGuideMode()
+        public void _SwitchGuideMode()
         {
             isGuide = !isGuide;
             UpdateSyncedVariables();
         }
 
-        public void SwitchTeams()
+        public void _SwitchTeams()
         {
             isTeams = !isTeams;
             UpdateSyncedVariables();
@@ -85,20 +85,20 @@ namespace VRCBilliards
 
             if (isGuide)
             {
-                poolMenu.EnableGuideline();
+                poolMenu._EnableGuideline();
             }
             else
             {
-                poolMenu.DisableGuideline();
+                poolMenu._DisableGuideline();
             }
 
             if (isTeams)
             {
-                poolMenu.DeselectTeams();
+                poolMenu._DeselectTeams();
             }
             else
             {
-                poolMenu.SelectTeams();
+                poolMenu._SelectTeams();
             }
 
             if (modeSelect)
@@ -106,13 +106,13 @@ namespace VRCBilliards
                 if (isGamemodeMenuSwitched)
                 {
                     //For 4 Ball Japanese
-                    poolMenu.Select4BallJapanese();
+                    poolMenu._Select4BallJapanese();
                     if (logger) logger.Log(name, "Switched to 4Ball JPN");
                 }
                 else
                 {
                     //For 8Ball
-                    poolMenu.Select8Ball();
+                    poolMenu._Select8Ball();
                     if (logger) logger.Log(name, "Switched to 8Ball");
                 }
             }
@@ -120,13 +120,13 @@ namespace VRCBilliards
             {
                 if (isGamemodeMenuSwitched)
                 {
-                    poolMenu.Select4BallKorean();
+                    poolMenu._Select4BallKorean();
                     if (logger) logger.Log(name, "Switched to 4Ball KOR");
                 }
                 else
                 {
                     //For 9Ball
-                    poolMenu.Select9Ball();
+                    poolMenu._Select9Ball();
                     if (logger) logger.Log(name, "Switched to 9Ball");
                 }
             }

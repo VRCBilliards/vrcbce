@@ -45,6 +45,8 @@ namespace VRCBilliards
         public string noTimerText = "No Limit";
         public string timerValueText = "{}s Limit";
         public Image timerButton, noTimerButton;
+        public TextMeshProUGUI visibleTimerDuringGame;
+        public string timerOutputFormat = "{} seconds remaining";
 
         [Header("Teams")]
         public TextMeshProUGUI teamsTxt;
@@ -81,112 +83,112 @@ namespace VRCBilliards
         private bool canStartGame;
 
         // TODO: This all needs to be secured.
-        public void UnlockTable()
+        public void _UnlockTable()
         {
-            manager.UnlockTable();
+            manager._UnlockTable();
         }
 
-        public void LockTable()
+        public void _LockTable()
         {
-            manager.LockTable();
+            manager._LockTable();
         }
 
-        public void SelectTeams()
+        public void _SelectTeams()
         {
-            manager.SelectTeams();
+            manager._SelectTeams();
         }
 
-        public void DeselectTeams()
+        public void _DeselectTeams()
         {
-            manager.DeselectTeams();
+            manager._DeselectTeams();
         }
 
-        public void Select4BallJapanese()
+        public void _Select4BallJapanese()
         {
-            manager.Select4BallJapanese();
+            manager._Select4BallJapanese();
         }
 
-        public void Select4BallKorean()
+        public void _Select4BallKorean()
         {
-            manager.Select4BallKorean();
+            manager._Select4BallKorean();
         }
 
-        public void Select8Ball()
+        public void _Select8Ball()
         {
-            manager.Select8Ball();
+            manager._Select8Ball();
         }
 
-        public void Select9Ball()
+        public void _Select9Ball()
         {
-            manager.Select9Ball();
+            manager._Select9Ball();
         }
 
-        public void IncreaseTimer()
+        public void _IncreaseTimer()
         {
-            manager.IncreaseTimer();
+            manager._IncreaseTimer();
         }
 
-        public void DecreaseTimer()
+        public void _DecreaseTimer()
         {
-            manager.DecreaseTimer();
+            manager._DecreaseTimer();
         }
 
-        public void EnableGuideline()
+        public void _EnableGuideline()
         {
-            manager.EnableGuideline();
+            manager._EnableGuideline();
         }
 
-        public void DisableGuideline()
+        public void _DisableGuideline()
         {
-            manager.DisableGuideline();
+            manager._DisableGuideline();
         }
 
-        public void SignUpAsPlayer1()
+        public void _SignUpAsPlayer1()
         {
             if (!isSignedUpToPlay)
             {
-                manager.JoinGame(0);
+                manager._JoinGame(0);
             }
             else
             {
-                manager.Raise();
+                manager._Raise();
             }
         }
 
-        public void SignUpAsPlayer2()
+        public void _SignUpAsPlayer2()
         {
             if (!isSignedUpToPlay)
             {
-                manager.JoinGame(1);
+                manager._JoinGame(1);
             }
         }
 
-        public void SignUpAsPlayer3()
+        public void _SignUpAsPlayer3()
         {
             if (!isSignedUpToPlay)
             {
-                manager.JoinGame(2);
+                manager._JoinGame(2);
             }
         }
 
-        public void SignUpAsPlayer4()
+        public void _SignUpAsPlayer4()
         {
             if (!isSignedUpToPlay)
             {
-                manager.JoinGame(3);
+                manager._JoinGame(3);
             }
         }
 
-        public void LeaveGame()
+        public void _LeaveGame()
         {
-            manager.LeaveGame();
+            manager._LeaveGame();
         }
 
-        public void StartGame()
+        public void _StartGame()
         {
             if (canStartGame)
             {
-                manager.StartNewGame();
+                manager._StartNewGame();
             }
         }
 
@@ -198,7 +200,7 @@ namespace VRCBilliards
             }
         }
 
-        public void EnableResetButton()
+        public void _EnableResetButton()
         {
             resetGameButton.SetActive(true);
             lockMenu.SetActive(false);
@@ -207,7 +209,7 @@ namespace VRCBilliards
             winnerText.text = "";
         }
 
-        public void EnableUnlockTableButton()
+        public void _EnableUnlockTableButton()
         {
             resetGameButton.SetActive(false);
             lockMenu.SetActive(true);
@@ -216,7 +218,7 @@ namespace VRCBilliards
             ResetScoreScreen();
         }
 
-        public void EnableMainMenu()
+        public void _EnableMainMenu()
         {
             resetGameButton.SetActive(false);
             lockMenu.SetActive(false);
@@ -238,7 +240,7 @@ namespace VRCBilliards
         /// <summary>
         /// Recieve a new set of data from the manager that can be displayed to viewers.
         /// </summary>
-        public void UpdateMainMenuView(
+        public void _UpdateMainMenuView(
             bool newIsTeams,
             bool isTeam2Playing,
             int gameMode,
@@ -488,7 +490,7 @@ namespace VRCBilliards
             return false;
         }
 
-        public void SetScore(bool isTeam2, int score)
+        public void _SetScore(bool isTeam2, int score)
         {
             if (score < 0)
             {
@@ -508,12 +510,12 @@ namespace VRCBilliards
             }
         }
 
-        public void GameWasReset()
+        public void _GameWasReset()
         {
             winnerText.text = "The game was ended!";
         }
 
-        public void TeamWins(bool isTeam2)
+        public void _TeamWins(bool isTeam2)
         {
             if (isTeams)
             {

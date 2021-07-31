@@ -61,8 +61,16 @@ namespace VRCBilliards
         private Vector3 vectorZero = Vector3.zero;
         private Vector3 vectorUp = Vector3.up;
 
+        private bool startupCompleted;
+
         public void Start()
         {
+            if (Networking.LocalPlayer == null)
+            {
+                gameObject.SetActive(false);
+                return;
+            }
+
             playerApi = Networking.LocalPlayer;
             usingDesktop = !playerApi.IsUserInVR();
 
@@ -96,11 +104,18 @@ namespace VRCBilliards
                 return;
             }
 
-            DenyAccess();
+            _DenyAccess();
+
+            startupCompleted = true;
         }
 
         public void Update()
         {
+            if (!startupCompleted)
+            {
+                return;
+            }
+
             // TODO: Add early return here if pool table is idle
 
             // Put cue in hand
@@ -139,7 +154,7 @@ namespace VRCBilliards
                 //cueLookAtConstraint.enabled = false;
                 positionAtStartOfArming = transform.position;
                 normalizedLineOfCueWhenArmed = (targetTransform.position - positionAtStartOfArming).normalized;
-                poolStateManager.StartHit();
+                poolStateManager._StartHit();
             }
         }
 
@@ -152,7 +167,7 @@ namespace VRCBilliards
             }
 
             isArmed = false;
-            poolStateManager.EndHit();
+            poolStateManager._EndHit();
         }
 
         public override void OnPickup()
@@ -170,7 +185,7 @@ namespace VRCBilliards
             targetController.isOtherBeingHeld = true;
             targetCollider.enabled = true;
 
-            poolStateManager.LocalPlayerPickedUpCue();
+            poolStateManager._LocalPlayerPickedUpCue();
 
             isPickedUp = true;
 
@@ -183,11 +198,11 @@ namespace VRCBilliards
 
             if (usingDesktop)
             {
-                poolStateManager.OnPutDownCueLocally();
+                poolStateManager._OnPutDownCueLocally();
                 Respawn();
             }
 
-            poolStateManager.LocalPlayerDroppedCue();
+            poolStateManager._LocalPlayerDroppedCue();
             isPickedUp = false;
 
             targetPickup.pickupable = false;
@@ -196,7 +211,7 @@ namespace VRCBilliards
         /// <summary>
         /// Set if local player can hold onto cue grips
         /// </summary>
-        public void AllowAccess()
+        public void _AllowAccess()
         {
             ownCollider.enabled = true;
             targetCollider.enabled = true;
@@ -205,7 +220,7 @@ namespace VRCBilliards
         /// <summary>
         /// Set if local player should not hold onto cue grips
         /// </summary>
-        public void DenyAccess()
+        public void _DenyAccess()
         {
             ResetTarget();
 
@@ -225,12 +240,12 @@ namespace VRCBilliards
         /// </summary>
         private void Respawn()
         {
-            targetController.Respawn();
+            targetController._Respawn();
             transform.SetPositionAndRotation(cueRespawnPosition.position, cueRespawnPosition.rotation);
 
             if (usingDesktop)
             {
-                poolStateManager.OnPutDownCueLocally();
+                poolStateManager._OnPutDownCueLocally();
             }
 
             cueParent.LookAt(targetTransform, vectorUp);
@@ -243,13 +258,13 @@ namespace VRCBilliards
             targetCollider.enabled = false;
         }
 
-        public void EnableConstraints()
+        public void _EnableConstraints()
         {
             //cuePosConstraint.enabled = true;
             //cueLookAtConstraint.enabled = true;
         }
 
-        public void DisableConstraints()
+        public void _DisableConstraints()
         {
             //cuePosConstraint.enabled = false;
             //cueLookAtConstraint.enabled = false;

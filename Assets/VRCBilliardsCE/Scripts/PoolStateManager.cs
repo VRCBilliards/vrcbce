@@ -1,12 +1,11 @@
 using System;
 using UdonSharp;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.Rendering;
-using UnityEngine.UI;
 using VRC.SDKBase;
 using VRC.Udon;
-using VRCPrefabs.CyanEmu;
 
 namespace VRCBilliards
 {
@@ -265,7 +264,7 @@ namespace VRCBilliards
         public GameObject desktopCursorObject;
         public GameObject desktopHitPosition;
         public GameObject desktopBase;
-        public GameObject desktopQuad;
+        //public GameObject desktopQuad;
         public GameObject[] desktopCueParents;
         public GameObject desktopOverlayPower;
         public GameObject desktopEPopup;
@@ -375,14 +374,7 @@ namespace VRCBilliards
         /// For clamping to table or set lower for kitchen
         /// </summary>
         private float repoMaxX = TABLE_WIDTH;
-        /// <summary>
-        /// What should the timer run out at
-        /// </summary>
-        private float timerEnd;
-        /// <summary>
-        /// 1 over time limit
-        /// </summary>
-        private float timerRecp;
+        private float remainingTime;
         private bool isTimerRunning;
         private bool isParticleAlive;
         private float particleTime;
@@ -460,7 +452,7 @@ namespace VRCBilliards
         private Vector3 cueArmedShotDirection;
         private float cueFDir;
         private Vector3 raySphereOutput;
-        private uint lastViewTimer;
+        private uint lastTimerType;
         private float timeLast;
         private float accumulation;
         private float shootAmt;
@@ -543,10 +535,21 @@ namespace VRCBilliards
 
         private float TotalPrice => price * raiseCount;
 
+        private bool hasPaidToSignUp;
+
         #endregion
+
+        private TMPro.TextMeshProUGUI timerText;
+        private string timerOutputFormat;
+
 
         public void Start()
         {
+            if (Networking.LocalPlayer == null)
+            {
+                return;
+            }
+
             localPlayer = Networking.LocalPlayer;
             networkingLocalPlayerID = localPlayer.playerId;
 
@@ -653,7 +656,13 @@ namespace VRCBilliards
             shadowRenders = shadows.GetComponentsInChildren<MeshRenderer>();
 
             Vector3 scale = baseObject.transform.lossyScale;
-            if (!(scale.x == scale.y && scale.y == scale.z))
+
+            // Round the scale to 1 decimal place. If the scale is not uniform, warn the user.
+            // Generally we understand that 
+            if (
+                Mathf.Round(scale.x * 10) != Mathf.Round(scale.y * 10) ||
+                Mathf.Round(scale.y * 10) != Mathf.Round(scale.z * 10)
+            )
             {
                 if (logger)
                 {
@@ -687,6 +696,9 @@ namespace VRCBilliards
                     logger.Error(name, "UdonChips enabled but we could not find the UdonChips object. It needs to be called 'UdonChips'.");
                 }
             }
+
+            timerText = poolMenu.visibleTimerDuringGame;
+            timerOutputFormat = poolMenu.timerOutputFormat;
         }
 
         public void Update()
@@ -747,7 +759,7 @@ namespace VRCBilliards
 
                 if (Input.GetKeyDown(KeyCode.E))
                 {
-                    OnDesktopTopDownViewStart();
+                    _OnDesktopTopDownViewStart();
                 }
             }
 
@@ -910,13 +922,18 @@ namespace VRCBilliards
                 tableCurrentColour = Color.Lerp(tableCurrentColour, tableSrcColour, Time.deltaTime * 3.0f);
             }
 
-            float timePercentage;
+            //float timePercentage;
 
             if (isTimerRunning)
             {
-                float timeleft = timerEnd - Time.timeSinceLevelLoad;
+                remainingTime -= Time.deltaTime;
 
-                if (timeleft < 0.0f)
+                if (timerText)
+                {
+                    timerText.text = timerOutputFormat.Replace("{}", Mathf.Round(remainingTime).ToString());
+                }
+
+                if (remainingTime < 0.0f)
                 {
                     isTimerRunning = false;
 
@@ -933,19 +950,19 @@ namespace VRCBilliards
                         isPlayerAllowedToPlay = false;
                     }
 
-                    timePercentage = 0.0f;
+                    //timePercentage = 0.0f;
                 }
-                else
-                {
-                    timePercentage = 1.0f - (timeleft * timerRecp);
-                }
+                // else
+                // {
+                //     //timePercentage = 1.0f - (timeleft * timerRecp);
+                // }
             }
-            else
-            {
-                timePercentage = 0.0f;
-            }
+            // else
+            // {
+            //     //timePercentage = 0.0f;
+            // }
 
-            tableMaterial.SetColor(uniformTableColour, new Color(tableCurrentColour.r, tableCurrentColour.g, tableCurrentColour.b, timePercentage));
+            //tableMaterial.SetColor(uniformTableColour, new Color(tableCurrentColour.r, tableCurrentColour.g, tableCurrentColour.b, timePercentage));
 
             // Run the intro animation.
             if (introAminTimer > 0.0f)
@@ -1040,7 +1057,7 @@ namespace VRCBilliards
 
         /// MENU ACCESSORS
 
-        public void UnlockTable()
+        public void _UnlockTable()
         {
             if (logger)
             {
@@ -1053,7 +1070,7 @@ namespace VRCBilliards
             RefreshNetworkData(false);
         }
 
-        public void LockTable()
+        public void _LockTable()
         {
             if (logger)
             {
@@ -1066,7 +1083,7 @@ namespace VRCBilliards
             RefreshNetworkData(false);
         }
 
-        public void JoinGame(int playerNumber)
+        public void _JoinGame(int playerNumber)
         {
             if (logger)
             {
@@ -1076,6 +1093,10 @@ namespace VRCBilliards
             if (!Pay(TotalPrice))
             {
                 return;
+            }
+            else
+            {
+                hasPaidToSignUp = true;
             }
 
             Networking.SetOwner(localPlayer, gameObject);
@@ -1102,7 +1123,7 @@ namespace VRCBilliards
             RefreshNetworkData(false);
         }
 
-        public void LeaveGame()
+        public void _LeaveGame()
         {
             if (logger)
             {
@@ -1161,7 +1182,7 @@ namespace VRCBilliards
             RefreshNetworkData(false);
         }
 
-        public void IncreaseTimer()
+        public void _IncreaseTimer()
         {
             if (logger)
             {
@@ -1177,7 +1198,7 @@ namespace VRCBilliards
             }
         }
 
-        public void DecreaseTimer()
+        public void _DecreaseTimer()
         {
             if (logger)
             {
@@ -1193,7 +1214,7 @@ namespace VRCBilliards
             }
         }
 
-        public void SelectTeams()
+        public void _SelectTeams()
         {
             if (logger)
             {
@@ -1206,7 +1227,7 @@ namespace VRCBilliards
             RefreshNetworkData(false);
         }
 
-        public void DeselectTeams()
+        public void _DeselectTeams()
         {
             if (logger)
             {
@@ -1219,7 +1240,7 @@ namespace VRCBilliards
             RefreshNetworkData(false);
         }
 
-        public void EnableGuideline()
+        public void _EnableGuideline()
         {
             if (logger)
             {
@@ -1231,7 +1252,7 @@ namespace VRCBilliards
             RefreshNetworkData(false);
         }
 
-        public void DisableGuideline()
+        public void _DisableGuideline()
         {
             if (logger)
             {
@@ -1246,7 +1267,7 @@ namespace VRCBilliards
         /// <summary>
         /// Initialize new match as the host.
         /// </summary>
-        public void StartNewGame()
+        public void _StartNewGame()
         {
             if (logger)
             {
@@ -1366,7 +1387,7 @@ namespace VRCBilliards
             }
         }
 
-        public void Select8Ball()
+        public void _Select8Ball()
         {
             if (logger)
             {
@@ -1379,7 +1400,7 @@ namespace VRCBilliards
             RefreshNetworkData(false);
         }
 
-        public void Select9Ball()
+        public void _Select9Ball()
         {
             if (logger)
             {
@@ -1395,7 +1416,7 @@ namespace VRCBilliards
         /// <summary>
         /// Player selected Japanese 4-ball.
         /// </summary>
-        public void Select4BallJapanese()
+        public void _Select4BallJapanese()
         {
             if (logger)
             {
@@ -1413,7 +1434,7 @@ namespace VRCBilliards
         /// <summary>
         /// Player selected Korean 4-ball.
         /// </summary>
-        public void Select4BallKorean()
+        public void _Select4BallKorean()
         {
             if (logger)
             {
@@ -1433,7 +1454,7 @@ namespace VRCBilliards
         /// <summary>
         /// Player is holding input trigger
         /// </summary>
-        public void StartHit()
+        public void _StartHit()
         {
             if (logger)
             {
@@ -1452,7 +1473,7 @@ namespace VRCBilliards
         /// <summary>
         /// Player stopped holding input trigger
         /// </summary>
-        public void EndHit()
+        public void _EndHit()
         {
             if (logger)
             {
@@ -1524,7 +1545,7 @@ namespace VRCBilliards
             {
                 Networking.SetOwner(localPlayer, gameObject);
 
-                Reset();
+                _Reset();
             }
             else if (logger)
             {
@@ -1532,7 +1553,7 @@ namespace VRCBilliards
             }
         }
 
-        private void Reset()
+        private void _Reset()
         {
             isGameInMenus = true;
             isPlayerAllowedToPlay = false;
@@ -1547,7 +1568,7 @@ namespace VRCBilliards
             }
         }
 
-        public void OnDesktopTopDownViewStart()
+        public void _OnDesktopTopDownViewStart()
         {
             if (logger)
             {
@@ -1573,7 +1594,7 @@ namespace VRCBilliards
         /// <summary>
         /// Cue put down local
         /// </summary>
-        public void OnPutDownCueLocally()
+        public void _OnPutDownCueLocally()
         {
             if (logger)
             {
@@ -2084,21 +2105,21 @@ namespace VRCBilliards
 
             if (isTableLocked)
             {
-                poolMenu.EnableUnlockTableButton();
+                poolMenu._EnableUnlockTableButton();
                 ResetScores();
             }
             else if (!isGameInMenus)
             {
-                poolMenu.EnableResetButton();
+                poolMenu._EnableResetButton();
                 UpdateScores();
             }
             else
             {
-                poolMenu.EnableMainMenu();
+                poolMenu._EnableMainMenu();
                 ResetScores();
             }
 
-            poolMenu.UpdateMainMenuView(
+            poolMenu._UpdateMainMenuView(
                 isTeams,
                 newIsTeam2Turn,
                 (int)gameMode,
@@ -2113,10 +2134,10 @@ namespace VRCBilliards
 
             if (isGameInMenus)
             {
-                if (lastViewTimer != timerType)
+                if (lastTimerType != timerType)
                 {
                     mainSrc.PlayOneShot(spinSfx);
-                    lastViewTimer = timerType;
+                    lastTimerType = timerType;
                 }
 
                 int numberOfPlayers = 0;
@@ -2145,6 +2166,14 @@ namespace VRCBilliards
                 }
 
                 isGameModePractice = localPlayerID == 0 && numberOfPlayers == 1;
+
+                int playerID = Networking.LocalPlayer.playerId;
+                if (hasPaidToSignUp && player1ID != playerID && player2ID != playerID && player3ID != playerID && player4ID != playerID)
+                {
+                    hasPaidToSignUp = false;
+                    PayBack(TotalPrice);
+                }
+
                 return;
             }
 
@@ -2345,18 +2374,30 @@ namespace VRCBilliards
                 logger.Log(name, "ResetTimer");
             }
 
-            if (timerType == 0)
+            if (timerType != 0)
             {
-                timerEnd = Time.timeSinceLevelLoad + 30.0f;
-                timerRecp = 0.03333333333f;
+                switch (timerType)
+                {
+                    case 1:
+                        remainingTime = 10f;
+                        break;
+                    case 2:
+                        remainingTime = 15f;
+                        break;
+                    case 3:
+                        remainingTime = 30f;
+                        break;
+                    case 4:
+                        remainingTime = 60f;
+                        break;
+                }
+
+                isTimerRunning = true;
             }
             else
             {
-                timerEnd = Time.timeSinceLevelLoad + 60.0f;
-                timerRecp = 0.01666666666f;
+                isTimerRunning = false;
             }
-
-            isTimerRunning = true;
         }
 
         private void OnLocalCaromPoint(Vector3 p)
@@ -2386,15 +2427,16 @@ namespace VRCBilliards
 
             ApplyTableColour(isTeam2Winner);
 
+            hasPaidToSignUp = false;
             GiveRewards();
 
             if (gameWasReset)
             {
-                poolMenu.GameWasReset();
+                poolMenu._GameWasReset();
             }
             else
             {
-                poolMenu.TeamWins(isTeam2Winner);
+                poolMenu._TeamWins(isTeam2Winner);
             }
 
             if (marker9ball)
@@ -2432,7 +2474,7 @@ namespace VRCBilliards
 
             raiseCount = 1;
 
-            poolMenu.UpdateMainMenuView(
+            poolMenu._UpdateMainMenuView(
                 isTeams,
                 newIsTeam2Turn,
                 (int)gameMode,
@@ -2445,7 +2487,7 @@ namespace VRCBilliards
                 guideLineEnabled
             );
 
-            poolMenu.EnableMainMenu();
+            poolMenu._EnableMainMenu();
         }
 
         private void OnRemoteTurnChange()
@@ -2541,24 +2583,24 @@ namespace VRCBilliards
             {
                 if (isGameModePractice)
                 {
-                    gripControllers[0].AllowAccess();
-                    gripControllers[1].AllowAccess();
+                    gripControllers[0]._AllowAccess();
+                    gripControllers[1]._AllowAccess();
                 }
                 else if (!playerIsTeam2)                       // Local player is 1, or 3
                 {
-                    gripControllers[0].AllowAccess();
-                    gripControllers[1].DenyAccess();
+                    gripControllers[0]._AllowAccess();
+                    gripControllers[1]._DenyAccess();
                 }
                 else                                                            // Local player is 0, or 2
                 {
-                    gripControllers[1].AllowAccess();
-                    gripControllers[0].DenyAccess();
+                    gripControllers[1]._AllowAccess();
+                    gripControllers[0]._DenyAccess();
                 }
             }
             else
             {
-                gripControllers[0].DenyAccess();
-                gripControllers[1].DenyAccess();
+                gripControllers[0]._DenyAccess();
+                gripControllers[1]._DenyAccess();
             }
         }
 
@@ -2570,7 +2612,7 @@ namespace VRCBilliards
                 logger.Log(name, "OnRemoteNewGame");
             }
 
-            poolMenu.EnableResetButton();
+            poolMenu._EnableResetButton();
 
             is8Ball = gameMode == 0u;
             isNineBall = gameMode == 1u;
@@ -3369,8 +3411,8 @@ namespace VRCBilliards
 
             Networking.LocalPlayer.Immobilize(false);
 
-            gripControllers[0].EnableConstraints();
-            gripControllers[1].EnableConstraints();
+            gripControllers[0]._EnableConstraints();
+            gripControllers[1]._EnableConstraints();
         }
 
         // TODO: Single use function, but it short-circuits so cannot be easily put into its using function.
@@ -3548,7 +3590,7 @@ namespace VRCBilliards
             }
 
             // Remove locks
-            EndHit();
+            _EndHit();
             isPlayerAllowedToPlay = false;
             isFoul = false;    // In case did not drop foul marker
 
@@ -3577,13 +3619,13 @@ namespace VRCBilliards
 
             if (isFourBall)
             {
-                poolMenu.SetScore(false, scores[0]);
-                poolMenu.SetScore(true, scores[1]);
+                poolMenu._SetScore(false, scores[0]);
+                poolMenu._SetScore(true, scores[1]);
             }
             else if (isNineBall)
             {
-                poolMenu.SetScore(false, -1);
-                poolMenu.SetScore(true, -1);
+                poolMenu._SetScore(false, -1);
+                poolMenu._SetScore(true, -1);
             }
             else
             {
@@ -3608,8 +3650,8 @@ namespace VRCBilliards
                     counters[Convert.ToUInt32(isTeam2Winner)] += (int)((ballPocketedState & 0x2) >> 1);
                 }
 
-                poolMenu.SetScore(false, counters[0]);
-                poolMenu.SetScore(true, counters[1]);
+                poolMenu._SetScore(false, counters[0]);
+                poolMenu._SetScore(true, counters[1]);
             }
         }
 
@@ -3620,8 +3662,8 @@ namespace VRCBilliards
                 logger.Log(name, "ResetScores");
             }
 
-            poolMenu.SetScore(false, 0);
-            poolMenu.SetScore(true, 0);
+            poolMenu._SetScore(false, 0);
+            poolMenu._SetScore(true, 0);
         }
 
         public override void OnPlayerLeft(VRCPlayerApi player)
@@ -3641,7 +3683,7 @@ namespace VRCBilliards
                 else
                 {
                     gameWasReset = true;
-                    Reset();
+                    _Reset();
                 }
             }
         }
@@ -3657,7 +3699,7 @@ namespace VRCBilliards
         [HideInInspector]
         public ushort numberOfCuesHeldByLocalPlayer;
 
-        public void LocalPlayerEnteredAreaNearTable()
+        public void _LocalPlayerEnteredAreaNearTable()
         {
             if (!isPlayerInVR)
             {
@@ -3667,19 +3709,19 @@ namespace VRCBilliards
         }
 
         /// <Summary> Is the local player near the table? </Summary>
-        public void LocalPlayerLeftAreaNearTable()
+        public void _LocalPlayerLeftAreaNearTable()
         {
             isNearTable = false;
             CannotEnterDesktopTopDownView();
         }
 
-        public void LocalPlayerPickedUpCue()
+        public void _LocalPlayerPickedUpCue()
         {
             numberOfCuesHeldByLocalPlayer++;
             CheckIfCanEnterDesktopTopDownView();
         }
 
-        public void LocalPlayerDroppedCue()
+        public void _LocalPlayerDroppedCue()
         {
             numberOfCuesHeldByLocalPlayer--;
             if (numberOfCuesHeldByLocalPlayer == 0)
@@ -3712,7 +3754,7 @@ namespace VRCBilliards
         }
 
         #region UdonChipsMethods
-        public void Raise()
+        public void _Raise()
         {
             if (!enableUdonChips || PlayerCount != 1)
             {
