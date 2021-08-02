@@ -21,7 +21,6 @@ VRChatのSDK3ワールド用のビリヤード台です。 8ボール、9ボー�
 開発者への連絡はこちら:
 
 @FairlySadPanda on Twitter
-
 FairlySadPanda#9528 on Discord
 
 # 設置方法
@@ -44,6 +43,26 @@ FairlySadPanda#9528 on Discord
 3. unitypackage内のアセットを全てインポートします。
 4. Projectフォルダの「VRCBilliards」の中の「PoolTable」をシーンにドラッグ&ドロップします。
 
+
+# サポート
+緊急の場合を除いて開発者へのDMでの連絡は避けてください。
+
+サポートを受けるには、Issueを作成してください。このためにはGithubアカウントが必要ですが、設定には1分もかかりません。
+
+アカウントを作成したら、このページの上部にある「Issue」をクリックします。
+
+![image](https://user-images.githubusercontent.com/732532/127752254-37061d3a-c13e-4de7-9212-792e17fe6472.png)
+
+「Create Issue」をクリックします。
+
+![image](https://user-images.githubusercontent.com/732532/127752268-c46fca03-72cf-4712-96b9-24e47764d791.png)
+
+Issueかバグレポートを記入して、「Submit New Issue」をクリックします。
+
+![image](https://user-images.githubusercontent.com/732532/127752457-03751bba-df2b-48f0-a220-a9cd699d9974.png)
+
+開発者へのDMはすぐに返事を得られるかも知れません。しかしIssueを作成することで、すべての開発者や外部の協力者とIssueを共有できます。このため、全体としてみるとより修正が簡単になります。
+
 # Unity由来のバグ
 
 prefab内のテキストが巨大化してしまうことがあります。このときは巨大化したTextMeshProのコンポーネントそれぞれのsizeを小さくします。（デフォルトの36に戻されてしまうため）
@@ -58,7 +77,7 @@ prefab内のテキストが巨大化してしまうことがあります。こ�
 このProjectは通常のUnity/C#のスタイルで書かれています。C#のスタイルは様々なものがありますが（開発チームが独自に定めたりします）
 Unityドキュメント、Unity Example Scripts、[Microsoftのベストプラクティス](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/inside-a-program/coding-conventions) を参考にしてください。
 
-  
+
   - 変数はBehaviourの一番上に書く。
   - セキュリティのためRPCを禁止する場合を除き（Udon特有の用法）、プロパティ名やメソッド名の先頭にアンダースコア（`_`）を使うことはできるだけ避けます。。
   - プロパティと引数には camelCase を、他には PascalCase を用います。
@@ -71,13 +90,13 @@ Unityドキュメント、Unity Example Scripts、[Microsoftのベストプラ�
 
 バージョン1.2.1から [UdonChips](https://lura.booth.pm/items/3060394) に対応しました！
 
-UdonChip連携を有効にするには: 
- 
+UdonChip連携を有効にするには:
+
   1. プロジェクトに一つの「UdonChips」オブジェクトを設置します。
   2. シーンのVRCBilliardsオブジェクトの「Enable UdonChips」オプションを有効にします。
 
 VRCBilliardsのコアとなるPoolStateManagerスクリプトにオプションがあります。
- 
+
   1. UCを支払ってゲームに参加します。
   2. Raisingを有効にすると、複数回支払うことができます。
   3. 自分一人のゲームでもUCを獲得できます。
