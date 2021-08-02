@@ -1,4 +1,4 @@
-<p align="center"><img src="https://avatars.githubusercontent.com/u/50210138?s=200&v=4" alt="Prefabs Logo"></p>
+*<p align="center"><img src="https://avatars.githubusercontent.com/u/50210138?s=200&v=4" alt="Prefabs Logo"></p>
 
 <p align="center"><i>Prefabsコミュニティーのサポ－トがなければ完成しませんでした！</i></p>
 
@@ -65,7 +65,8 @@ Issueかバグレポートを記入して、「Submit New Issue」をクリッ�
 
 # Unity由来のバグ
 
-prefab内のテキストが巨大化してしまうことがあります。このときは巨大化したTextMeshProのコンポーネントそれぞれのsizeを小さくします。（デフォルトの36に戻されてしまうため）
+* prefab内のテキストが巨大化してしまう： 巨大化したTextMeshProのコンポーネントそれぞれのsizeを小さくします。（デフォルトの36に戻されてしまうため）
+* アップデートしたらプレイヤーが台にひっかかる（その他「アップデートしたら壊れた！」という問題： シーン内のビリヤード台を削除してPrefabを設置し直します。UnityのPrefab更新はやっかいなので、アップデートして何かが壊れた時は、必ず変更していないビリヤード台でも問題がないか確認してください。Prefabをたくさん変更している場合、この作業は面倒なものになります。その場合は連絡してください。
 
 # 「コミュニティ」について
 
