@@ -10,6 +10,9 @@ namespace FairlySadPanda
             public TMPro.TextMeshProUGUI text;
             public int maxChars;
 
+            [Tooltip("Print Log calls to console. Enable to make logs easier to see.")]
+            public bool printLogsToConsole;
+
             public void Start()
             {
                 Log("TestLogger", "Start");
@@ -17,7 +20,11 @@ namespace FairlySadPanda
 
             public void Log(string source, string log)
             {
-                Debug.Log($"[{Time.timeSinceLevelLoad:N2}] [<color=green>{source}</color>] {log}");
+                if (printLogsToConsole)
+                {
+                    Debug.Log($"[{Time.timeSinceLevelLoad:N2}] [<color=green>{source}</color>] {log}");
+                }
+
                 text.text += $"\n[{Time.timeSinceLevelLoad:N2}] [<color=green>{source}</color>] {log}";
                 while (text.text.Length > maxChars && text.text.Contains("\n"))
                 {
@@ -34,7 +41,6 @@ namespace FairlySadPanda
                     text.text = text.text.Substring(text.text.IndexOf("\n") + 1);
                 }
             }
-
 
             public void Error(string source, string log)
             {

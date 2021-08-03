@@ -46,6 +46,7 @@ namespace VRCBilliards
         public string timerValueText = "{}s Limit";
         public Image timerButton, noTimerButton;
         public TextMeshProUGUI visibleTimerDuringGame;
+        public Image timerCountdown;
         public string timerOutputFormat = "{} seconds remaining";
 
         [Header("Teams")]
@@ -223,6 +224,7 @@ namespace VRCBilliards
             resetGameButton.SetActive(false);
             lockMenu.SetActive(false);
             mainMenu.SetActive(true);
+            visibleTimerDuringGame.text = "";
         }
 
         private void UpdateButtonColors(Image[] buttons, int selectedIndex)
@@ -253,8 +255,6 @@ namespace VRCBilliards
             bool guideline
         )
         {
-            Debug.Log($"Got a new menu update: teams? {newIsTeams} team 2's turn? {isTeam2Playing} game mode {gameMode} timer mode {timerMode} player 1 {player1ID} player 2 {player2ID} player 3 {player3ID} player 4 {player4ID}");
-
             if (newIsTeams)
             {
                 if (Utilities.IsValid(teamsTxt)) teamsTxt.text = "Teams: YES";
@@ -460,7 +460,6 @@ namespace VRCBilliards
             {
                 return false;
             }
-
             menuText.text = player.displayName;
             scoreText.text = player.displayName;
 

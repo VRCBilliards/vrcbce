@@ -26,6 +26,7 @@ namespace VRCBilliards
         {
             if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.right), out hit, maxLengthOfLine, tableLayers))
             {
+
                 line.SetPosition(1, new Vector3(hit.distance, 0, 0));
                 line.endWidth = Mathf.Lerp(line.startWidth, 0, Mathf.InverseLerp(0, maxLengthOfLine, hit.distance));
             }

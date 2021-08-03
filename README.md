@@ -1,3 +1,5 @@
+<p align="center">🗾 🇯🇵 -> https://github.com/FairlySadPanda/vrcbce/blob/master/README_ja.md</p>
+
 <p align="center"><img src="https://avatars.githubusercontent.com/u/50210138?s=200&v=4" alt="Prefabs Logo"></p>
 
 <p align="center"><i>This prefab could not have been constructed without the kind support of the Prefabs community. <3</i></p>

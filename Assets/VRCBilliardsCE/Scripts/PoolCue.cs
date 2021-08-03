@@ -8,7 +8,7 @@ namespace VRCBilliards
     [RequireComponent(typeof(SphereCollider))]
     public class PoolCue : UdonSharpBehaviour
     {
-        public PoolOtherHand targetController;
+        public PoolOtherHand otherHand;
         private Transform targetTransform;
 
         public Transform cueRespawnPosition;
@@ -63,6 +63,9 @@ namespace VRCBilliards
 
         private bool startupCompleted;
 
+        [HideInInspector]
+        public bool tableIsActive;
+
         public void Start()
         {
             if (Networking.LocalPlayer == null)
@@ -76,7 +79,7 @@ namespace VRCBilliards
 
             ownCollider = GetComponent<Collider>();
 
-            targetTransform = targetController.transform;
+            targetTransform = otherHand.transform;
 
             targetCollider = targetTransform.GetComponent<Collider>();
             if (!targetCollider)
@@ -116,7 +119,10 @@ namespace VRCBilliards
                 return;
             }
 
-            // TODO: Add early return here if pool table is idle
+            if (!tableIsActive)
+            {
+                return;
+            }
 
             // Put cue in hand
             if (!localPlayerIsInDesktopTopDownView)
@@ -130,7 +136,7 @@ namespace VRCBilliards
                 }
                 else
                 {
-                    if (usingDesktop && isPickedUp)
+                    if (isPickedUp && usingDesktop)
                     {
                         var data = playerApi.GetTrackingData(VRCPlayerApi.TrackingDataType.RightHand);
                         transform.position = data.position;
@@ -150,8 +156,6 @@ namespace VRCBilliards
             if (!usingDesktop)
             {
                 isArmed = true;
-                //cuePosConstraint.enabled = false;
-                //cueLookAtConstraint.enabled = false;
                 positionAtStartOfArming = transform.position;
                 normalizedLineOfCueWhenArmed = (targetTransform.position - positionAtStartOfArming).normalized;
                 poolStateManager._StartHit();
@@ -160,12 +164,6 @@ namespace VRCBilliards
 
         public override void OnPickupUseUp()
         {
-            if (!usingDesktop)
-            {
-                //cuePosConstraint.enabled = true;
-                //cueLookAtConstraint.enabled = true;
-            }
-
             isArmed = false;
             poolStateManager._EndHit();
         }
@@ -176,13 +174,18 @@ namespace VRCBilliards
             {
                 targetTransform.localScale = vectorOne;
             }
+            else
+            {
+                GetComponent<MeshRenderer>().enabled = false;
+                otherHand.GetComponent<MeshRenderer>().enabled = false;
+            }
 
             targetTransform.localScale = vectorOne; //TODO: This code is defective.
 
             // Not sure if this is necessary to do both since we pickup this one, but just to be safe
             Networking.SetOwner(Networking.LocalPlayer, gameObject);
             Networking.SetOwner(Networking.LocalPlayer, targetTransform.gameObject); // Varneon: One .gameObject is fine during pickup event
-            targetController.isOtherBeingHeld = true;
+            otherHand.isOtherBeingHeld = true;
             targetCollider.enabled = true;
 
             poolStateManager._LocalPlayerPickedUpCue();
@@ -198,6 +201,8 @@ namespace VRCBilliards
 
             if (usingDesktop)
             {
+                GetComponent<MeshRenderer>().enabled = true;
+                otherHand.GetComponent<MeshRenderer>().enabled = true;
                 poolStateManager._OnPutDownCueLocally();
                 Respawn();
             }
@@ -240,7 +245,7 @@ namespace VRCBilliards
         /// </summary>
         private void Respawn()
         {
-            targetController._Respawn();
+            otherHand._Respawn();
             transform.SetPositionAndRotation(cueRespawnPosition.position, cueRespawnPosition.rotation);
 
             if (usingDesktop)
@@ -248,26 +253,15 @@ namespace VRCBilliards
                 poolStateManager._OnPutDownCueLocally();
             }
 
-            cueParent.LookAt(targetTransform, vectorUp);
+            cueParent.position = transform.position;
+            cueParent.LookAt(targetTransform.position);
         }
 
         private void ResetTarget()
         {
             targetTransform.localScale = vectorZero;
-            targetController.isOtherBeingHeld = false;
+            otherHand.isOtherBeingHeld = false;
             targetCollider.enabled = false;
-        }
-
-        public void _EnableConstraints()
-        {
-            //cuePosConstraint.enabled = true;
-            //cueLookAtConstraint.enabled = true;
-        }
-
-        public void _DisableConstraints()
-        {
-            //cuePosConstraint.enabled = false;
-            //cueLookAtConstraint.enabled = false;
         }
     }
 }

@@ -170,7 +170,7 @@ namespace VRCBilliards
         public Color aimLocked = new Color(1.0f, 1.0f, 1.0f, 1.0f);
 
         [Header("Cues")]
-        public PoolCue[] gripControllers;
+        public PoolCue[] poolCues;
 
         /// <summary>
         /// The balls that are used by the table.
@@ -186,7 +186,7 @@ namespace VRCBilliards
         private Transform[] ballShadowPosConstraintTransforms;
         public GameObject cueTip;
         private Transform cueTipTransform;
-        public GameObject guideline;
+        public ShotGuideController guideline;
         public GameObject devhit;
         public GameObject[] playerTotems;
         public GameObject[] cueTips;
@@ -375,6 +375,7 @@ namespace VRCBilliards
         /// </summary>
         private float repoMaxX = TABLE_WIDTH;
         private float remainingTime;
+        private float originalRemainingTime;
         private bool isTimerRunning;
         private bool isParticleAlive;
         private float particleTime;
@@ -453,7 +454,6 @@ namespace VRCBilliards
         private float cueFDir;
         private Vector3 raySphereOutput;
         private uint lastTimerType;
-        private float timeLast;
         private float accumulation;
         private float shootAmt;
         private int[] rackOrder8Ball = { 9, 2, 10, 11, 1, 3, 4, 12, 5, 13, 14, 6, 15, 7, 8 };
@@ -541,6 +541,7 @@ namespace VRCBilliards
 
         private TMPro.TextMeshProUGUI timerText;
         private string timerOutputFormat;
+        private UnityEngine.UI.Image timerCountdown;
 
 
         public void Start()
@@ -619,7 +620,7 @@ namespace VRCBilliards
 
             if (guideline)
             {
-                guideline.SetActive(false);
+                guideline.gameObject.SetActive(false);
             }
 
             if (devhit)
@@ -699,16 +700,11 @@ namespace VRCBilliards
 
             timerText = poolMenu.visibleTimerDuringGame;
             timerOutputFormat = poolMenu.timerOutputFormat;
+            timerCountdown = poolMenu.timerCountdown;
         }
 
         public void Update()
         {
-            // Physics step accumulator routine
-            float time = Time.timeSinceLevelLoad;
-            float timeDelta = time - timeLast;
-
-            timeLast = time;
-
             if (isParticleAlive)
             {
                 float scale, s, v, e;
@@ -766,7 +762,7 @@ namespace VRCBilliards
             // Run sim only if things are moving
             if (gameIsSimulating)
             {
-                accumulation += timeDelta;
+                accumulation += Time.deltaTime;
 
                 if (accumulation > MAX_DELTA)
                 {
@@ -868,7 +864,7 @@ namespace VRCBilliards
                     {
                         if (guideLineEnabled && guideline)
                         {
-                            guideline.SetActive(true);
+                            guideline.gameObject.SetActive(true);
                         }
 
                         if (devhit)
@@ -903,7 +899,7 @@ namespace VRCBilliards
 
                         if (guideline)
                         {
-                            guideline.SetActive(false);
+                            guideline.gameObject.SetActive(false);
                         }
                     }
                 }
@@ -928,11 +924,6 @@ namespace VRCBilliards
             {
                 remainingTime -= Time.deltaTime;
 
-                if (timerText)
-                {
-                    timerText.text = timerOutputFormat.Replace("{}", Mathf.Round(remainingTime).ToString());
-                }
-
                 if (remainingTime < 0.0f)
                 {
                     isTimerRunning = false;
@@ -952,15 +943,24 @@ namespace VRCBilliards
 
                     //timePercentage = 0.0f;
                 }
-                // else
-                // {
-                //     //timePercentage = 1.0f - (timeleft * timerRecp);
-                // }
+                else
+                {
+                    if (timerText)
+                    {
+                        timerText.text = timerOutputFormat.Replace("{}", Mathf.Round(remainingTime).ToString());
+                    }
+
+                    if (timerCountdown)
+                    {
+                        timerCountdown.fillAmount = remainingTime / originalRemainingTime;
+                    }
+                }
             }
-            // else
-            // {
-            //     //timePercentage = 0.0f;
-            // }
+            else
+            {
+                timerText.text = "";
+                timerCountdown.fillAmount = 0f;
+            }
 
             //tableMaterial.SetColor(uniformTableColour, new Color(tableCurrentColour.r, tableCurrentColour.g, tableCurrentColour.b, timePercentage));
 
@@ -1040,8 +1040,20 @@ namespace VRCBilliards
 
         public override void OnDeserialization()
         {
+            // A somewhat loose way of handling if the pool cues need to run their Update() loops.
+            if (isGameInMenus)
+            {
+                poolCues[0].tableIsActive = false;
+                poolCues[1].tableIsActive = false;
+            }
+            else
+            {
+                poolCues[0].tableIsActive = true;
+                poolCues[1].tableIsActive = true;
+            }
+
             // Check if local simulation is in progress, the event will fire off later when physics
-            // are settled by the client
+            // are settled by the client.
             if (gameIsSimulating)
             {
                 isUpdateLocked = true;
@@ -1293,6 +1305,9 @@ namespace VRCBilliards
             gameIsSimulating = false;
             isOpen = true;
             isGameInMenus = false;
+            poolCues[0].tableIsActive = true;
+            poolCues[1].tableIsActive = true;
+
             isPlayer2Blue = false;
             isTeam2Winner = false;
 
@@ -1556,6 +1571,8 @@ namespace VRCBilliards
         private void _Reset()
         {
             isGameInMenus = true;
+            poolCues[0].tableIsActive = false;
+            poolCues[1].tableIsActive = false;
             isPlayerAllowedToPlay = false;
             gameIsSimulating = false;
             newIsTeam2Turn = false;
@@ -1587,8 +1604,8 @@ namespace VRCBilliards
             // Lock player in place
             localPlayer.Immobilize(true);
 
-            gripControllers[0].localPlayerIsInDesktopTopDownView = true;
-            gripControllers[1].localPlayerIsInDesktopTopDownView = true;
+            poolCues[0].localPlayerIsInDesktopTopDownView = true;
+            poolCues[1].localPlayerIsInDesktopTopDownView = true;
         }
 
         /// <summary>
@@ -1929,11 +1946,6 @@ namespace VRCBilliards
                 }
             }
 
-            HandleTableBallStateAtEndOfTurn(winCondition, foulCondition, deferLossCondition, isObjectiveSink, isOpponentSink);
-        }
-
-        private void HandleTableBallStateAtEndOfTurn(bool winCondition, bool foulCondition, bool deferLossCondition, bool isObjectiveSink, bool isOpponentSink)
-        {
             if (winCondition)
             {
                 if (foulCondition)
@@ -2255,7 +2267,7 @@ namespace VRCBilliards
 
                 if (guideline)
                 {
-                    guideline.SetActive(false);
+                    guideline.gameObject.SetActive(false);
                 }
             }
         }
@@ -2380,15 +2392,19 @@ namespace VRCBilliards
                 {
                     case 1:
                         remainingTime = 10f;
+                        originalRemainingTime = 10f;
                         break;
                     case 2:
                         remainingTime = 15f;
+                        originalRemainingTime = 15f;
                         break;
                     case 3:
                         remainingTime = 30f;
+                        originalRemainingTime = 30f;
                         break;
                     case 4:
                         remainingTime = 60f;
+                        originalRemainingTime = 60f;
                         break;
                 }
 
@@ -2509,14 +2525,20 @@ namespace VRCBilliards
             {
                 if (!newIsTeam2Turn)
                 {
-                    logger.Log(name, "0 ball is 0 mesh, 9 ball is 1 mesh");
+                    if (logger != null)
+                    {
+                        logger.Log(name, "0 ball is 0 mesh, 9 ball is 1 mesh");
+                    }
 
                     ballTransforms[0].GetComponent<MeshFilter>().sharedMesh = cueballMeshes[0];
                     ballTransforms[9].GetComponent<MeshFilter>().sharedMesh = cueballMeshes[1];
                 }
                 else
                 {
-                    logger.Log(name, "0 ball is 0 mesh, 9 ball is 1 mesh");
+                    if (logger != null)
+                    {
+                        logger.Log(name, "0 ball is 0 mesh, 9 ball is 1 mesh");
+                    }
 
                     ballTransforms[9].GetComponent<MeshFilter>().sharedMesh = cueballMeshes[0];
                     ballTransforms[0].GetComponent<MeshFilter>().sharedMesh = cueballMeshes[1];
@@ -2544,7 +2566,7 @@ namespace VRCBilliards
 
                     if (logger)
                     {
-                        logger.Log(name, "enabling marker because it is our turn and there was a foul last turn");
+                        logger.Log(name, "Enabling marker because it is our turn and there was a foul last turn");
                     }
 
                     if (marker)
@@ -2583,24 +2605,24 @@ namespace VRCBilliards
             {
                 if (isGameModePractice)
                 {
-                    gripControllers[0]._AllowAccess();
-                    gripControllers[1]._AllowAccess();
+                    poolCues[0]._AllowAccess();
+                    poolCues[1]._AllowAccess();
                 }
                 else if (!playerIsTeam2)                       // Local player is 1, or 3
                 {
-                    gripControllers[0]._AllowAccess();
-                    gripControllers[1]._DenyAccess();
+                    poolCues[0]._AllowAccess();
+                    poolCues[1]._DenyAccess();
                 }
                 else                                                            // Local player is 0, or 2
                 {
-                    gripControllers[1]._AllowAccess();
-                    gripControllers[0]._DenyAccess();
+                    poolCues[1]._AllowAccess();
+                    poolCues[0]._DenyAccess();
                 }
             }
             else
             {
-                gripControllers[0]._DenyAccess();
-                gripControllers[1]._DenyAccess();
+                poolCues[0]._DenyAccess();
+                poolCues[1]._DenyAccess();
             }
         }
 
@@ -2830,18 +2852,18 @@ namespace VRCBilliards
 
             isTimerRunning = false;
 
-            gripControllers[0].localPlayerIsInDesktopTopDownView = false;
-            gripControllers[1].localPlayerIsInDesktopTopDownView = false;
+            poolCues[0].localPlayerIsInDesktopTopDownView = false;
+            poolCues[1].localPlayerIsInDesktopTopDownView = false;
 
             if (!localPlayer.IsUserInVR())
             {
-                gripControllers[0].usingDesktop = true;
-                gripControllers[1].usingDesktop = true;
+                poolCues[0].usingDesktop = true;
+                poolCues[1].usingDesktop = true;
             }
             else
             {
-                gripControllers[0].usingDesktop = false;
-                gripControllers[1].usingDesktop = false;
+                poolCues[0].usingDesktop = false;
+                poolCues[1].usingDesktop = false;
             }
 
             if (IsSinglePlayer)
@@ -3357,6 +3379,9 @@ namespace VRCBilliards
             }
 
             isGameInMenus = true;
+            poolCues[0].tableIsActive = false;
+            poolCues[1].tableIsActive = false;
+
             isTeam2Winner = newIsTeam2Winner;
 
             RefreshNetworkData(newIsTeam2Turn);
@@ -3406,13 +3431,10 @@ namespace VRCBilliards
                 desktopCamera.enabled = false;
             }
 
-            gripControllers[0].localPlayerIsInDesktopTopDownView = false;
-            gripControllers[1].localPlayerIsInDesktopTopDownView = false;
+            poolCues[0].localPlayerIsInDesktopTopDownView = false;
+            poolCues[1].localPlayerIsInDesktopTopDownView = false;
 
             Networking.LocalPlayer.Immobilize(false);
-
-            gripControllers[0]._EnableConstraints();
-            gripControllers[1]._EnableConstraints();
         }
 
         // TODO: Single use function, but it short-circuits so cannot be easily put into its using function.
@@ -3423,15 +3445,6 @@ namespace VRCBilliards
                 isEntertingDesktopModeThisFrame = false;
                 return;
             }
-
-            // // Keep UI rendering
-            // if (Utilities.IsValid(localPlayer))
-            // {
-            //     VRCPlayerApi.TrackingData hmd = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
-            //     desktopQuad.transform.position = hmd.position + (hmd.rotation * Vector3.forward);
-            // }
-
-            // desktopEPopup.transform.position = desktopQuad.transform.position;
 
             deskTopCursor.x = Mathf.Clamp
             (
@@ -3586,7 +3599,7 @@ namespace VRCBilliards
 
             if (guideline)
             {
-                guideline.SetActive(false);
+                guideline.gameObject.SetActive(false);
             }
 
             // Remove locks
