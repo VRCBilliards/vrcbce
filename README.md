@@ -36,6 +36,10 @@ Recommended:
 
 1. CyanEmu for emulating locally (https://github.com/CyanLaser/CyanEmu)
 2. VRWorldToolkit for general world development assistance (https://github.com/oneVR/VRWorldToolkit)
+3. UdonChips in order to allow UdonChips support with the table. Read Below.
+ 
+Optional (not required):
+1. UdonChips SaveAndLoad in order for people to be able to use their chips in your world or specific worlds without having to start over from scratch (https://booth.pm/en/items/3072281)
 
 Installation Steps:
 
