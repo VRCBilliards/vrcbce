@@ -3,9 +3,9 @@ using UdonSharp;
 using UnityEngine;
 using VRC.Udon;
 
-namespace FairlySadPanda.Utilities
+namespace FairlySadPanda.UsefulThings
 {
-	[AddComponentMenu("FSP/Utilities/Activate Udon Event")]
+    [AddComponentMenu("FSP/Utilities/Activate Udon Event")]
     public class ActivaterUdonEvent : UdonSharpBehaviour
     {
         public bool networked;

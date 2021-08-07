@@ -20,7 +20,7 @@ namespace VRCBilliards
         public TextMeshProUGUI modeLeft;
         public TextMeshProUGUI modeRight;
 
-        public FairlySadPanda.Utilities.Logger logger;
+        public FairlySadPanda.UsefulThings.Logger logger;
 
         [UdonSynced]
         [HideInInspector]

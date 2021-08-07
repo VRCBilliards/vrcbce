@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace FairlySadPanda
 {
-    namespace Utilities
+    namespace UsefulThings
     {
         public class Logger : UdonSharpBehaviour
         {

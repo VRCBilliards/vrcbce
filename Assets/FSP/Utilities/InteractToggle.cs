@@ -2,7 +2,7 @@
 using UdonSharp;
 using UnityEngine;
 
-namespace FairlySadPanda.Utilities
+namespace FairlySadPanda.UsefulThings
 {
     [AddComponentMenu("FSP/Utilities/Interact Toggle")]
     public class InteractToggle : UdonSharpBehaviour

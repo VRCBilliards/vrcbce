@@ -476,7 +476,7 @@ namespace VRCBilliards
         [UdonSynced]
         private int player4ID;
 
-        public FairlySadPanda.Utilities.Logger logger;
+        public FairlySadPanda.UsefulThings.Logger logger;
 
         [UdonSynced]
         private bool gameWasReset;
