@@ -962,7 +962,7 @@ namespace VRCBilliards
                 timerCountdown.fillAmount = 0f;
             }
 
-            //tableMaterial.SetColor(uniformTableColour, new Color(tableCurrentColour.r, tableCurrentColour.g, tableCurrentColour.b, timePercentage));
+            tableMaterial.SetColor(uniformTableColour, tableCurrentColour);
 
             // Run the intro animation.
             if (introAminTimer > 0.0f)
