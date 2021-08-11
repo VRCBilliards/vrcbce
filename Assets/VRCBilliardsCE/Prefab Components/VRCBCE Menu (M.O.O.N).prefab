@@ -828,7 +828,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -200, y: -142.29997}
-  m_SizeDelta: {x: 66.1, y: 30}
+  m_SizeDelta: {x: 60, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3492924435431232798
 CanvasRenderer:
@@ -2508,7 +2508,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Guideline:'
+  m_text: Guideline
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9a3b1e8a8dbce9c40858b1d009683eca, type: 2}
   m_sharedMaterial: {fileID: -2341511444795799642, guid: 9a3b1e8a8dbce9c40858b1d009683eca,
@@ -2776,7 +2776,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Teams:'
+  m_text: Teams
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9a3b1e8a8dbce9c40858b1d009683eca, type: 2}
   m_sharedMaterial: {fileID: -2341511444795799642, guid: 9a3b1e8a8dbce9c40858b1d009683eca,
@@ -6648,7 +6648,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 200, y: -142.29997}
-  m_SizeDelta: {x: 66.1, y: 30}
+  m_SizeDelta: {x: 60, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3492924436663864803
 CanvasRenderer:
@@ -7073,7 +7073,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Game Modes:'
+  m_text: Game Modes
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9a3b1e8a8dbce9c40858b1d009683eca, type: 2}
   m_sharedMaterial: {fileID: -2341511444795799642, guid: 9a3b1e8a8dbce9c40858b1d009683eca,
