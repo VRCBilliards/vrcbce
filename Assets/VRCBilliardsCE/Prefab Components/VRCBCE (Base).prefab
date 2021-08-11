@@ -8489,7 +8489,6 @@ GameObject:
   - component: {fileID: 3805221874696699105}
   - component: {fileID: 3805221874696699106}
   - component: {fileID: 3805221874696699116}
-  - component: {fileID: 3805221874696699107}
   m_Layer: 17
   m_Name: Logger
   m_TagString: Untagged
@@ -8605,18 +8604,6 @@ MonoBehaviour:
   publicVariablesUnityEngineObjects:
   - {fileID: 3805221875248830655}
   publicVariablesSerializationDataFormat: 0
---- !u!114 &3805221874696699107
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3805221874696699117}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: -1533785930, guid: 661092b4961be7145bfbe56e1e62337b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &3805221874710714465
 GameObject:
   m_ObjectHideFlags: 0
