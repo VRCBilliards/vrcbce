@@ -27,7 +27,7 @@ namespace VRCBilliards
                 return;
             }
 
-            originalOffset = transform.localPosition;
+            originalOffset = transform.position;
             originalParent = transform.parent;
 
             cue = objPrimary.GetComponent<PoolCue>();
@@ -76,10 +76,7 @@ namespace VRCBilliards
 
         public void _Respawn()
         {
-            if (originalOffset != new Vector3())
-            {
-                transform.localPosition = originalOffset;
-            }
+            transform.position = originalOffset;
         }
     }
 }

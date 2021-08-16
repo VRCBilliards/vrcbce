@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: PoolStateManager
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 8fd8455133691274abc9330a3d9d05e0,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 68def5afb169b0b41be5d9ee253758c4,
     type: 2}
   udonAssembly: 
   assemblyError: 
@@ -47,7 +47,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 12
-      Data: 220
+      Data: 222
     - Name: 
       Entry: 7
       Data: 
@@ -13199,13 +13199,129 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: pressE
+      Data: oldDesktopCue
     - Name: $v
       Entry: 7
       Data: 742|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: fieldSymbol
       Entry: 7
       Data: 743|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
+    - Name: internalType
+      Entry: 9
+      Data: 353
+    - Name: declarationType
+      Entry: 3
+      Data: 2
+    - Name: syncMode
+      Entry: 3
+      Data: 0
+    - Name: symbolResolvedTypeName
+      Entry: 1
+      Data: SystemUInt32
+    - Name: symbolOriginalName
+      Entry: 1
+      Data: oldDesktopCue
+    - Name: symbolUniqueName
+      Entry: 1
+      Data: oldDesktopCue
+    - Name: symbolDefaultValue
+      Entry: 6
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: fieldAttributes
+      Entry: 7
+      Data: 744|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: userBehaviourSource
+      Entry: 6
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 
+    - Name: $k
+      Entry: 1
+      Data: newDesktopCue
+    - Name: $v
+      Entry: 7
+      Data: 745|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+    - Name: fieldSymbol
+      Entry: 7
+      Data: 746|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
+    - Name: internalType
+      Entry: 9
+      Data: 353
+    - Name: declarationType
+      Entry: 3
+      Data: 2
+    - Name: syncMode
+      Entry: 3
+      Data: 0
+    - Name: symbolResolvedTypeName
+      Entry: 1
+      Data: SystemUInt32
+    - Name: symbolOriginalName
+      Entry: 1
+      Data: newDesktopCue
+    - Name: symbolUniqueName
+      Entry: 1
+      Data: newDesktopCue
+    - Name: symbolDefaultValue
+      Entry: 6
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: fieldAttributes
+      Entry: 7
+      Data: 747|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: userBehaviourSource
+      Entry: 6
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 
+    - Name: $k
+      Entry: 1
+      Data: pressE
+    - Name: $v
+      Entry: 7
+      Data: 748|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+    - Name: fieldSymbol
+      Entry: 7
+      Data: 749|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
       Data: 94
@@ -13232,14 +13348,14 @@ MonoBehaviour:
       Data: 
     - Name: fieldAttributes
       Entry: 7
-      Data: 744|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
+      Data: 750|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 745|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
+      Data: 751|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
     - Name: tooltip
       Entry: 1
       Data: The object that contains the UI that appears when you can press E to
@@ -13270,10 +13386,10 @@ MonoBehaviour:
       Data: isNearTable
     - Name: $v
       Entry: 7
-      Data: 746|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+      Data: 752|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: fieldSymbol
       Entry: 7
-      Data: 747|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
+      Data: 753|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
       Data: 117
@@ -13300,7 +13416,7 @@ MonoBehaviour:
       Data: 
     - Name: fieldAttributes
       Entry: 7
-      Data: 748|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
+      Data: 754|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
         mscorlib
     - Name: 
       Entry: 12
@@ -13328,10 +13444,10 @@ MonoBehaviour:
       Data: canEnterDesktopTopDownView
     - Name: $v
       Entry: 7
-      Data: 749|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+      Data: 755|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: fieldSymbol
       Entry: 7
-      Data: 750|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
+      Data: 756|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
       Data: 117
@@ -13358,7 +13474,7 @@ MonoBehaviour:
       Data: 
     - Name: fieldAttributes
       Entry: 7
-      Data: 751|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
+      Data: 757|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
         mscorlib
     - Name: 
       Entry: 12
@@ -13386,13 +13502,13 @@ MonoBehaviour:
       Data: numberOfCuesHeldByLocalPlayer
     - Name: $v
       Entry: 7
-      Data: 752|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+      Data: 758|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: fieldSymbol
       Entry: 7
-      Data: 753|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
+      Data: 759|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 7
-      Data: 754|System.RuntimeType, mscorlib
+      Data: 760|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
       Data: System.UInt16, mscorlib
@@ -13422,14 +13538,14 @@ MonoBehaviour:
       Data: 
     - Name: fieldAttributes
       Entry: 7
-      Data: 755|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
+      Data: 761|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 756|UnityEngine.HideInInspector, UnityEngine.CoreModule
+      Data: 762|UnityEngine.HideInInspector, UnityEngine.CoreModule
     - Name: 
       Entry: 8
       Data: 

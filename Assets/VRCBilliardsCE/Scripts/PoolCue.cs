@@ -5,13 +5,12 @@ using VRC.SDKBase;
 
 namespace VRCBilliards
 {
-    [RequireComponent(typeof(SphereCollider))]
     public class PoolCue : UdonSharpBehaviour
     {
         public PoolOtherHand otherHand;
         private Transform targetTransform;
 
-        public Transform cueRespawnPosition;
+        private Vector3 cueRespawnPosition;
 
         public Transform cueParent;
 
@@ -60,6 +59,8 @@ namespace VRCBilliards
         private Vector3 vectorOne = Vector3.one;
         private Vector3 vectorZero = Vector3.zero;
         private Vector3 vectorUp = Vector3.up;
+        private Quaternion upwardsRotation = Quaternion.Euler(-90, 0, 0);
+        private Quaternion startingRotation;
 
         private bool startupCompleted;
 
@@ -74,6 +75,7 @@ namespace VRCBilliards
                 return;
             }
 
+            cueRespawnPosition = transform.position;
             playerApi = Networking.LocalPlayer;
             usingDesktop = !playerApi.IsUserInVR();
 
@@ -107,12 +109,14 @@ namespace VRCBilliards
                 return;
             }
 
+            startingRotation = cueParent.rotation;
+
             _DenyAccess();
 
             startupCompleted = true;
         }
 
-        public void Update()
+        public void LateUpdate()
         {
             if (!startupCompleted)
             {
@@ -136,15 +140,13 @@ namespace VRCBilliards
                 }
                 else
                 {
-                    if (isPickedUp && usingDesktop)
-                    {
-                        var data = playerApi.GetTrackingData(VRCPlayerApi.TrackingDataType.RightHand);
-                        transform.position = data.position;
-                    }
-
                     var lerpPercent = Time.deltaTime * 16.0f;
                     cueParent.position = Vector3.Lerp(cueParent.position, transform.position, lerpPercent);
-                    cueParent.LookAt(Vector3.Lerp(oldTargetPos, targetTransform.position, lerpPercent));
+
+                    if (!usingDesktop)
+                    {
+                        cueParent.LookAt(Vector3.Lerp(oldTargetPos, targetTransform.position, lerpPercent));
+                    }
                 }
 
                 oldTargetPos = targetTransform.position;
@@ -170,6 +172,18 @@ namespace VRCBilliards
 
         public override void OnPickup()
         {
+            if (thisPickup.currentPlayer.playerId == Networking.LocalPlayer.playerId)
+            {
+                // Not sure if this is necessary to do both since we pickup this one, but just to be safe
+                Networking.SetOwner(Networking.LocalPlayer, gameObject);
+                Networking.SetOwner(Networking.LocalPlayer, otherHand.gameObject); // Varneon: One .gameObject is fine during pickup event
+            }
+
+            if (!startupCompleted)
+            {
+                return;
+            }
+
             if (!usingDesktop)    // We dont need other hand to be availible for desktop player
             {
                 targetTransform.localScale = vectorOne;
@@ -178,13 +192,10 @@ namespace VRCBilliards
             {
                 GetComponent<MeshRenderer>().enabled = false;
                 otherHand.GetComponent<MeshRenderer>().enabled = false;
+                cueParent.rotation = upwardsRotation;
             }
 
             targetTransform.localScale = vectorOne; //TODO: This code is defective.
-
-            // Not sure if this is necessary to do both since we pickup this one, but just to be safe
-            Networking.SetOwner(Networking.LocalPlayer, gameObject);
-            Networking.SetOwner(Networking.LocalPlayer, targetTransform.gameObject); // Varneon: One .gameObject is fine during pickup event
             otherHand.isOtherBeingHeld = true;
             targetCollider.enabled = true;
 
@@ -197,14 +208,20 @@ namespace VRCBilliards
 
         public override void OnDrop()
         {
+            if (!startupCompleted)
+            {
+                return;
+            }
+
             ResetTarget();
+            targetPickup.Drop();
 
             if (usingDesktop)
             {
                 GetComponent<MeshRenderer>().enabled = true;
                 otherHand.GetComponent<MeshRenderer>().enabled = true;
                 poolStateManager._OnPutDownCueLocally();
-                Respawn();
+                _Respawn();
             }
 
             poolStateManager._LocalPlayerDroppedCue();
@@ -227,11 +244,6 @@ namespace VRCBilliards
         /// </summary>
         public void _DenyAccess()
         {
-            ResetTarget();
-
-            // Put back on the table
-            Respawn();
-
             ownCollider.enabled = false;
             targetCollider.enabled = false;
 
@@ -243,18 +255,20 @@ namespace VRCBilliards
         /// <summary>
         /// Returns the cue back to the table
         /// </summary>
-        private void Respawn()
+        public void _Respawn()
         {
+            transform.position = cueRespawnPosition;
+            cueParent.position = transform.position;
             otherHand._Respawn();
-            transform.SetPositionAndRotation(cueRespawnPosition.position, cueRespawnPosition.rotation);
 
             if (usingDesktop)
             {
-                poolStateManager._OnPutDownCueLocally();
+                cueParent.rotation = startingRotation;
             }
-
-            cueParent.position = transform.position;
-            cueParent.LookAt(targetTransform.position);
+            else
+            {
+                cueParent.LookAt(targetTransform.position);
+            }
         }
 
         private void ResetTarget()

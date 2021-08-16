@@ -543,6 +543,8 @@ namespace VRCBilliards
         private string timerOutputFormat;
         private UnityEngine.UI.Image timerCountdown;
 
+        private UInt32 oldDesktopCue;
+        private UInt32 newDesktopCue;
 
         public void Start()
         {
@@ -2504,6 +2506,9 @@ namespace VRCBilliards
             );
 
             poolMenu._EnableMainMenu();
+
+            poolCues[0]._Respawn();
+            poolCues[1]._Respawn();
         }
 
         private void OnRemoteTurnChange()
@@ -3435,6 +3440,12 @@ namespace VRCBilliards
             poolCues[1].localPlayerIsInDesktopTopDownView = false;
 
             Networking.LocalPlayer.Immobilize(false);
+
+            if (isGameModePractice)
+            {
+                poolCues[0]._Respawn();
+                poolCues[1]._Respawn();
+            }
         }
 
         // TODO: Single use function, but it short-circuits so cannot be easily put into its using function.
@@ -3464,7 +3475,14 @@ namespace VRCBilliards
                 Vector3 ncursor = deskTopCursor;
                 ncursor.y = 0.0f;
                 Vector3 delta = ncursor - currentBallPositions[0];
-                GameObject cue = desktopCueParents[Convert.ToUInt32(newIsTeam2Turn)];
+                newDesktopCue = Convert.ToUInt32(newIsTeam2Turn);
+                GameObject cue = desktopCueParents[newDesktopCue];
+
+                if (isGameModePractice && newDesktopCue != oldDesktopCue)
+                {
+                    poolCues[oldDesktopCue]._Respawn();
+                    oldDesktopCue = newDesktopCue;
+                }
 
                 if (Input.GetButton("Fire1"))
                 {
