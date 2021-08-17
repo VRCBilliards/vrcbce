@@ -1,34 +1,80 @@
 fileFormatVersion: 2
 guid: f32bdb482be829146b6d7fe31dbf7bba
 ModelImporter:
-  serializedVersion: 23
-  fileIDToRecycleName:
-    100000: //RootNode
-    100002: score
-    100004: table
-    100006: 4ball_fillers
-    400000: //RootNode
-    400002: score
-    400004: table
-    400006: 4ball_fillers
-    2100000: No Name
-    2100002: table
-    2300000: //RootNode
-    2300002: score
-    2300004: table
-    2300006: 4ball_fillers
-    3300000: //RootNode
-    3300002: score
-    3300004: table
-    3300006: 4ball_fillers
-    4300000: Plane
-    4300002: Plane.022
-    4300004: table
-    4300006: score
-    4300008: 4ball_fillers
+  serializedVersion: 19301
+  internalIDToNameTable:
+  - first:
+      1: 100000
+    second: //RootNode
+  - first:
+      1: 100002
+    second: score
+  - first:
+      1: 100004
+    second: table
+  - first:
+      1: 100006
+    second: 4ball_fillers
+  - first:
+      4: 400000
+    second: //RootNode
+  - first:
+      4: 400002
+    second: score
+  - first:
+      4: 400004
+    second: table
+  - first:
+      4: 400006
+    second: 4ball_fillers
+  - first:
+      21: 2100000
+    second: No Name
+  - first:
+      21: 2100002
+    second: table
+  - first:
+      23: 2300000
+    second: //RootNode
+  - first:
+      23: 2300002
+    second: score
+  - first:
+      23: 2300004
+    second: table
+  - first:
+      23: 2300006
+    second: 4ball_fillers
+  - first:
+      33: 3300000
+    second: //RootNode
+  - first:
+      33: 3300002
+    second: score
+  - first:
+      33: 3300004
+    second: table
+  - first:
+      33: 3300006
+    second: 4ball_fillers
+  - first:
+      43: 4300000
+    second: Plane
+  - first:
+      43: 4300002
+    second: Plane.022
+  - first:
+      43: 4300004
+    second: table
+  - first:
+      43: 4300006
+    second: score
+  - first:
+      43: 4300008
+    second: 4ball_fillers
   externalObjects: {}
   materials:
-    importMaterials: 0
+    materialImportMode: 0
     materialName: 0
     materialSearch: 1
     materialLocation: 1
@@ -62,37 +108,40 @@ ModelImporter:
     meshCompression: 0
     addColliders: 0
     useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
     importVisibility: 1
     importBlendShapes: 1
-    importCameras: 1
-    importLights: 1
+    importCameras: 0
+    importLights: 0
+    fileIdsGeneration: 1
     swapUVChannels: 0
-    generateSecondaryUV: 1
+    generateSecondaryUV: 0
     useFileUnits: 1
-    optimizeMeshForGPU: 1
     keepQuads: 0
     weldVertices: 1
     preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    meshOptimizationFlags: -1
     indexFormat: 0
     secondaryUVAngleDistortion: 17
     secondaryUVAreaDistortion: 26
     secondaryUVHardAngle: 131
     secondaryUVPackMargin: 4
     useFileScale: 1
-    previousCalculatedGlobalScale: 1
-    hasPreviousCalculatedGlobalScale: 0
   tangentSpace:
     normalSmoothAngle: 113
     normalImportMode: 0
-    tangentImportMode: 3
+    tangentImportMode: 2
     normalCalculationMode: 4
     legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
-    blendShapeNormalImportMode: 1
+    blendShapeNormalImportMode: 2
     normalSmoothingSource: 0
-  importAnimation: 1
-  copyAvatar: 0
+  referencedClips: []
+  importAnimation: 0
   humanDescription:
-    serializedVersion: 2
+    serializedVersion: 3
     human: []
     skeleton: []
     armTwist: 0.5
@@ -102,13 +151,16 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
+    globalScale: 1
     rootMotionBoneName: 
     hasTranslationDoF: 0
     hasExtraRoot: 0
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
+  autoGenerateAvatarMappingIfUnspecified: 1
   animationType: 0
   humanoidOversampling: 1
+  avatarSetup: 0
   additionalBone: 0
   userData: 
   assetBundleName: 
