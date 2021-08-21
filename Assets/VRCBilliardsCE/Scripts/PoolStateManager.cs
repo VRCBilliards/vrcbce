@@ -694,10 +694,6 @@ namespace VRCBilliards
             if (enableUdonChips)
             {
                 udonChips = (UdonBehaviour)GameObject.Find("UdonChips").GetComponent(typeof(UdonBehaviour));
-                if (udonChips == null && logger)
-                {
-                    logger.Error(name, "UdonChips enabled but we could not find the UdonChips object. It needs to be called 'UdonChips'.");
-                }
             }
 
             timerText = poolMenu.visibleTimerDuringGame;
