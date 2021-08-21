@@ -524,17 +524,17 @@ namespace VRCBilliards
         public bool enableUdonChips = false;
 
         [Tooltip("The base cost of a game in UC.")]
-        public float price = 150.0f;
+        public float price = 100.0f;
 
         [Tooltip(
             "Allow for a player to add more UC to their total entry cost. If the player wins, they get a bigger reward.")]
         public bool allowRaising = true;
 
         [Tooltip("The basic prize a player gets for winning versus an opponent.")]
-        public float prize = 300.0f;
+        public float prize = 200.0f;
 
         [Tooltip("The reward a player gets for beating themselves at pool.")]
-        public float singlePlayPrize = 200.0f;
+        public float singlePlayPrize = 150.0f;
 
         [Tooltip("An optional sound clip to play when someone pays to play.")]
         public AudioClip paySound;
