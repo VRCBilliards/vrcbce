@@ -19,8 +19,8 @@ MonoBehaviour:
   m_SourceFontFileGUID: aef422a30b8aad04cbb24604f60dde7c
   m_SourceFontFile_EditorRef: {fileID: 12800000, guid: aef422a30b8aad04cbb24604f60dde7c,
     type: 3}
-  m_SourceFontFile: {fileID: 12800000, guid: aef422a30b8aad04cbb24604f60dde7c, type: 3}
-  m_AtlasPopulationMode: 1
+  m_SourceFontFile: {fileID: 0}
+  m_AtlasPopulationMode: 0
   m_FaceInfo:
     m_FaceIndex: 0
     m_FamilyName: Source Han Sans JP
@@ -5096,7 +5096,7 @@ Texture2D:
   m_CompleteImageSize: 1048576
   m_TextureFormat: 1
   m_MipCount: 1
-  m_IsReadable: 1
+  m_IsReadable: 0
   m_IgnoreMasterTextureLimit: 0
   m_IsPreProcessed: 0
   m_StreamingMipmaps: 0
