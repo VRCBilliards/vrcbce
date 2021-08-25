@@ -288,6 +288,31 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 8854834282281994078}
     m_Modifications:
+    - target: {fileID: 3492924435537722065, guid: ee9f4e835544408469fb94985a04b320,
+        type: 3}
+      propertyPath: m_Color.a
+      value: 0.9019608
+      objectReference: {fileID: 0}
+    - target: {fileID: 3492924435834431084, guid: ee9f4e835544408469fb94985a04b320,
+        type: 3}
+      propertyPath: m_Color.a
+      value: 0.9019608
+      objectReference: {fileID: 0}
+    - target: {fileID: 3492924435880690331, guid: ee9f4e835544408469fb94985a04b320,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.0601
+      objectReference: {fileID: 0}
+    - target: {fileID: 3492924435880690331, guid: ee9f4e835544408469fb94985a04b320,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.0122
+      objectReference: {fileID: 0}
+    - target: {fileID: 3492924436264105408, guid: ee9f4e835544408469fb94985a04b320,
+        type: 3}
+      propertyPath: m_Color.a
+      value: 0.9019608
+      objectReference: {fileID: 0}
     - target: {fileID: 3492924436368285980, guid: ee9f4e835544408469fb94985a04b320,
         type: 3}
       propertyPath: m_RootOrder
@@ -363,6 +388,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: VRCBCE Menu (M.O.O.N)
       objectReference: {fileID: 0}
+    - target: {fileID: 3492924436491926404, guid: ee9f4e835544408469fb94985a04b320,
+        type: 3}
+      propertyPath: m_Color.a
+      value: 0.9019608
+      objectReference: {fileID: 0}
     - target: {fileID: 3492924436653712648, guid: ee9f4e835544408469fb94985a04b320,
         type: 3}
       propertyPath: m_fontColor.b
@@ -388,6 +418,16 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -0.0231
       objectReference: {fileID: 0}
+    - target: {fileID: 3492924437037904714, guid: ee9f4e835544408469fb94985a04b320,
+        type: 3}
+      propertyPath: m_Color.a
+      value: 0.9019608
+      objectReference: {fileID: 0}
+    - target: {fileID: 3492924437224115606, guid: ee9f4e835544408469fb94985a04b320,
+        type: 3}
+      propertyPath: m_Color.a
+      value: 0.9019608
+      objectReference: {fileID: 0}
     - target: {fileID: 3492924437292106802, guid: ee9f4e835544408469fb94985a04b320,
         type: 3}
       propertyPath: m_LocalPosition.z
@@ -402,6 +442,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5554447489202010689, guid: ee9f4e835544408469fb94985a04b320,
+        type: 3}
+      propertyPath: m_Color.a
+      value: 0.9019608
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ee9f4e835544408469fb94985a04b320, type: 3}
