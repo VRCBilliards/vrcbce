@@ -361,6 +361,16 @@ PrefabInstance:
       propertyPath: m_Name
       value: VRCBCE (Metal)
       objectReference: {fileID: 0}
+    - target: {fileID: 3805221874242128667, guid: 886d4d3eda11f744481df3dc87c99269,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 98c4d478d23d9fb48a38ad294bd0314a, type: 2}
+    - target: {fileID: 3805221875202885321, guid: 886d4d3eda11f744481df3dc87c99269,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: abb5237591d332742951a51bd06dcfd7, type: 2}
     - target: {fileID: 8658868485224426084, guid: 886d4d3eda11f744481df3dc87c99269,
         type: 3}
       propertyPath: m_AnchorMax.x
