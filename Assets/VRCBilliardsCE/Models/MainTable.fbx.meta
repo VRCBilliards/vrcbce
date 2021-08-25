@@ -1,44 +1,41 @@
 fileFormatVersion: 2
-guid: 3958350f57428fe40b32e25e611e714a
+guid: f32bdb482be829146b6d7fe31dbf7bba
 ModelImporter:
   serializedVersion: 19301
   internalIDToNameTable:
   - first:
       1: 100000
-    second: 4ballFiller
+    second: //RootNode
   - first:
       1: 100002
-    second: //RootNode
+    second: score
   - first:
       1: 100004
-    second: score
+    second: table
   - first:
       1: 100006
-    second: table
+    second: 4ball_fillers
   - first:
       4: 400000
-    second: 4ballFiller
-  - first:
-      4: 400002
     second: //RootNode
   - first:
-      4: 400004
+      4: 400002
     second: score
   - first:
-      4: 400006
+      4: 400004
     second: table
   - first:
+      4: 400006
+    second: 4ball_fillers
+  - first:
       21: 2100000
-    second: m_Table
-  - first:
-      21: 2100002
-    second: m_Glass
-  - first:
-      21: 2100004
     second: No Name
   - first:
+      21: 2100002
+    second: table
+  - first:
       23: 2300000
-    second: 4ballFiller
+    second: //RootNode
   - first:
       23: 2300002
     second: score
@@ -46,8 +43,11 @@ ModelImporter:
       23: 2300004
     second: table
   - first:
+      23: 2300006
+    second: 4ball_fillers
+  - first:
       33: 3300000
-    second: 4ballFiller
+    second: //RootNode
   - first:
       33: 3300002
     second: score
@@ -55,30 +55,29 @@ ModelImporter:
       33: 3300004
     second: table
   - first:
+      33: 3300006
+    second: 4ball_fillers
+  - first:
       43: 4300000
-    second: table
+    second: Plane
   - first:
       43: 4300002
-    second: score
+    second: Plane.022
   - first:
       43: 4300004
-    second: 4ballFiller
+    second: table
+  - first:
+      43: 4300006
+    second: score
+  - first:
+      43: 4300008
+    second: 4ball_fillers
   externalObjects:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: No Name
-    second: {fileID: 2100000, guid: 939b9bb5b7a7cef439e03f4e72d8b0f0, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: m_Glass
-    second: {fileID: 2100000, guid: dbb7c9e6147d4a941ba651282914ca8e, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: m_Table
-    second: {fileID: 2100000, guid: aa73bb4f93476264f9a7a66d506f72e5, type: 2}
+      name: table
+    second: {fileID: 2100000, guid: 3ed95f4ea8efe0842b61892a88772ae3, type: 2}
   materials:
     materialImportMode: 1
     materialName: 0
@@ -104,7 +103,8 @@ ModelImporter:
     animationScaleError: 0.5
     animationWrapMode: 0
     extraExposedTransformPaths: []
-    extraUserProperties: []
+    extraUserProperties:
+    - '#BAKERY{"meshName":["table"],"padding":[256],"unwrapper":[0]}'
     clipAnimations: []
     isReadable: 1
   meshes:
@@ -120,7 +120,7 @@ ModelImporter:
     importLights: 0
     fileIdsGeneration: 1
     swapUVChannels: 0
-    generateSecondaryUV: 1
+    generateSecondaryUV: 0
     useFileUnits: 1
     keepQuads: 0
     weldVertices: 1
@@ -130,21 +130,21 @@ ModelImporter:
     minBoneWeight: 0.001
     meshOptimizationFlags: -1
     indexFormat: 0
-    secondaryUVAngleDistortion: 8
-    secondaryUVAreaDistortion: 15.000001
-    secondaryUVHardAngle: 88
+    secondaryUVAngleDistortion: 17
+    secondaryUVAreaDistortion: 26
+    secondaryUVHardAngle: 131
     secondaryUVPackMargin: 4
     useFileScale: 1
   tangentSpace:
-    normalSmoothAngle: 60
+    normalSmoothAngle: 113
     normalImportMode: 0
-    tangentImportMode: 3
+    tangentImportMode: 2
     normalCalculationMode: 4
     legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
     blendShapeNormalImportMode: 2
     normalSmoothingSource: 0
   referencedClips: []
-  importAnimation: 1
+  importAnimation: 0
   humanDescription:
     serializedVersion: 3
     human: []
