@@ -229,7 +229,7 @@ namespace VRCBilliards
         [Header("Materials")] public MeshRenderer[] ballRenderers;
 
         public MeshRenderer tableRenderer;
-        private Material tableMaterial;
+        private Material[] tableMaterials;
 
         public Texture[] sets;
 
@@ -598,7 +598,7 @@ namespace VRCBilliards
             tableReflection = null;
 #endif
 
-            tableMaterial = tableRenderer.material;
+            tableMaterials = tableRenderer.materials;
             baseObjectRot = baseObject.transform.rotation;
 
             ballRigidbodies = new Rigidbody[ballTransforms.Length];
@@ -1000,7 +1000,9 @@ namespace VRCBilliards
                 timerCountdown.fillAmount = 0f;
             }
 
-            tableMaterial.SetColor(uniformTableColour, tableCurrentColour);
+            foreach (Material tableMaterial in tableMaterials){
+                tableMaterial.SetColor(uniformTableColour, tableCurrentColour);
+            }
 
             // Run the intro animation.
             if (introAminTimer > 0.0f)
@@ -2736,7 +2738,7 @@ namespace VRCBilliards
                 pointerClothColour = fabricGray;
             }
 
-            tableMaterial.SetColor("_ClothColour", pointerClothColour);
+            tableRenderer.material.SetColor("_ClothColour", pointerClothColour);
 
             if (tableReflection)
             {
