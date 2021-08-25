@@ -19,23 +19,26 @@ This prefab has no limitations in terms of its use. It can be:
 
 It's also 100% free to modify, re-use and re-distribute. Make it your own!
 
-If you'd like to get in touch with the repo maintainer:
+If you'd like to get in touch with the repo maintainers:
 
-@FairlySadPanda on Twitter
+[@FairlySadPanda](https://twitter.com/FairlySadPanda) on Twitter,
 FairlySadPanda#9528 on Discord
+
+[@Metamensa](https://twitter.com/Metamensa) on Twitter,
+Metamaniac#3582 on Discord
 
 # Installation
 
 Requirements:
 
 1. A project with the latest VRChat SDK3 Release installed in it
-2. The project also has the latest UdonSharp (https://github.com/MerlinVR/UdonSharp)
+2. The project also has the latest [UdonSharp](https://github.com/MerlinVR/UdonSharp)
 3. The project also has TextMeshPro installed in it.
 
 Recommended:
 
-1. CyanEmu for emulating locally (https://github.com/CyanLaser/CyanEmu)
-2. VRWorldToolkit for general world development assistance (https://github.com/oneVR/VRWorldToolkit)
+1. [CyanEmu](https://github.com/CyanLaser/CyanEmu) for emulating locally
+2. [VRWorldToolkit](https://github.com/oneVR/VRWorldToolkit) for general world development assistance
 
 Installation Steps:
 
@@ -46,24 +49,24 @@ Installation Steps:
 
 # Getting Support
 
-Unless it's urgent, please don't DM VRCBCE contributers asking for help!
+Unless it's urgent, please don't DM VRCBCE contributors asking for help!
 
-The best way to get support is to create an Issue. You'll need a Github account for this, which takes less than a minute to set up.
+The best way to get support is to create an Issue. You'll need a GitHub account for this, which takes less than a minute to set up.
 
 Afterwards, click Issues at the top of this page:
-  
+
 ![image](https://user-images.githubusercontent.com/732532/127752254-37061d3a-c13e-4de7-9212-792e17fe6472.png)
 
 Then click Create Issue.
-  
+
 ![image](https://user-images.githubusercontent.com/732532/127752268-c46fca03-72cf-4712-96b9-24e47764d791.png)
 
 Afterwards, add your bug report or issue into the box and click Submit New Issue.
-  
+
 ![image](https://user-images.githubusercontent.com/732532/127752457-03751bba-df2b-48f0-a220-a9cd699d9974.png)
 
-DMing a contributor might get you a faster response, but writing an issue means that all contriutors can see the issue, bugs can be tracked and referenced, and overall it's a lot easier to fix things!
-  
+DMing a contributor might get you a faster response, but writing an issue means that all contributors can see the issue, bugs can be tracked and referenced, and overall it's a lot easier to fix things!
+
 # Known Unity-Related Bugs
 
 Problem: The prefab has giant text!
@@ -82,8 +85,8 @@ We encourage anyone to have a go modifying this prefab!
 
 # Note on Pull Requests to this repo
 
-The code in this project is written to look like normal Unity/C# code. C# has several standards (and teams tend to set their own) but for reference, refer to the Unity documentation, Unity example scripts, and Microsoft's best practice [https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/inside-a-program/coding-conventions](here).
-  
+The code in this project is written to look like normal Unity/C# code. C# has several standards (and teams tend to set their own) but for reference, refer to the Unity documentation, Unity example scripts, and [Microsoft's best practice guidelines](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/inside-a-program/coding-conventions).
+
   Generally: 
   - Put variables at the top of the behaviour.
   - Avoid using underscore ahead of properties and methods unless it's a public method that needs to be non-RPCable for security reasons (an Udon-specific use of the underscore).
@@ -92,20 +95,41 @@ The code in this project is written to look like normal Unity/C# code. C# has se
 # Original Creator
 
 The original creator of this prefab was Harry_T. Harry_T did (unsuccessfully) attempt to DMCA this repo off of Github, but didn't realize that they were releasing the exact same assets on their own Github as public domain. They are currently MIA after nuking their Github/Twitter. Despite this, it's only fair to cite them as the original source, and pay credit to the impressive bit of physics code that drives this entire prefab. They also made a small contribution directly to this repo.
-  
+
 # UdonChips Integration
-  
+
 With 1.2.1, VRCBCE supports [UdonChips](https://lura.booth.pm/items/3060394)!
 
 To enable UdonChips support, you need to do two things:
-  
+
   1. Have the UdonChips UdonBehaviour in the project, with the object it's on called "UdonChips".
   2. Tick the "Enable UdonChips" option on your pool table's VRCBilliards object.
-  
+
 The VRCBilliards object, which contains the core PoolStateManager script, contains a number of options. At the moment, the following is supported:
-  
+
   1. Paying UC to join a game of pool.
   2. If Allow Raising is enabled, you can pay to join multiple times - the more you pay in, the more the table can pay out!
   3. You can also earn UC for winning versus yourself.
   4. All costs and rewards are modifiable via the PoolStateManager script.
   5. The exact message to display on each join button is customizable in the PoolMenu script.
+
+# Credits
+🐼 FairlySadPanda - Maintainer, Lead Programmer, Networking, Refactoring
+
+😺 Table - Maintainer, Designer, Optimization, General polish
+
+✨ esnya - UI, UdonChips implementation, misc. fixes
+
+🌙 M.O.O.N - UI
+
+🌳 Ivylistar - Metal Table
+
+🚗 Varneon - Optimization
+
+🧙‍♂️ Xiexe - Original Forker, Early refactor work
+
+🧙‍♀️ Silent - [Filamented](https://gitlab.com/s-ilent/filamented)
+
+💻 Vowgan & Legoman99573 - Misc. commits
+
+harry_t - Original Prefab, Physics code
