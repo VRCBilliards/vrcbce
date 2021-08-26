@@ -26,7 +26,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3096588051897554758}
   m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 1.1803, y: 0.8225, z: 0.45}
+  m_LocalPosition: {x: 1.1803, y: 0.8225, z: 0.5116}
   m_LocalScale: {x: 0.125, y: 0.125, z: 0.125}
   m_Children:
   - {fileID: 2016665054841202153}
@@ -70,7 +70,7 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 2, y: 1, z: 0.5}
+  m_Size: {x: 1.5, y: 1, z: 0.5}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &7727709638564069736
 GameObject:
@@ -176,7 +176,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Toggle UI
+  m_text: 'Toggle
+
+    UI'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9a3b1e8a8dbce9c40858b1d009683eca, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: 118df4b120f215c4996b462a42a51283, type: 2}
@@ -288,6 +290,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 8854834282281994078}
     m_Modifications:
+    - target: {fileID: 992202117206350037, guid: ee9f4e835544408469fb94985a04b320,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 1.172
+      objectReference: {fileID: 0}
+    - target: {fileID: 992202117206350037, guid: ee9f4e835544408469fb94985a04b320,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0.016
+      objectReference: {fileID: 0}
     - target: {fileID: 3492924435537722065, guid: ee9f4e835544408469fb94985a04b320,
         type: 3}
       propertyPath: m_Color.a
@@ -416,7 +428,7 @@ PrefabInstance:
     - target: {fileID: 3492924436889124330, guid: ee9f4e835544408469fb94985a04b320,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -0.0231
+      value: 0.015999991
       objectReference: {fileID: 0}
     - target: {fileID: 3492924437037904714, guid: ee9f4e835544408469fb94985a04b320,
         type: 3}
@@ -442,6 +454,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5433868121936968853, guid: ee9f4e835544408469fb94985a04b320,
+        type: 3}
+      propertyPath: m_Color.a
+      value: 0.9019608
       objectReference: {fileID: 0}
     - target: {fileID: 5554447489202010689, guid: ee9f4e835544408469fb94985a04b320,
         type: 3}
