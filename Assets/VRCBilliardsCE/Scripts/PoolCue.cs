@@ -67,6 +67,8 @@ namespace VRCBilliards
         [HideInInspector]
         public bool tableIsActive;
 
+        private VRCPlayerApi lastPlayerHeld;
+
         public void Start()
         {
             if (Networking.LocalPlayer == null)
@@ -138,15 +140,24 @@ namespace VRCBilliards
                     // Pull the cue backwards or forwards on the locked cue's line based on how far away the locking cue handle has been moved since locking.
                     cueParent.position = positionAtStartOfArming + (normalizedLineOfCueWhenArmed * Vector3.Dot(offsetBetweenArmedPositions, normalizedLineOfCueWhenArmed));
                 }
-                else
+                else if(thisPickup.currentPlayer != null)
                 {
                     var lerpPercent = Time.deltaTime * 16.0f;
                     cueParent.position = Vector3.Lerp(cueParent.position, transform.position, lerpPercent);
 
-                    if (!usingDesktop)
+                    if (thisPickup.currentPlayer.IsUserInVR())
                     {
                         cueParent.LookAt(Vector3.Lerp(oldTargetPos, targetTransform.position, lerpPercent));
                     }
+                    else
+                    {
+                        cueParent.rotation = upwardsRotation;
+                    }
+                }
+                else
+                {
+                    cueParent.position = transform.position;
+                    cueParent.LookAt(targetTransform.position);
                 }
 
                 oldTargetPos = targetTransform.position;
@@ -172,6 +183,8 @@ namespace VRCBilliards
 
         public override void OnPickup()
         {
+            lastPlayerHeld = thisPickup.currentPlayer;
+
             if (thisPickup.currentPlayer.playerId == Networking.LocalPlayer.playerId)
             {
                 // Not sure if this is necessary to do both since we pickup this one, but just to be safe
@@ -184,7 +197,7 @@ namespace VRCBilliards
                 return;
             }
 
-            if (!usingDesktop)    // We dont need other hand to be availible for desktop player
+            if (thisPickup.currentPlayer.IsUserInVR())    // We dont need other hand to be availible for desktop player
             {
                 targetTransform.localScale = vectorOne;
             }
@@ -192,7 +205,6 @@ namespace VRCBilliards
             {
                 GetComponent<MeshRenderer>().enabled = false;
                 otherHand.GetComponent<MeshRenderer>().enabled = false;
-                cueParent.rotation = upwardsRotation;
             }
 
             targetTransform.localScale = vectorOne; //TODO: This code is defective.
@@ -221,6 +233,11 @@ namespace VRCBilliards
                 GetComponent<MeshRenderer>().enabled = true;
                 otherHand.GetComponent<MeshRenderer>().enabled = true;
                 poolStateManager._OnPutDownCueLocally();
+            }
+
+            // We rotate the cue rather than make it track the offhand pickup when in Desktop. 
+            if (!lastPlayerHeld.IsUserInVR())
+            {
                 _Respawn();
             }
 
