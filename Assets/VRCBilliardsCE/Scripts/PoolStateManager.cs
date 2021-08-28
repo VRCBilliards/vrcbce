@@ -10,26 +10,29 @@ using VRC.Udon;
 namespace VRCBilliards
 {
     /// <summary>
-    /// Main Behaviour for the VRCBilliards 8Ball variant.
+    /// Main Behaviour for VRCBilliards: Community Edition. This is a giant class. Here be dragons.
     /// </summary>
     [RequireComponent(typeof(AudioSource))]
     public class PoolStateManager : UdonSharpBehaviour
     {
         /*
+            ORDERING RULES (as their naming convention)
+            PUBLIC_CONSTS
+            PRIVATE_CONSTS
+            publicVariables
+            privateVariables
+        */
+        
+        #region Constants
+
+        /*
          * Constants
          */
 
-#if UNITY_ANDROID
         /// <summary>
-        /// Maximum steps/frame ( 5ish )
-        /// </summary>
-    const float MAX_DELTA = 0.075f;
-#else
-        /// <summary>
-        /// Maximum steps/frame ( 8 )
+        /// Maximum steps/frame (8). Note: for Android this was originally designed to be replaced with a value of 0.075.
         /// </summary>
         private const float MAX_DELTA = 0.1f;
-#endif
 
         // Physics calculation constants (measurements are in meters)
 
@@ -37,8 +40,7 @@ namespace VRCBilliards
         /// time step in seconds per iteration
         /// </summary>
         private const float FIXED_TIME_STEP = 0.0125f;
-
-        //private const float FIXED_TIME_STEP = 0.005f;
+        
         /// <summary>
         /// horizontal span of table
         /// </summary>
@@ -124,31 +126,42 @@ namespace VRCBilliards
         /// <summary>
         /// Rack position on Y axis
         /// </summary>
-        private const float RACHEIGHT = -0.0702f;
+        private const float RACK_HEIGHT = -0.0702f;
 
         /// <summary>
         /// Vectors cannot be const.
         /// </summary>
+        // ReSharper disable once InconsistentNaming
         private Vector3 CONTACT_POINT = new Vector3(0.0f, -0.03f, 0.0f);
 
-        private const float SINA = 0.28078832987f;
-        private const float COSA = 0.95976971915f;
+        private const float SIN_A = 0.28078832987f;
+        private const float COS_A = 0.95976971915f;
         private const float F = 1.72909790282f;
 
-        private const float desktopCursorSpeed = 0.035f;
+        private const float DESKTOP_CURSOR_SPEED = 0.035f;
 
         private const float DEFAULT_FORCE_MULTIPLIER = 1.5f;
-        private float forceMultiplier;
 
         private Vector3 vectorZero = Vector3.zero;
         private Quaternion quaternionIdentity = Quaternion.identity;
+
+        /// <summary>
+        /// Number of simulated balls in the table's domain.
+        /// </summary>
+        private const int NUMBER_OF_SIMULATED_BALLS = 16;
+        
+        #endregion
 
         /*
          * Public Variables
          */
 
         [Header("Other VRCBilliards Components")]
+        [Tooltip("Does the table model for this table have rails that guide the ball when the ball sinks?")]
+        public bool tableModelHasRails;
+        
         public GameObject baseObject;
+        public Transform sunkBallsPositionRoot;
 
         public PoolMenu poolMenu;
         public GameObject shadows;
@@ -219,7 +232,7 @@ namespace VRCBilliards
         public GameObject marker;
         private Material markerMaterial;
         public GameObject marker9ball;
-        public GameObject tableCollisionParent;
+        //public GameObject tableCollisionParent;
         public GameObject pocketBlockers;
         public GameObject point4Ball;
         private Transform point4BallTransform;
@@ -290,9 +303,6 @@ namespace VRCBilliards
         //public GameObject desktopQuad;
         public GameObject[] desktopCueParents;
         public GameObject desktopOverlayPower;
-        public GameObject desktopEPopup;
-
-        [Header("Networking Stuff")] public GameObject[] playerSlotOwners;
 
         [Header("UI Stuff")]
         //public Text[] lobbyNames;
@@ -309,6 +319,11 @@ namespace VRCBilliards
         /// 18:0 (0xffff)	Each bit represents each ball, if it has been pocketed or not
         /// </summary>
         [UdonSynced] private uint ballPocketedState;
+
+        /// <summary>
+        ///  Tracks if each ball is pocketed. Easier to read than a bit array.
+        /// </summary>
+        [UdonSynced] private bool[] ballsArePocketed;
 
         /// <summary>
         /// 19:1 (0x02)		Whos turn is it, 0 or 1
@@ -429,11 +444,9 @@ namespace VRCBilliards
         /// </summary>
         private bool playerIsTeam2;
 
-        [UdonSynced] private Vector3[] currentBallPositions = new Vector3[16];
-
-        [UdonSynced] private Vector3[] currentBallVelocities = new Vector3[16];
-
-        [UdonSynced] private Vector3[] currentAngularVelocities = new Vector3[16];
+        [UdonSynced] private Vector3[] currentBallPositions = new Vector3[NUMBER_OF_SIMULATED_BALLS];
+        [UdonSynced] private Vector3[] currentBallVelocities = new Vector3[NUMBER_OF_SIMULATED_BALLS];
+        [UdonSynced] private Vector3[] currentAngularVelocities = new Vector3[NUMBER_OF_SIMULATED_BALLS];
 
         /// <summary>
         /// Runtime target colour
@@ -472,7 +485,7 @@ namespace VRCBilliards
         private float desktopClampX = TABLE_WIDTH;
         private float desktopClampY = TABLE_HEIGHT;
         private bool isDesktopLocalTurn;
-        private bool isEntertingDesktopModeThisFrame;
+        private bool isEnteringDesktopModeThisFrame;
 
         /// <summary>
         /// Cue input tracking
@@ -516,8 +529,28 @@ namespace VRCBilliards
         private Transform markerTransform;
 
         private Camera desktopCamera;
+        
+        /// <summary>
+        /// A value intended to accomodate for resized tables, to make them possible to use without using an avatar with
+        /// an equivalent height.
+        /// </summary>
+        private float forceMultiplier;
+        
+        private TMPro.TextMeshProUGUI timerText;
+        private string timerOutputFormat;
+        private UnityEngine.UI.Image timerCountdown;
+
+        private UInt32 oldDesktopCue;
+        private UInt32 newDesktopCue;
+
+        /// <summary>
+        /// Have we run a network sync once? Used for situations where we need to specifically catch up a late-joiner.
+        /// </summary>
+        private bool hasRunSyncOnce;
 
         #region UdonChipsVariables
+        // We are breaking our normal Java-like ordering rules here. UdonChips is a layer on top of regular VRCBCE code,
+        // and we want the ability to contain it easily. A region is the best way of handling this.
 
         [Header("UdonChips")]
         [Tooltip("Enable this to integrate with UdonChips.")]
@@ -570,13 +603,6 @@ namespace VRCBilliards
         private bool hasPaidToSignUp;
 
         #endregion
-
-        private TMPro.TextMeshProUGUI timerText;
-        private string timerOutputFormat;
-        private UnityEngine.UI.Image timerCountdown;
-
-        private UInt32 oldDesktopCue;
-        private UInt32 newDesktopCue;
 
         public void Start()
         {
@@ -817,7 +843,7 @@ namespace VRCBilliards
 
             // Update rendering objects positions
             uint ballBit = 0x1u;
-            for (int i = 0; i < 16; i++)
+            for (int i = 0; i < NUMBER_OF_SIMULATED_BALLS; i++)
             {
                 if ((ballBit & ballPocketedState) == 0x0u)
                 {
@@ -1041,7 +1067,7 @@ namespace VRCBilliards
                 Color c = r.material.color;
                 r.material.color = new Color(c.r, c.g, c.b, aitime);
 
-                for (int i = 1; i < 16; i++)
+                for (int i = 1; i < NUMBER_OF_SIMULATED_BALLS; i++)
                 {
                     ball = ballTransforms[i];
 
@@ -1628,7 +1654,7 @@ namespace VRCBilliards
             }
 
             isInDesktopTopDownView = true;
-            isEntertingDesktopModeThisFrame = true;
+            isEnteringDesktopModeThisFrame = true;
 
             if (desktopBase)
             {
@@ -1675,7 +1701,7 @@ namespace VRCBilliards
             }
 
             // Run main simulation / inter-ball collision
-            for (int i = 1; i < 16; i++)
+            for (int i = 1; i < NUMBER_OF_SIMULATED_BALLS; i++)
             {
                 ballBit <<= 1;
 
@@ -1722,7 +1748,7 @@ namespace VRCBilliards
             ballBit = 0x1U;
 
             // Run edge collision
-            for (int index = 0; index < 16; index++)
+            for (int index = 0; index < NUMBER_OF_SIMULATED_BALLS; index++)
             {
                 if ((ballBit & ballPocketedState) == 0U)
                 {
@@ -1815,7 +1841,7 @@ namespace VRCBilliards
             ballBit = 0x1U;
 
             // Run triggers
-            for (int i = 0; i < 16; i++)
+            for (int i = 0; i < NUMBER_OF_SIMULATED_BALLS; i++)
             {
                 if ((ballBit & ballPocketedState) == 0U)
                 {
@@ -1835,7 +1861,7 @@ namespace VRCBilliards
                         uint total = 0U;
 
                         // Get total for X positioning
-                        int count_extent = isNineBall ? 10 : 16;
+                        int count_extent = isNineBall ? 10 : NUMBER_OF_SIMULATED_BALLS;
                         for (int j = 1; j < count_extent; j++)
                         {
                             total += (ballPocketedState >> j) & 0x1U;
@@ -2228,25 +2254,27 @@ namespace VRCBilliards
                     PayBack(TotalPrice);
                 }
 
+                hasRunSyncOnce = true;
+
                 return;
             }
 
             // Effects colliders need to be turned off when not simulating
             // to improve pickups being glitchy
-            if (gameIsSimulating)
-            {
-                if (tableCollisionParent)
-                {
-                    tableCollisionParent.SetActive(true);
-                }
-            }
-            else
-            {
-                if (tableCollisionParent)
-                {
-                    tableCollisionParent.SetActive(false);
-                }
-            }
+            // if (gameIsSimulating)
+            // {
+            //     if (tableCollisionParent)
+            //     {
+            //         tableCollisionParent.SetActive(true);
+            //     }
+            // }
+            // else
+            // {
+            //     if (tableCollisionParent)
+            //     {
+            //         tableCollisionParent.SetActive(false);
+            //     }
+            // }
 
             if (isFourBall)
             {
@@ -2281,7 +2309,10 @@ namespace VRCBilliards
                     }
                 }
 
-                RackBalls();
+                if (!tableModelHasRails || !hasRunSyncOnce)
+                {
+                    PlaceSunkBallsIntoRestingPlace();
+                }
 
                 if (timerType > 0 && !isTimerRunning)
                 {
@@ -2312,6 +2343,8 @@ namespace VRCBilliards
                     guideline.gameObject.SetActive(false);
                 }
             }
+
+            hasRunSyncOnce = true;
         }
 
         /// <summary>
@@ -2502,13 +2535,16 @@ namespace VRCBilliards
                 marker9ball.SetActive(false);
             }
 
-            if (tableCollisionParent)
+            // if (tableCollisionParent)
+            // {
+            //     tableCollisionParent.SetActive(false);
+            // }
+
+            if (!tableModelHasRails || !hasRunSyncOnce)
             {
-                tableCollisionParent.SetActive(false);
+                PlaceSunkBallsIntoRestingPlace();
             }
-
-            RackBalls(); // To make sure rigidbodies are completely off
-
+            
             if (logger)
             {
                 logger.Log(name, "disabling marker because the game is over");
@@ -2804,7 +2840,7 @@ namespace VRCBilliards
                     }
                 }
 
-                for (int i = 10; i < 16; i++)
+                for (int i = 10; i < NUMBER_OF_SIMULATED_BALLS; i++)
                 {
                     if (ballTransforms[i])
                     {
@@ -2819,7 +2855,7 @@ namespace VRCBilliards
             }
             else if (isFourBall)
             {
-                for (int i = 1; i < 16; i++)
+                for (int i = 1; i < NUMBER_OF_SIMULATED_BALLS; i++)
                 {
                     if (ballTransforms[i])
                     {
@@ -2874,7 +2910,7 @@ namespace VRCBilliards
             }
             else
             {
-                for (int i = 0; i < 16; i++)
+                for (int i = 0; i < NUMBER_OF_SIMULATED_BALLS; i++)
                 {
                     if (ballTransforms[i])
                     {
@@ -2919,28 +2955,31 @@ namespace VRCBilliards
         }
 
         /// <summary>
-        /// Finalize positions onto their rack spots
+        /// Call at the start of each turn.
+        /// Place sunk inert balls into a specific storage location.
+        /// Sunk ball state is replicated, so this is network-stable.
         /// </summary>
-        private void RackBalls()
+        private void PlaceSunkBallsIntoRestingPlace()
         {
             if (logger)
             {
-                logger.Log(name, "RackBalls");
+                logger.Log(name, "PlaceSunkBallsIntoRestingPlace");
             }
 
             uint ball_bit = 0x1u;
+            int numberOfSunkBalls = 0;
+            float posX = sunkBallsPositionRoot.position.x;
+            float posY = sunkBallsPositionRoot.position.y;
+            float posZ = sunkBallsPositionRoot.position.z;
 
-            for (int i = 0; i < 16; i++)
+            for (int i = 0; i < NUMBER_OF_SIMULATED_BALLS; i++)
             {
                 ballTransforms[i].GetComponent<Rigidbody>().isKinematic = true;
 
                 if ((ball_bit & ballPocketedState) == ball_bit)
                 {
-                    ballTransforms[i].localPosition = new Vector3(
-                        currentBallPositions[i].x,
-                        RACHEIGHT,
-                        currentBallPositions[i].z
-                    );
+                    ballTransforms[i].position = new Vector3(posX + numberOfSunkBalls * BALL_DIAMETER, posY, posZ);
+                    numberOfSunkBalls++;
                 }
 
                 ball_bit <<= 1;
@@ -2956,7 +2995,7 @@ namespace VRCBilliards
             if (gameMode != 1u)
             {
                 // Check all
-                for (int i = 1; i < 16; i++)
+                for (int i = 1; i < NUMBER_OF_SIMULATED_BALLS; i++)
                 {
                     if ((currentBallPositions[0] - currentBallPositions[i]).sqrMagnitude < BALL_DSQR)
                     {
@@ -3038,13 +3077,13 @@ namespace VRCBilliards
             //V1.y = 0.0f;
             // (baked):
             V1.x = (-V.x * F) - (0.00240675711f * W.z);
-            V1.z = (0.71428571428f * V.z) + (0.00857142857f * ((W.x * SINA) - (W.y * COSA))) - V.z;
+            V1.z = (0.71428571428f * V.z) + (0.00857142857f * ((W.x * SIN_A) - (W.y * COS_A))) - V.z;
             V1.y = 0.0f;
 
             // s_x = V.x * SINA - V.y * COSA + W.z;
             // (baked): y component not used:
-            s_x = (V.x * SINA) + W.z;
-            s_z = -V.z - (W.y * COSA) + (W.x * SINA);
+            s_x = (V.x * SIN_A) + W.z;
+            s_z = -V.z - (W.y * COS_A) + (W.x * SIN_A);
 
             // k = (5.0f * s_z) / ( 2 * BALL_MASS * A );
             // (baked):
@@ -3052,14 +3091,14 @@ namespace VRCBilliards
 
             // c = V.x * COSA - V.y * COSA;
             // (baked): y component not used
-            c = V.x * COSA;
+            c = V.x * COS_A;
 
-            W1.x = k * SINA;
+            W1.x = k * SIN_A;
 
             //W1.z = (5.0f / (2.0f * BALL_MASS)) * (-s_x / A + ((SINA * c * EP1) / B) * (COSA - SINA));
             // (baked):
             W1.z = 15.625f * ((-s_x * 0.04571428571f) + (c * 0.0546021744f));
-            W1.y = k * COSA;
+            W1.y = k * COS_A;
 
             // Unrotate result
             currentBallVelocities[id] += rb * V1;
@@ -3187,7 +3226,7 @@ namespace VRCBilliards
             uint ball_bit = 0x1U << ballID;
 
             // ball/ball collisions
-            for (int i = ballID + 1; i < 16; i++)
+            for (int i = ballID + 1; i < NUMBER_OF_SIMULATED_BALLS; i++)
             {
                 ball_bit <<= 1;
 
@@ -3312,7 +3351,7 @@ namespace VRCBilliards
             uint ball_bit = 0x1U;
 
             // Loop balls look for collisions
-            for (int i = 1; i < 16; i++)
+            for (int i = 1; i < NUMBER_OF_SIMULATED_BALLS; i++)
             {
                 ball_bit <<= 1;
 
@@ -3406,7 +3445,7 @@ namespace VRCBilliards
                 return 1;
             }
 
-            for (int i = 9; i < 16; i++)
+            for (int i = 9; i < NUMBER_OF_SIMULATED_BALLS; i++)
             {
                 if (((field >> i) & 0x1U) == 0x00U)
                 {
@@ -3493,21 +3532,21 @@ namespace VRCBilliards
         // TODO: Single use function, but it short-circuits so cannot be easily put into its using function.
         private void HandleUpdatingDesktopViewUI()
         {
-            if (isEntertingDesktopModeThisFrame)
+            if (isEnteringDesktopModeThisFrame)
             {
-                isEntertingDesktopModeThisFrame = false;
+                isEnteringDesktopModeThisFrame = false;
                 return;
             }
 
             deskTopCursor.x = Mathf.Clamp
             (
-                deskTopCursor.x + (Input.GetAxis("Mouse X") * desktopCursorSpeed),
+                deskTopCursor.x + (Input.GetAxis("Mouse X") * DESKTOP_CURSOR_SPEED),
                 -desktopClampX,
                 desktopClampX
             );
             deskTopCursor.z = Mathf.Clamp
             (
-                deskTopCursor.z + (Input.GetAxis("Mouse Y") * desktopCursorSpeed),
+                deskTopCursor.z + (Input.GetAxis("Mouse Y") * DESKTOP_CURSOR_SPEED),
                 -desktopClampY,
                 desktopClampY
             );
