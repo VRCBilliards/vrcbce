@@ -1,106 +1,301 @@
 fileFormatVersion: 2
 guid: 56dbeace3e19a5141b5853d303665813
 ModelImporter:
-  serializedVersion: 23
-  fileIDToRecycleName:
-    100000: Ball_00
-    100002: Ball_00_1
-    100004: Ball_1
-    100006: Ball_10
-    100008: Ball_11
-    100010: Ball_12
-    100012: Ball_2
-    100014: Ball_3
-    100016: Ball_4
-    100018: Ball_5
-    100020: Ball_6
-    100022: Ball_7
-    100024: Ball_8
-    100026: Ball_9
-    100028: //RootNode
-    100030: Ball_00.001
-    100032: Ball_13
-    100034: Ball_14
-    100036: Ball_15
-    400000: Ball_00
-    400002: Ball_00_1
-    400004: Ball_1
-    400006: Ball_10
-    400008: Ball_11
-    400010: Ball_12
-    400012: Ball_2
-    400014: Ball_3
-    400016: Ball_4
-    400018: Ball_5
-    400020: Ball_6
-    400022: Ball_7
-    400024: Ball_8
-    400026: Ball_9
-    400028: //RootNode
-    400030: Ball_00.001
-    400032: Ball_13
-    400034: Ball_14
-    400036: Ball_15
-    2100000: balls
-    2100002: shadowplane
-    2100004: shadowplane.001
-    2300000: Ball_00
-    2300002: Ball_00_1
-    2300004: Ball_1
-    2300006: Ball_10
-    2300008: Ball_11
-    2300010: Ball_12
-    2300012: Ball_2
-    2300014: Ball_3
-    2300016: Ball_4
-    2300018: Ball_5
-    2300020: Ball_6
-    2300022: Ball_7
-    2300024: Ball_8
-    2300026: Ball_9
-    2300028: Ball_00.001
-    2300030: Ball_13
-    2300032: Ball_14
-    2300034: Ball_15
-    3300000: Ball_00
-    3300002: Ball_00_1
-    3300004: Ball_1
-    3300006: Ball_10
-    3300008: Ball_11
-    3300010: Ball_12
-    3300012: Ball_2
-    3300014: Ball_3
-    3300016: Ball_4
-    3300018: Ball_5
-    3300020: Ball_6
-    3300022: Ball_7
-    3300024: Ball_8
-    3300026: Ball_9
-    3300028: Ball_00.001
-    3300030: Ball_13
-    3300032: Ball_14
-    3300034: Ball_15
-    4300000: Ball_12
-    4300002: Ball_11
-    4300004: Ball_10
-    4300006: Ball_9
-    4300008: Ball_8
-    4300010: Ball_7
-    4300012: Ball_6
-    4300014: Ball_5
-    4300016: Ball_4
-    4300018: Ball_3
-    4300020: Ball_2
-    4300022: Ball_1
-    4300024: Ball_00
-    4300026: Ball_00_1
-    4300028: Ball_00.001
-    4300030: Ball_13
-    4300032: Ball_14
-    4300034: Ball_15
-  externalObjects: {}
+  serializedVersion: 19301
+  internalIDToNameTable:
+  - first:
+      1: 100000
+    second: Ball_00
+  - first:
+      1: 100002
+    second: Ball_00_1
+  - first:
+      1: 100004
+    second: Ball_1
+  - first:
+      1: 100006
+    second: Ball_10
+  - first:
+      1: 100008
+    second: Ball_11
+  - first:
+      1: 100010
+    second: Ball_12
+  - first:
+      1: 100012
+    second: Ball_2
+  - first:
+      1: 100014
+    second: Ball_3
+  - first:
+      1: 100016
+    second: Ball_4
+  - first:
+      1: 100018
+    second: Ball_5
+  - first:
+      1: 100020
+    second: Ball_6
+  - first:
+      1: 100022
+    second: Ball_7
+  - first:
+      1: 100024
+    second: Ball_8
+  - first:
+      1: 100026
+    second: Ball_9
+  - first:
+      1: 100028
+    second: //RootNode
+  - first:
+      1: 100030
+    second: Ball_00.001
+  - first:
+      1: 100032
+    second: Ball_13
+  - first:
+      1: 100034
+    second: Ball_14
+  - first:
+      1: 100036
+    second: Ball_15
+  - first:
+      4: 400000
+    second: Ball_00
+  - first:
+      4: 400002
+    second: Ball_00_1
+  - first:
+      4: 400004
+    second: Ball_1
+  - first:
+      4: 400006
+    second: Ball_10
+  - first:
+      4: 400008
+    second: Ball_11
+  - first:
+      4: 400010
+    second: Ball_12
+  - first:
+      4: 400012
+    second: Ball_2
+  - first:
+      4: 400014
+    second: Ball_3
+  - first:
+      4: 400016
+    second: Ball_4
+  - first:
+      4: 400018
+    second: Ball_5
+  - first:
+      4: 400020
+    second: Ball_6
+  - first:
+      4: 400022
+    second: Ball_7
+  - first:
+      4: 400024
+    second: Ball_8
+  - first:
+      4: 400026
+    second: Ball_9
+  - first:
+      4: 400028
+    second: //RootNode
+  - first:
+      4: 400030
+    second: Ball_00.001
+  - first:
+      4: 400032
+    second: Ball_13
+  - first:
+      4: 400034
+    second: Ball_14
+  - first:
+      4: 400036
+    second: Ball_15
+  - first:
+      21: 2100000
+    second: balls
+  - first:
+      21: 2100002
+    second: shadowplane
+  - first:
+      21: 2100004
+    second: shadowplane.001
+  - first:
+      23: 2300000
+    second: Ball_00
+  - first:
+      23: 2300002
+    second: Ball_00_1
+  - first:
+      23: 2300004
+    second: Ball_1
+  - first:
+      23: 2300006
+    second: Ball_10
+  - first:
+      23: 2300008
+    second: Ball_11
+  - first:
+      23: 2300010
+    second: Ball_12
+  - first:
+      23: 2300012
+    second: Ball_2
+  - first:
+      23: 2300014
+    second: Ball_3
+  - first:
+      23: 2300016
+    second: Ball_4
+  - first:
+      23: 2300018
+    second: Ball_5
+  - first:
+      23: 2300020
+    second: Ball_6
+  - first:
+      23: 2300022
+    second: Ball_7
+  - first:
+      23: 2300024
+    second: Ball_8
+  - first:
+      23: 2300026
+    second: Ball_9
+  - first:
+      23: 2300028
+    second: Ball_00.001
+  - first:
+      23: 2300030
+    second: Ball_13
+  - first:
+      23: 2300032
+    second: Ball_14
+  - first:
+      23: 2300034
+    second: Ball_15
+  - first:
+      33: 3300000
+    second: Ball_00
+  - first:
+      33: 3300002
+    second: Ball_00_1
+  - first:
+      33: 3300004
+    second: Ball_1
+  - first:
+      33: 3300006
+    second: Ball_10
+  - first:
+      33: 3300008
+    second: Ball_11
+  - first:
+      33: 3300010
+    second: Ball_12
+  - first:
+      33: 3300012
+    second: Ball_2
+  - first:
+      33: 3300014
+    second: Ball_3
+  - first:
+      33: 3300016
+    second: Ball_4
+  - first:
+      33: 3300018
+    second: Ball_5
+  - first:
+      33: 3300020
+    second: Ball_6
+  - first:
+      33: 3300022
+    second: Ball_7
+  - first:
+      33: 3300024
+    second: Ball_8
+  - first:
+      33: 3300026
+    second: Ball_9
+  - first:
+      33: 3300028
+    second: Ball_00.001
+  - first:
+      33: 3300030
+    second: Ball_13
+  - first:
+      33: 3300032
+    second: Ball_14
+  - first:
+      33: 3300034
+    second: Ball_15
+  - first:
+      43: 4300000
+    second: Ball_12
+  - first:
+      43: 4300002
+    second: Ball_11
+  - first:
+      43: 4300004
+    second: Ball_10
+  - first:
+      43: 4300006
+    second: Ball_9
+  - first:
+      43: 4300008
+    second: Ball_8
+  - first:
+      43: 4300010
+    second: Ball_7
+  - first:
+      43: 4300012
+    second: Ball_6
+  - first:
+      43: 4300014
+    second: Ball_5
+  - first:
+      43: 4300016
+    second: Ball_4
+  - first:
+      43: 4300018
+    second: Ball_3
+  - first:
+      43: 4300020
+    second: Ball_2
+  - first:
+      43: 4300022
+    second: Ball_1
+  - first:
+      43: 4300024
+    second: Ball_00
+  - first:
+      43: 4300026
+    second: Ball_00_1
+  - first:
+      43: 4300028
+    second: Ball_00.001
+  - first:
+      43: 4300030
+    second: Ball_13
+  - first:
+      43: 4300032
+    second: Ball_14
+  - first:
+      43: 4300034
+    second: Ball_15
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: balls
+    second: {fileID: 2100000, guid: 397c2fcfe58ef54439ec7bed699754a9, type: 2}
   materials:
-    importMaterials: 1
+    materialImportMode: 1
     materialName: 0
     materialSearch: 1
     materialLocation: 1
@@ -133,25 +328,28 @@ ModelImporter:
     meshCompression: 0
     addColliders: 0
     useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
     importVisibility: 1
     importBlendShapes: 1
-    importCameras: 1
-    importLights: 1
+    importCameras: 0
+    importLights: 0
+    fileIdsGeneration: 1
     swapUVChannels: 0
     generateSecondaryUV: 0
     useFileUnits: 1
-    optimizeMeshForGPU: 1
     keepQuads: 0
     weldVertices: 1
     preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    meshOptimizationFlags: -1
     indexFormat: 0
     secondaryUVAngleDistortion: 8
     secondaryUVAreaDistortion: 15.000001
     secondaryUVHardAngle: 88
     secondaryUVPackMargin: 4
     useFileScale: 1
-    previousCalculatedGlobalScale: 1
-    hasPreviousCalculatedGlobalScale: 0
   tangentSpace:
     normalSmoothAngle: 60
     normalImportMode: 0
@@ -160,10 +358,10 @@ ModelImporter:
     legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
     blendShapeNormalImportMode: 1
     normalSmoothingSource: 0
+  referencedClips: []
   importAnimation: 1
-  copyAvatar: 0
   humanDescription:
-    serializedVersion: 2
+    serializedVersion: 3
     human: []
     skeleton: []
     armTwist: 0.5
@@ -173,13 +371,16 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
+    globalScale: 1
     rootMotionBoneName: 
     hasTranslationDoF: 0
     hasExtraRoot: 0
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
+  autoGenerateAvatarMappingIfUnspecified: 1
   animationType: 0
   humanoidOversampling: 1
+  avatarSetup: 0
   additionalBone: 0
   userData: 
   assetBundleName: 
