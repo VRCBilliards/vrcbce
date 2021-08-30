@@ -1893,10 +1893,11 @@ namespace VRCBilliards
                         // VFX ( make ball move )
                         Rigidbody body = ballTransforms[i].GetComponent<Rigidbody>();
                         body.isKinematic = false;
+                        
                         body.velocity = baseObjectRot * new Vector3(
-                            currentBallVelocities[i].x,
+                            Mathf.Clamp(currentBallVelocities[i].x, -1f, 1f),
                             0.0f,
-                            currentBallVelocities[i].z
+                            Mathf.Clamp(currentBallVelocities[i].z, -1f, 1f)
                         );
                     }
                 }
@@ -2952,6 +2953,9 @@ namespace VRCBilliards
             {
                 PayBack(price * (raiseCount - 1));
             }
+            
+            // Make sure that we run a pass on rigidbodies to ensure they are off.
+            PlaceSunkBallsIntoRestingPlace();
         }
 
         /// <summary>
