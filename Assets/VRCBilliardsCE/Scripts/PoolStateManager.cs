@@ -174,14 +174,15 @@ namespace VRCBilliards
         [Tooltip("Use fake shadows? Fake shadows are high-performance, but they may clash with your world's lighting.")]
         public bool fakeBallShadows = true;
 
-        [Tooltip(
-            "Change the length of the intro ball-drop animation. If you set this to zero, the animation will not play at all.")]
+        [Tooltip("Change the length of the intro ball-drop animation. If you set this to zero, the animation will not play at all.")]
         [Range(0f, 5f)]
         public float introAnimationLength = 2.0f;
 
-        [Tooltip(
-            "If enabled, worldspace table scales beyond 1 in x or z will increase the force of hits to compensate, making it easier for regular-sized avatars to play.")]
+        [Tooltip("If enabled, worldspace table scales beyond 1 in x or z will increase the force of hits to compensate, making it easier for regular-sized avatars to play.")]
         public bool scaleHitForceWithScaleBeyond1;
+
+        [Tooltip("This value scales the clamp applied to the velocity of pocketted balls. Raising this will make pockets look less artificial at the cost of increasing the chance high-velocity balls will fly out of the table.")]
+        public float pocketVelocityClamp = 0.5f;
 
         [Header("Table Colours")] public Color tableBlue = new Color(0.0f, 0.75f, 1.75f, 1.0f);
         public Color tableOrange = new Color(1.75f, 0.25f, 0.0f, 1.0f);
@@ -1895,10 +1896,11 @@ namespace VRCBilliards
                         body.isKinematic = false;
                         
                         body.velocity = baseObjectRot * new Vector3(
-                            Mathf.Clamp(currentBallVelocities[i].x, -1f, 1f),
+                            Mathf.Clamp(currentBallVelocities[i].x, (pocketVelocityClamp * -1), pocketVelocityClamp),
                             0.0f,
-                            Mathf.Clamp(currentBallVelocities[i].z, -1f, 1f)
+                            Mathf.Clamp(currentBallVelocities[i].z, (pocketVelocityClamp * -1), pocketVelocityClamp)
                         );
+                        // Debug.Log("Ball sunk velocity, " + body.velocity);
                     }
                 }
 
