@@ -1,49 +1,130 @@
 fileFormatVersion: 2
 guid: aa7fbf9e5e9208045b0303fc8825707c
 ModelImporter:
-  serializedVersion: 23
-  fileIDToRecycleName:
-    100000: Button E
-    100002: Desktop Ball
-    100004: Desktop Cursor
-    100006: Desktop Hit
-    100008: Desktop Hit Lwr
-    100010: Desktop Strength Base
-    100012: Desktop Strength Overlay
-    100014: //RootNode
-    400000: Button E
-    400002: Desktop Ball
-    400004: Desktop Cursor
-    400006: Desktop Hit
-    400008: Desktop Hit Lwr
-    400010: Desktop Strength Base
-    400012: Desktop Strength Overlay
-    400014: //RootNode
-    2100000: desktop
-    2300000: Button E
-    2300002: Desktop Ball
-    2300004: Desktop Cursor
-    2300006: Desktop Hit
-    2300008: Desktop Hit Lwr
-    2300010: Desktop Strength Base
-    2300012: Desktop Strength Overlay
-    3300000: Button E
-    3300002: Desktop Ball
-    3300004: Desktop Cursor
-    3300006: Desktop Hit
-    3300008: Desktop Hit Lwr
-    3300010: Desktop Strength Base
-    3300012: Desktop Strength Overlay
-    4300000: Desktop Ball
-    4300002: Button E
-    4300004: Desktop Cursor
-    4300006: Desktop Hit
-    4300008: Desktop Hit Lwr
-    4300010: Desktop Strength Overlay
-    4300012: Desktop Strength Base
-  externalObjects: {}
+  serializedVersion: 19301
+  internalIDToNameTable:
+  - first:
+      1: 100000
+    second: Button E
+  - first:
+      1: 100002
+    second: Desktop Ball
+  - first:
+      1: 100004
+    second: Desktop Cursor
+  - first:
+      1: 100006
+    second: Desktop Hit
+  - first:
+      1: 100008
+    second: Desktop Hit Lwr
+  - first:
+      1: 100010
+    second: Desktop Strength Base
+  - first:
+      1: 100012
+    second: Desktop Strength Overlay
+  - first:
+      1: 100014
+    second: //RootNode
+  - first:
+      4: 400000
+    second: Button E
+  - first:
+      4: 400002
+    second: Desktop Ball
+  - first:
+      4: 400004
+    second: Desktop Cursor
+  - first:
+      4: 400006
+    second: Desktop Hit
+  - first:
+      4: 400008
+    second: Desktop Hit Lwr
+  - first:
+      4: 400010
+    second: Desktop Strength Base
+  - first:
+      4: 400012
+    second: Desktop Strength Overlay
+  - first:
+      4: 400014
+    second: //RootNode
+  - first:
+      21: 2100000
+    second: desktop
+  - first:
+      23: 2300000
+    second: Button E
+  - first:
+      23: 2300002
+    second: Desktop Ball
+  - first:
+      23: 2300004
+    second: Desktop Cursor
+  - first:
+      23: 2300006
+    second: Desktop Hit
+  - first:
+      23: 2300008
+    second: Desktop Hit Lwr
+  - first:
+      23: 2300010
+    second: Desktop Strength Base
+  - first:
+      23: 2300012
+    second: Desktop Strength Overlay
+  - first:
+      33: 3300000
+    second: Button E
+  - first:
+      33: 3300002
+    second: Desktop Ball
+  - first:
+      33: 3300004
+    second: Desktop Cursor
+  - first:
+      33: 3300006
+    second: Desktop Hit
+  - first:
+      33: 3300008
+    second: Desktop Hit Lwr
+  - first:
+      33: 3300010
+    second: Desktop Strength Base
+  - first:
+      33: 3300012
+    second: Desktop Strength Overlay
+  - first:
+      43: 4300000
+    second: Desktop Ball
+  - first:
+      43: 4300002
+    second: Button E
+  - first:
+      43: 4300004
+    second: Desktop Cursor
+  - first:
+      43: 4300006
+    second: Desktop Hit
+  - first:
+      43: 4300008
+    second: Desktop Hit Lwr
+  - first:
+      43: 4300010
+    second: Desktop Strength Overlay
+  - first:
+      43: 4300012
+    second: Desktop Strength Base
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: desktop
+    second: {fileID: 2100000, guid: e44af93d9fc79e24da143d600f218c90, type: 2}
   materials:
-    importMaterials: 1
+    materialImportMode: 1
     materialName: 0
     materialSearch: 1
     materialLocation: 1
@@ -76,25 +157,28 @@ ModelImporter:
     meshCompression: 1
     addColliders: 0
     useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
     importVisibility: 1
     importBlendShapes: 1
-    importCameras: 1
-    importLights: 1
+    importCameras: 0
+    importLights: 0
+    fileIdsGeneration: 1
     swapUVChannels: 0
     generateSecondaryUV: 0
     useFileUnits: 1
-    optimizeMeshForGPU: 1
     keepQuads: 0
     weldVertices: 1
     preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    meshOptimizationFlags: -1
     indexFormat: 0
     secondaryUVAngleDistortion: 8
     secondaryUVAreaDistortion: 15.000001
     secondaryUVHardAngle: 88
     secondaryUVPackMargin: 4
     useFileScale: 1
-    previousCalculatedGlobalScale: 1
-    hasPreviousCalculatedGlobalScale: 0
   tangentSpace:
     normalSmoothAngle: 60
     normalImportMode: 0
@@ -103,10 +187,10 @@ ModelImporter:
     legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
     blendShapeNormalImportMode: 1
     normalSmoothingSource: 0
+  referencedClips: []
   importAnimation: 1
-  copyAvatar: 0
   humanDescription:
-    serializedVersion: 2
+    serializedVersion: 3
     human: []
     skeleton: []
     armTwist: 0.5
@@ -116,13 +200,16 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
+    globalScale: 1
     rootMotionBoneName: 
     hasTranslationDoF: 0
     hasExtraRoot: 0
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
+  autoGenerateAvatarMappingIfUnspecified: 1
   animationType: 0
   humanoidOversampling: 1
+  avatarSetup: 0
   additionalBone: 0
   userData: 
   assetBundleName: 
