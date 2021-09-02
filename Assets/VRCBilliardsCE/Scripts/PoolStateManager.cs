@@ -322,11 +322,6 @@ namespace VRCBilliards
         [UdonSynced] private uint ballPocketedState;
 
         /// <summary>
-        ///  Tracks if each ball is pocketed. Easier to read than a bit array.
-        /// </summary>
-        [UdonSynced] private bool[] ballsArePocketed;
-
-        /// <summary>
         /// 19:1 (0x02)		Whos turn is it, 0 or 1
         /// </summary>
         [UdonSynced] private bool newIsTeam2Turn;
