@@ -9,8 +9,7 @@ namespace VRCBilliards
 {
     public class PoolMenu : UdonSharpBehaviour
     {
-        [Header("Pool State Manager")]
-        public PoolStateManager manager;
+        private PoolStateManager manager;
 
         [Header("Style")]
         public Color selectedColor = Color.white;
@@ -66,13 +65,22 @@ namespace VRCBilliards
         public TextMeshProUGUI player4MenuText;
 
         [Header("Score")]
-        public TextMeshProUGUI player1ScoreText;
-        public TextMeshProUGUI player2ScoreText;
-        public TextMeshProUGUI player3ScoreText;
-        public TextMeshProUGUI player4ScoreText;
+        public GameObject[] scores;
 
-        public TextMeshProUGUI team1ScoreText;
-        public TextMeshProUGUI team2ScoreText;
+        public GameObject player1Score;
+        public GameObject player2Score;
+        public GameObject player3Score;
+        public GameObject player4Score;
+        public GameObject teamAScore;
+        public GameObject teamBScore;
+        
+        private TextMeshProUGUI[] player1Scores;
+        private TextMeshProUGUI[] player2Scores;
+        private TextMeshProUGUI[] player3Scores;
+        private TextMeshProUGUI[] player4Scores;
+
+        private TextMeshProUGUI[] teamAScores;
+        private TextMeshProUGUI[] teamBScores;
 
         public TextMeshProUGUI winnerText;
 
@@ -82,6 +90,34 @@ namespace VRCBilliards
         private bool isTeams;
         private bool isSignedUpToPlay;
         private bool canStartGame;
+
+        public void Start()
+        {
+            manager = transform.parent.GetComponentInChildren<PoolStateManager>();
+            if (!manager)
+            {
+                Debug.LogError($"A VRCBCE menu, {name}, cannot start because it cannot find a PoolStateManager in the children of its parent!");
+                gameObject.SetActive(false);
+                return;
+            }
+
+            player1Scores = new TextMeshProUGUI[scores.Length];
+            player2Scores = new TextMeshProUGUI[scores.Length];
+            player3Scores = new TextMeshProUGUI[scores.Length];
+            player4Scores = new TextMeshProUGUI[scores.Length];
+            teamAScores = new TextMeshProUGUI[scores.Length];
+            teamBScores = new TextMeshProUGUI[scores.Length];
+
+            for (int i = 0; i < scores.Length; i++)
+            {
+                player1Scores[i] = scores[i].transform.Find(player1Score.name).GetComponent<TextMeshProUGUI>();
+                player2Scores[i] = scores[i].transform.Find(player2Score.name).GetComponent<TextMeshProUGUI>();
+                player3Scores[i] = scores[i].transform.Find(player3Score.name).GetComponent<TextMeshProUGUI>();
+                player4Scores[i] = scores[i].transform.Find(player4Score.name).GetComponent<TextMeshProUGUI>();
+                teamAScores[i] = scores[i].transform.Find(teamAScore.name).GetComponent<TextMeshProUGUI>();
+                teamBScores[i] = scores[i].transform.Find(teamBScore.name).GetComponent<TextMeshProUGUI>();
+            }
+        }
 
         // TODO: This all needs to be secured.
         public void _UnlockTable()
@@ -340,42 +376,58 @@ namespace VRCBilliards
 
             if (player1ID > 0)
             {
-                found = HandlePlayerState(player1MenuText, player1ScoreText, VRCPlayerApi.GetPlayerById(player1ID));
+                found = HandlePlayerState(player1MenuText, player1Scores, VRCPlayerApi.GetPlayerById(player1ID));
             }
             else
             {
                 player1MenuText.text = defaultText.Replace("{}", "1");
-                player1ScoreText.text = "";
+
+                foreach (var score in player1Scores)
+                {
+                    score.text = "";    
+                }
             }
 
             if (player2ID > 0)
             {
-                found = HandlePlayerState(player2MenuText, player2ScoreText, VRCPlayerApi.GetPlayerById(player2ID));
+                found = HandlePlayerState(player2MenuText, player2Scores, VRCPlayerApi.GetPlayerById(player2ID));
             }
             else
             {
                 player2MenuText.text = defaultText.Replace("{}", "2");
-                player2ScoreText.text = "";
+                
+                foreach (var score in player2Scores)
+                {
+                    score.text = "";    
+                }
             }
 
             if (player3ID > 0)
             {
-                found = HandlePlayerState(player3MenuText, player3ScoreText, VRCPlayerApi.GetPlayerById(player3ID));
+                found = HandlePlayerState(player3MenuText, player3Scores, VRCPlayerApi.GetPlayerById(player3ID));
             }
             else
             {
                 player3MenuText.text = newIsTeams ? defaultText.Replace("{}", "3") : "";
-                player3ScoreText.text = "";
+                
+                foreach (var score in player3Scores)
+                {
+                    score.text = "";    
+                }
             }
 
             if (player4ID > 0)
             {
-                found = HandlePlayerState(player4MenuText, player4ScoreText, VRCPlayerApi.GetPlayerById(player4ID));
+                found = HandlePlayerState(player4MenuText, player4Scores, VRCPlayerApi.GetPlayerById(player4ID));
             }
             else
             {
                 player4MenuText.text = newIsTeams ? defaultText.Replace("{}", "4") : "";
-                player4ScoreText.text = "";
+               
+                foreach (var score in player4Scores)
+                {
+                    score.text = "";    
+                }
             }
 
             int id = Networking.LocalPlayer.playerId;
@@ -454,14 +506,18 @@ namespace VRCBilliards
             }
         }
 
-        private bool HandlePlayerState(TextMeshProUGUI menuText, TextMeshProUGUI scoreText, VRCPlayerApi player)
+        private bool HandlePlayerState(TextMeshProUGUI menuText, TextMeshProUGUI[] scores, VRCPlayerApi player)
         {
             if (!Utilities.IsValid(player))
             {
                 return false;
             }
             menuText.text = player.displayName;
-            scoreText.text = player.displayName;
+
+            foreach (var score in scores)
+            {
+                score.text = player.displayName;    
+            }
 
             if (player.playerId == Networking.LocalPlayer.playerId)
             {
@@ -493,19 +549,32 @@ namespace VRCBilliards
         {
             if (score < 0)
             {
-                team1ScoreText.text = "";
-                team2ScoreText.text = "";
+                foreach (var scoreText in teamAScores)
+                {
+                    scoreText.text = "";  
+                }
+                
+                foreach (var scoreText in teamBScores)
+                {
+                    scoreText.text = "";  
+                }
 
                 return;
             }
 
             if (isTeam2)
             {
-                team2ScoreText.text = $"{score}";
+                foreach (var scoreText in teamBScores)
+                {
+                    scoreText.text = $"{score}"; 
+                }
             }
             else
             {
-                team1ScoreText.text = $"{score}";
+                foreach (var scoreText in teamAScores)
+                {
+                    scoreText.text = $"{score}"; 
+                }
             }
         }
 
@@ -520,35 +589,57 @@ namespace VRCBilliards
             {
                 if (isTeam2)
                 {
-                    winnerText.text = $"{player2ScoreText.text} and {player4ScoreText.text} win!";
+                    winnerText.text = $"{player2Scores[0].text} and {player4Scores[0].text} win!";
                 }
                 else
                 {
-                    winnerText.text = $"{player1ScoreText.text} and {player3ScoreText.text} win!";
+                    winnerText.text = $"{player1Scores[0].text} and {player3Scores[0].text} win!";
                 }
             }
             else
             {
                 if (isTeam2)
                 {
-                    winnerText.text = $"{player2ScoreText.text} wins!";
+                    winnerText.text = $"{player2Scores[0].text} wins!";
                 }
                 else
                 {
-                    winnerText.text = $"{player1ScoreText.text} wins!";
+                    winnerText.text = $"{player1Scores[0].text} wins!";
                 }
             }
         }
 
         private void ResetScoreScreen()
         {
-            player1ScoreText.text = "";
-            player2ScoreText.text = "";
-            player3ScoreText.text = "";
-            player4ScoreText.text = "";
-
-            team1ScoreText.text = "";
-            team2ScoreText.text = "";
+            foreach (var score in player1Scores)
+            {
+                score.text = "";
+            }
+            
+            foreach (var score in player2Scores)
+            {
+                score.text = "";
+            }
+            
+            foreach (var score in player3Scores)
+            {
+                score.text = "";
+            }
+            
+            foreach (var score in player4Scores)
+            {
+                score.text = "";
+            }
+            
+            foreach (var score in teamAScores)
+            {
+                score.text = "";
+            }
+            
+            foreach (var score in teamBScores)
+            {
+                score.text = "";
+            }
 
             winnerText.text = "";
         }
