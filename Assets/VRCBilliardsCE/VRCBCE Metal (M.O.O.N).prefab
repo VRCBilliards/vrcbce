@@ -360,6 +360,31 @@ PrefabInstance:
       propertyPath: m_Name
       value: VRCBCE Menu (M.O.O.N)
       objectReference: {fileID: 0}
+    - target: {fileID: 5504866426431299960, guid: ee9f4e835544408469fb94985a04b320,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5504866426431299960, guid: ee9f4e835544408469fb94985a04b320,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 24.599997
+      objectReference: {fileID: 0}
+    - target: {fileID: 7966470108517044836, guid: ee9f4e835544408469fb94985a04b320,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 9.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7966470108517044836, guid: ee9f4e835544408469fb94985a04b320,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 7.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 9116246103682537617, guid: ee9f4e835544408469fb94985a04b320,
+        type: 3}
+      propertyPath: m_text
+      value: 
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ee9f4e835544408469fb94985a04b320, type: 3}
 --- !u!1 &1975643016467680049 stripped
