@@ -65,6 +65,10 @@ namespace VRCBilliards
         public TextMeshProUGUI player4MenuText;
 
         [Header("Score")]
+        [Tooltip("A specific score display that only shows during gameplay. If this is populated, the table info display will be hidden during gameplay.")]
+        public GameObject inGameScoreDisplay;
+        [Tooltip("The table information screen. This will be hidden during games if the in-game score display is populated.")]
+        public GameObject tableInfoScreen;
         public GameObject[] scores;
 
         public GameObject player1Score;
@@ -244,6 +248,16 @@ namespace VRCBilliards
             mainMenu.SetActive(false);
 
             winnerText.text = "";
+
+            if (inGameScoreDisplay)
+            {
+                inGameScoreDisplay.SetActive(true);
+
+                if (tableInfoScreen)
+                {
+                    tableInfoScreen.SetActive(false);
+                }
+            }
         }
 
         public void _EnableUnlockTableButton()
@@ -261,6 +275,16 @@ namespace VRCBilliards
             lockMenu.SetActive(false);
             mainMenu.SetActive(true);
             visibleTimerDuringGame.text = "";
+
+            if (inGameScoreDisplay)
+            {
+                inGameScoreDisplay.SetActive(false);
+            }
+
+            if (tableInfoScreen)
+            {
+                tableInfoScreen.SetActive(true);
+            }
         }
 
         private void UpdateButtonColors(Image[] buttons, int selectedIndex)
@@ -642,6 +666,8 @@ namespace VRCBilliards
             }
 
             winnerText.text = "";
+            
+            
         }
     }
 }
