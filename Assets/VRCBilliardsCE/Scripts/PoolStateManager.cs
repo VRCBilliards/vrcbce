@@ -3006,9 +3006,9 @@ namespace VRCBilliards
 
             uint ball_bit = 0x1u;
             int numberOfSunkBalls = 0;
-            float posX = sunkBallsPositionRoot.position.x;
-            float posY = sunkBallsPositionRoot.position.y;
-            float posZ = sunkBallsPositionRoot.position.z;
+            float posX = sunkBallsPositionRoot.localPosition.x;
+            float posY = sunkBallsPositionRoot.localPosition.y;
+            float posZ = sunkBallsPositionRoot.localPosition.z;
 
             for (int i = 0; i < NUMBER_OF_SIMULATED_BALLS; i++)
             {
@@ -3016,7 +3016,7 @@ namespace VRCBilliards
 
                 if ((ball_bit & ballPocketedState) == ball_bit)
                 {
-                    ballTransforms[i].position = new Vector3(posX + numberOfSunkBalls * BALL_DIAMETER, posY, posZ);
+                    ballTransforms[i].localPosition = new Vector3(posX + numberOfSunkBalls * BALL_DIAMETER, posY, posZ);
                     numberOfSunkBalls++;
                 }
 
