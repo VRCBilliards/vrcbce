@@ -1,0 +1,180 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: cf-balls-glossy
+  m_Shader: {fileID: 4800000, guid: 0b7113dea2069fc4e8943843eff19f70, type: 3}
+  m_ShaderKeywords: _SPECULARHIGHLIGHTS_OFF
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _BumpMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ColorPrimary:
+        m_Texture: {fileID: 2800000, guid: 0bf1dc4cbb9677d4d999d5450fd9004b, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailAlbedoMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailMask:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailNormalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Emission:
+        m_Texture: {fileID: 2800000, guid: e440b5b891140b748843e4721eff88a5, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionColor:
+        m_Texture: {fileID: 2800000, guid: 0bf1dc4cbb9677d4d999d5450fd9004b, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _FurHeightMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _FurTex:
+        m_Texture: {fileID: 2800000, guid: 4936f95df08752e46940d871d9288f05, type: 3}
+        m_Scale: {x: 8, y: 8}
+        m_Offset: {x: 0, y: 0}
+    - _FurTexPrimary:
+        m_Texture: {fileID: 2800000, guid: a3437494f2ecaf142bde5fcdfbd35dd4, type: 3}
+        m_Scale: {x: 8, y: 8}
+        m_Offset: {x: 0, y: 0}
+    - _FurTexSecondary:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 69f2be7b2ff862b4db4505b849ba104d, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTexPrimary:
+        m_Texture: {fileID: 2800000, guid: 3c66e9118c3c66d4fb29afe3150fb0b2, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTexSecondary:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MetallicGlossMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MirrorTexture:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _OcclusionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ParallaxMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SpecularPrimary:
+        m_Texture: {fileID: 2800000, guid: 0bf1dc4cbb9677d4d999d5450fd9004b, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - _AudioLinkFurInfluence: 0
+    - _AudioLinkInfluence: 0
+    - _Brightness: 4.18
+    - _BrightnessPrimary: -0.8
+    - _BumpScale: 1
+    - _Color: 33
+    - _CullMode: 2
+    - _Cutoff: 0.5
+    - _DetailNormalMapScale: 1
+    - _DstBlend: 0
+    - _Emission: 0.1
+    - _EmissionPrimary: 0.2
+    - _EmissionScaleUI: 0.49
+    - _EmissionSecondary: 0
+    - _EnableEmission: 0
+    - _EnableMirrorOptions: 0
+    - _EnableMirrorTexture: 0
+    - _FurDensity: 0.2
+    - _FurDensityPrimary: 0.315
+    - _FurDensitySecondary: 0.11
+    - _FurHeightPrimary: 1
+    - _FurLength: 0.0025
+    - _FurLengthPrimary: 0.0125
+    - _FurLengthSecondary: 0.5
+    - _FurShading: 0.227
+    - _FurShadingPrimary: 0.25
+    - _FurShadingSecondary: 0.25
+    - _FurThinness: 5
+    - _FurThinnessPrimary: 10
+    - _FurThinnessSecondary: 1
+    - _GlossMapScale: 1
+    - _Glossiness: 0.8
+    - _GlossyReflections: 1
+    - _Hue: 0
+    - _HuePrimary: 0
+    - _HueSecondary: 0
+    - _HueShift: 107
+    - _Invert: 0.022
+    - _InvertPrimary: -5
+    - _Metallic: 0.2
+    - _Mirror: 0
+    - _MirrorTextureUV: 0
+    - _Mode: 0
+    - _OcclusionStrength: 1
+    - _Parallax: 0.02
+    - _RadHueOffset: 6
+    - _RimPower: 4
+    - _Sat: 1
+    - _SatPrimary: 1
+    - _SatSecondary: 1
+    - _SatShift: 102
+    - _Saturate: 0.49
+    - _Saturation: 0.357
+    - _Shininess: 10
+    - _ShininessPrimary: 8
+    - _ShininessSecondary: 8
+    - _SmoothnessTextureChannel: 0
+    - _Specular: 0
+    - _SpecularHighlights: 0
+    - _SpecularPrimary: 1
+    - _SrcBlend: 1
+    - _UVSec: 0
+    - _ZWrite: 1
+    - m_end_mirrorOptions: 0
+    - m_start_mirrorOptions: 0
+    m_Colors:
+    - _Base: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorPrimary: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorSecondary: {r: 1, g: 1, b: 1, a: 1}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
+    - _ForceGlobal: {r: 0, g: 0, b: 0, a: 0}
+    - _ForceLocal: {r: 0, g: 0, b: 0, a: 0}
+    - _MirrorTexturePan: {r: 0, g: 0, b: 0, a: 0}
+    - _RimColor: {r: 1, g: 1, b: 1, a: 1}
+    - _Specular: {r: 1, g: 0.88686925, b: 0.6556604, a: 1}
+    - _SpecularPrimary: {r: 1, g: 0.8862745, b: 0.654902, a: 0.5019608}
+    - _SpecularSecondary: {r: 1, g: 1, b: 1, a: 1}
