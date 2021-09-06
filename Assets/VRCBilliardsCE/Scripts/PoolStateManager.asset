@@ -1784,8 +1784,8 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 98|UnityEngine.HeaderAttribute, UnityEngine.CoreModule
-    - Name: header
+      Data: 98|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
+    - Name: tooltip
       Entry: 1
       Data: Use fake shadows? Fake shadows are high-performance, but they may clash
         with your world's lighting.
@@ -1852,8 +1852,8 @@ MonoBehaviour:
       Data: 1
     - Name: 
       Entry: 7
-      Data: 102|UnityEngine.HeaderAttribute, UnityEngine.CoreModule
-    - Name: header
+      Data: 102|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
+    - Name: tooltip
       Entry: 1
       Data: Does the table model for this table have rails that guide the ball when
         the ball sinks?
