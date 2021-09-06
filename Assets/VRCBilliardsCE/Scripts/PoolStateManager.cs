@@ -158,9 +158,9 @@ namespace VRCBilliards
         
         [Header("Options")]
         
-        [Header("Use fake shadows? Fake shadows are high-performance, but they may clash with your world's lighting.")]
+        [Tooltip("Use fake shadows? Fake shadows are high-performance, but they may clash with your world's lighting.")]
         public bool fakeBallShadows = true;
-        [Header("Does the table model for this table have rails that guide the ball when the ball sinks?")]
+        [Tooltip("Does the table model for this table have rails that guide the ball when the ball sinks?")]
         public bool tableModelHasRails;
 
         [Header("------")]

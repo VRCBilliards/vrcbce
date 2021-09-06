@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: PoolStateManager
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 68def5afb169b0b41be5d9ee253758c4,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 8fd8455133691274abc9330a3d9d05e0,
     type: 2}
   udonAssembly: 
   assemblyError: 
@@ -1784,8 +1784,8 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 98|UnityEngine.HeaderAttribute, UnityEngine.CoreModule
-    - Name: header
+      Data: 98|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
+    - Name: tooltip
       Entry: 1
       Data: Use fake shadows? Fake shadows are high-performance, but they may clash
         with your world's lighting.
@@ -1852,8 +1852,8 @@ MonoBehaviour:
       Data: 1
     - Name: 
       Entry: 7
-      Data: 102|UnityEngine.HeaderAttribute, UnityEngine.CoreModule
-    - Name: header
+      Data: 102|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
+    - Name: tooltip
       Entry: 1
       Data: Does the table model for this table have rails that guide the ball when
         the ball sinks?
