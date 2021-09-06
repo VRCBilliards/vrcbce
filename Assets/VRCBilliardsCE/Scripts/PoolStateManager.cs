@@ -155,24 +155,24 @@ namespace VRCBilliards
         /*
          * Public Variables
          */
-
-        [Header("Other VRCBilliards Components")]
-        [Tooltip("Does the table model for this table have rails that guide the ball when the ball sinks?")]
-        public bool tableModelHasRails;
         
-        public GameObject baseObject;
-        public Transform sunkBallsPositionRoot;
+        [Header("Options")]
+        
+        [Header("Use fake shadows? Fake shadows are high-performance, but they may clash with your world's lighting.")]
+        public bool fakeBallShadows = true;
+        [Header("Does the table model for this table have rails that guide the ball when the ball sinks?")]
+        public bool tableModelHasRails;
 
-        public PoolMenu poolMenu;
+        [Header("------")]
+        
+        [Header("Important Objects")]
+        public Transform sunkBallsPositionRoot;
         public GameObject shadows;
 
-        [Header("Shader Information")] public string uniformTableColour = "_EmissionColor";
+        [Header("Shader Information")]
+        public string uniformTableColour = "_EmissionColor";
         public string uniformMarkerColour = "_Color";
         public string uniformCueColour = "_EmissionColor";
-
-        [Header("Options")]
-        [Tooltip("Use fake shadows? Fake shadows are high-performance, but they may clash with your world's lighting.")]
-        public bool fakeBallShadows = true;
 
         [Tooltip("Change the length of the intro ball-drop animation. If you set this to zero, the animation will not play at all.")]
         [Range(0f, 5f)]
@@ -269,6 +269,9 @@ namespace VRCBilliards
         public Mesh nineBall;
         public Mesh fourBallAdd;
         public Mesh fourBallMinus;
+        
+        private GameObject baseObject;
+        private PoolMenu poolMenu;
 
         private Quaternion baseObjectRot;
 
@@ -602,6 +605,40 @@ namespace VRCBilliards
 
         public void Start()
         {
+            if (transform.parent && transform.parent.parent)
+            {
+                baseObject = transform.parent.parent.gameObject;
+            }
+            
+            if (baseObject == null)
+            {
+                if (logger)
+                {
+                    logger.Error(name, "The pool table attempted to access the root of the table, which should be an object two parents above its own transform. It was unable to do so, and the pool table will thus not function.");   
+                }
+                else
+                {
+                    Debug.LogError("The pool table attempted to access the root of the table, which should be an object two parents above its own transform. It was unable to do so, and the pool table will thus not function.");    
+                }
+                gameObject.SetActive(false);
+                return;
+            }
+
+            poolMenu = baseObject.GetComponentInChildren<PoolMenu>(true);
+            if (poolMenu == null)
+            {
+                if (logger)
+                {
+                    logger.Error(name, "The pool table attempted to find a PoolMenu inside the children of its base object (its parent's parent), but was unable to do so, and will not function.");   
+                }
+                else
+                {
+                    Debug.LogError("The pool table attempted to find a PoolMenu inside the children of its base object (its parent's parent), but was unable to do so, and will not function.");    
+                }
+                gameObject.SetActive(false);
+                return;
+            }
+            
             if (Networking.LocalPlayer == null)
             {
                 return;
