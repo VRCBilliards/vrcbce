@@ -285,6 +285,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 8854834282281994078}
     m_Modifications:
+    - target: {fileID: 992202117206350037, guid: ee9f4e835544408469fb94985a04b320,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 1.17
+      objectReference: {fileID: 0}
+    - target: {fileID: 992202117206350037, guid: ee9f4e835544408469fb94985a04b320,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0.015
+      objectReference: {fileID: 0}
     - target: {fileID: 3492924436368285980, guid: ee9f4e835544408469fb94985a04b320,
         type: 3}
       propertyPath: m_RootOrder
@@ -360,6 +370,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: VRCBCE Menu (M.O.O.N)
       objectReference: {fileID: 0}
+    - target: {fileID: 5433868121936968853, guid: ee9f4e835544408469fb94985a04b320,
+        type: 3}
+      propertyPath: m_Color.a
+      value: 0.87058824
+      objectReference: {fileID: 0}
     - target: {fileID: 5504866426431299960, guid: ee9f4e835544408469fb94985a04b320,
         type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -370,6 +385,21 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 24.599997
       objectReference: {fileID: 0}
+    - target: {fileID: 7366014742925185596, guid: ee9f4e835544408469fb94985a04b320,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 1.17
+      objectReference: {fileID: 0}
+    - target: {fileID: 7366014742925185596, guid: ee9f4e835544408469fb94985a04b320,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0.015
+      objectReference: {fileID: 0}
+    - target: {fileID: 7467908718316244178, guid: ee9f4e835544408469fb94985a04b320,
+        type: 3}
+      propertyPath: m_Color.a
+      value: 0.87058824
+      objectReference: {fileID: 0}
     - target: {fileID: 7966470108517044836, guid: ee9f4e835544408469fb94985a04b320,
         type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -379,6 +409,21 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 7.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 8984270444961131412, guid: ee9f4e835544408469fb94985a04b320,
+        type: 3}
+      propertyPath: m_Color.a
+      value: 0.87058824
+      objectReference: {fileID: 0}
+    - target: {fileID: 9021988055868913018, guid: ee9f4e835544408469fb94985a04b320,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -1.17
+      objectReference: {fileID: 0}
+    - target: {fileID: 9021988055868913018, guid: ee9f4e835544408469fb94985a04b320,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0.015
       objectReference: {fileID: 0}
     - target: {fileID: 9116246103682537617, guid: ee9f4e835544408469fb94985a04b320,
         type: 3}
