@@ -22,7 +22,7 @@ namespace VRCBilliards
             publicVariables
             privateVariables
         */
-        
+
         #region Constants
 
         /*
@@ -40,7 +40,7 @@ namespace VRCBilliards
         /// time step in seconds per iteration
         /// </summary>
         private const float FIXED_TIME_STEP = 0.0125f;
-        
+
         /// <summary>
         /// horizontal span of table
         /// </summary>
@@ -149,22 +149,22 @@ namespace VRCBilliards
         /// Number of simulated balls in the table's domain.
         /// </summary>
         private const int NUMBER_OF_SIMULATED_BALLS = 16;
-        
+
         #endregion
 
         /*
          * Public Variables
          */
-        
+
         [Header("Options")]
-        
+
         [Tooltip("Use fake shadows? Fake shadows are high-performance, but they may clash with your world's lighting.")]
         public bool fakeBallShadows = true;
         [Tooltip("Does the table model for this table have rails that guide the ball when the ball sinks?")]
         public bool tableModelHasRails;
 
         [Header("------")]
-        
+
         [Header("Important Objects")]
         public Transform sunkBallsPositionRoot;
         public GameObject shadows;
@@ -199,7 +199,7 @@ namespace VRCBilliards
         public Color fabricGray = new Color(0.3f, 0.3f, 0.3f, 1.0f);
         public Color fabricBlue = new Color(0.1f, 0.6f, 1.0f, 1.0f);
         public Color fabricGreen = new Color(0.15f, 0.75f, 0.3f, 1.0f);
-        
+
 
         [Header("Cues")] public PoolCue[] poolCues;
 
@@ -265,7 +265,7 @@ namespace VRCBilliards
         public Mesh nineBall;
         public Mesh fourBallAdd;
         public Mesh fourBallMinus;
-        
+
         private GameObject baseObject;
         private PoolMenu poolMenu;
 
@@ -522,19 +522,24 @@ namespace VRCBilliards
         private Transform markerTransform;
 
         private Camera desktopCamera;
-        
+
         /// <summary>
         /// A value intended to accomodate for resized tables, to make them possible to use without using an avatar with
         /// an equivalent height.
         /// </summary>
         private float forceMultiplier;
-        
+
         private TMPro.TextMeshProUGUI timerText;
         private string timerOutputFormat;
         private UnityEngine.UI.Image timerCountdown;
 
         private UInt32 oldDesktopCue;
         private UInt32 newDesktopCue;
+
+        /// <summary>
+        /// Force inflicted on non-kinematic pool balls from the center of the table outwards. Helps prevent bounce-back.
+        /// </summary>
+        private float repulsionForce = 0.2F;
 
         /// <summary>
         /// Have we run a network sync once? Used for situations where we need to specifically catch up a late-joiner.
@@ -596,7 +601,7 @@ namespace VRCBilliards
         private bool hasPaidToSignUp;
 
         #endregion
-        
+
         private bool startHasConcluded;
 
         public void Start()
@@ -605,16 +610,16 @@ namespace VRCBilliards
             {
                 baseObject = transform.parent.parent.gameObject;
             }
-            
+
             if (baseObject == null)
             {
                 if (logger)
                 {
-                    logger.Error(name, "The pool table attempted to access the root of the table, which should be an object two parents above its own transform. It was unable to do so, and the pool table will thus not function.");   
+                    logger.Error(name, "The pool table attempted to access the root of the table, which should be an object two parents above its own transform. It was unable to do so, and the pool table will thus not function.");
                 }
                 else
                 {
-                    Debug.LogError("The pool table attempted to access the root of the table, which should be an object two parents above its own transform. It was unable to do so, and the pool table will thus not function.");    
+                    Debug.LogError("The pool table attempted to access the root of the table, which should be an object two parents above its own transform. It was unable to do so, and the pool table will thus not function.");
                 }
                 gameObject.SetActive(false);
                 return;
@@ -625,16 +630,16 @@ namespace VRCBilliards
             {
                 if (logger)
                 {
-                    logger.Error(name, "The pool table attempted to find a PoolMenu inside the children of its base object (its parent's parent), but was unable to do so, and will not function.");   
+                    logger.Error(name, "The pool table attempted to find a PoolMenu inside the children of its base object (its parent's parent), but was unable to do so, and will not function.");
                 }
                 else
                 {
-                    Debug.LogError("The pool table attempted to find a PoolMenu inside the children of its base object (its parent's parent), but was unable to do so, and will not function.");    
+                    Debug.LogError("The pool table attempted to find a PoolMenu inside the children of its base object (its parent's parent), but was unable to do so, and will not function.");
                 }
                 gameObject.SetActive(false);
                 return;
             }
-            
+
             if (Networking.LocalPlayer == null)
             {
                 return;
@@ -791,8 +796,8 @@ namespace VRCBilliards
             timerCountdown = poolMenu.timerCountdown;
 
             startHasConcluded = true;
-            
-            
+
+
         }
 
         public void Update()
@@ -1058,7 +1063,8 @@ namespace VRCBilliards
                 timerCountdown.fillAmount = 0f;
             }
 
-            foreach (Material tableMaterial in tableMaterials){
+            foreach (Material tableMaterial in tableMaterials)
+            {
                 tableMaterial.SetColor(uniformTableColour, tableCurrentColour);
             }
 
@@ -1127,7 +1133,29 @@ namespace VRCBilliards
                 }
             }
         }
-        
+
+        private void FixedUpdate()
+        {
+            if (isGameInMenus)
+            {
+                return;
+            }
+
+            Vector3 referencePosition = transform.position;
+
+            foreach (Rigidbody poolBall in ballRigidbodies)
+            {
+                if (poolBall.isKinematic || !((referencePosition.y - poolBall.position.y) < 0))
+                {
+                    continue;
+                }
+
+                Vector3 differenceNormalized = poolBall.position - referencePosition;
+                differenceNormalized = Vector3.Normalize(differenceNormalized) * repulsionForce;
+
+                poolBall.AddForce(differenceNormalized);
+            }
+        }
         public void _ReEnableShadowConstraints()
         {
             foreach (PositionConstraint con in ballShadowPosConstraints)
@@ -2171,6 +2199,7 @@ namespace VRCBilliards
 
                     isRepositioningCueBall = true;
                     repoMaxX = -SPOT_POSITION_X;
+                    ballRigidbodies[0].isKinematic = true;
 
                     if (marker)
                     {
@@ -2585,7 +2614,7 @@ namespace VRCBilliards
             {
                 PlaceSunkBallsIntoRestingPlace();
             }
-            
+
             if (logger)
             {
                 logger.Log(name, "disabling marker because the game is over");
@@ -2684,6 +2713,7 @@ namespace VRCBilliards
                 if (isOurTurn)
                 {
                     isRepositioningCueBall = true;
+                    ballRigidbodies[0].isKinematic = true;
                     repoMaxX = TABLE_WIDTH;
 
                     if (logger)
@@ -2996,7 +3026,7 @@ namespace VRCBilliards
             {
                 PayBack(price * (raiseCount - 1));
             }
-            
+
             // Make sure that we run a pass on rigidbodies to ensure they are off.
             PlaceSunkBallsIntoRestingPlace();
         }
