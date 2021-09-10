@@ -602,6 +602,8 @@ namespace VRCBilliards
         private bool hasPaidToSignUp;
 
         #endregion
+        
+        private bool startHasConcluded;
 
         public void Start()
         {
@@ -794,6 +796,8 @@ namespace VRCBilliards
             timerText = poolMenu.visibleTimerDuringGame;
             timerOutputFormat = poolMenu.timerOutputFormat;
             timerCountdown = poolMenu.timerCountdown;
+            
+            startHasConcluded = true;
         }
 
         public void Update()
@@ -1131,7 +1135,10 @@ namespace VRCBilliards
 
         public void OnEnable()
         {
-            PlaceSunkBallsIntoRestingPlace();
+            if (startHasConcluded)
+            {
+                ReadNetworkData();
+            }
         }
 
         public void _ReEnableShadowConstraints()
