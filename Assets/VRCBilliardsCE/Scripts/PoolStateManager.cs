@@ -398,7 +398,7 @@ namespace VRCBilliards
         /// <summary>
         /// Ball dropper timer
         /// </summary>
-        private float introAminTimer;
+        private float introAnimTimer;
 
         /// <summary>
         /// Tracker variable to see if balls are still on the go
@@ -796,8 +796,10 @@ namespace VRCBilliards
             timerText = poolMenu.visibleTimerDuringGame;
             timerOutputFormat = poolMenu.timerOutputFormat;
             timerCountdown = poolMenu.timerCountdown;
-            
+
             startHasConcluded = true;
+            
+            
         }
 
         public void Update()
@@ -1067,18 +1069,18 @@ namespace VRCBilliards
                 tableMaterial.SetColor(uniformTableColour, tableCurrentColour);
             }
 
-            // Run the intro animation.
-            if (introAminTimer > 0.0f)
+            // Run the intro animation. Do not run the animation if this is our first sync!
+            if (hasRunSyncOnce && introAnimTimer > 0.0f)
             {
-                introAminTimer -= Time.deltaTime;
+                introAnimTimer -= Time.deltaTime;
 
                 Vector3 temp;
                 float atime;
                 float aitime;
 
-                if (introAminTimer < 0.0f)
+                if (introAnimTimer < 0.0f)
                 {
-                    introAminTimer = 0.0f;
+                    introAnimTimer = 0.0f;
                 }
 
                 // Cueball drops late
@@ -1086,7 +1088,7 @@ namespace VRCBilliards
                 temp = ball.localPosition;
                 float height = ball.position.y - ballShadowOffset;
 
-                atime = Mathf.Clamp(introAminTimer - 0.33f, 0.0f, 1.0f);
+                atime = Mathf.Clamp(introAnimTimer - 0.33f, 0.0f, 1.0f);
                 aitime = 1.0f - atime;
                 temp.y = Mathf.Abs(Mathf.Cos(atime * 6.29f)) * atime * 0.5f;
                 ball.localPosition = temp;
@@ -1111,7 +1113,7 @@ namespace VRCBilliards
                     temp = ball.localPosition;
                     height = ball.position.y - ballShadowOffset;
 
-                    atime = Mathf.Clamp(introAminTimer - 0.84f - (i * 0.03f), 0.0f, 1.0f);
+                    atime = Mathf.Clamp(introAnimTimer - 0.84f - (i * 0.03f), 0.0f, 1.0f);
                     aitime = 1.0f - atime;
 
                     temp.y = Mathf.Abs(Mathf.Cos(atime * 6.29f)) * atime * 0.5f;
@@ -1132,15 +1134,7 @@ namespace VRCBilliards
                 }
             }
         }
-
-        public void OnEnable()
-        {
-            if (startHasConcluded)
-            {
-                ReadNetworkData();
-            }
-        }
-
+        
         public void _ReEnableShadowConstraints()
         {
             foreach (PositionConstraint con in ballShadowPosConstraints)
@@ -2394,6 +2388,14 @@ namespace VRCBilliards
             hasRunSyncOnce = true;
         }
 
+        public void OnDisable()
+        {
+            // Disabling the table means we're in an identical state to a late-joiner - the table will have progressed
+            // since we last ran a sync. Ergo, we should tell the table that it needs to handle things as if the player
+            // is a late-joiner.
+            hasRunSyncOnce = false;
+        }
+
         /// <summary>
         /// Updates table colour target to appropriate player colour
         /// </summary>
@@ -2971,12 +2973,15 @@ namespace VRCBilliards
                 }
             }
 
-            // Effects
-            introAminTimer = introAnimationLength;
-            if (introAminTimer > 0.0f)
+            // Effects - don't run this if this is the first network sync, as we may be catching up.
+            if (hasRunSyncOnce)
             {
-                mainSrc.PlayOneShot(introSfx, 1.0f);
-                SendCustomEventDelayedSeconds(nameof(_ReEnableShadowConstraints), introAnimationLength);
+                introAnimTimer = introAnimationLength;
+                if (introAnimTimer > 0.0f)
+                {
+                    mainSrc.PlayOneShot(introSfx, 1.0f);
+                    SendCustomEventDelayedSeconds(nameof(_ReEnableShadowConstraints), introAnimationLength);
+                }
             }
 
             isTimerRunning = false;
