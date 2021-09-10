@@ -1129,6 +1129,11 @@ namespace VRCBilliards
             }
         }
 
+        public void OnEnable()
+        {
+            PlaceSunkBallsIntoRestingPlace();
+        }
+
         public void _ReEnableShadowConstraints()
         {
             foreach (PositionConstraint con in ballShadowPosConstraints)
