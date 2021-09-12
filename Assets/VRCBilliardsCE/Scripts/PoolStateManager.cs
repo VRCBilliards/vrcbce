@@ -273,8 +273,6 @@ namespace VRCBilliards
         private GameObject baseObject;
         private PoolMenu poolMenu;
 
-        private Quaternion baseObjectRot;
-
         /// <summary>
         /// True whilst balls are rolling
         /// </summary>
@@ -660,7 +658,6 @@ namespace VRCBilliards
 #endif
 
             tableMaterials = tableRenderer.materials;
-            baseObjectRot = baseObject.transform.rotation;
 
             ballRigidbodies = new Rigidbody[ballTransforms.Length];
             for (int i = 0; i < ballRigidbodies.Length; i++)
@@ -1932,8 +1929,8 @@ namespace VRCBilliards
                         // VFX ( make ball move )
                         Rigidbody body = ballTransforms[i].GetComponent<Rigidbody>();
                         body.isKinematic = false;
-                        
-                        body.velocity = baseObjectRot * new Vector3(
+
+                        body.velocity = baseObject.transform.rotation * new Vector3(
                             Mathf.Clamp(currentBallVelocities[i].x, (pocketVelocityClamp * -1), pocketVelocityClamp),
                             0.0f,
                             Mathf.Clamp(currentBallVelocities[i].z, (pocketVelocityClamp * -1), pocketVelocityClamp)
@@ -3275,7 +3272,7 @@ namespace VRCBilliards
             currentBallVelocities[ballID] = V;
 
             // FSP [22/03/21]: Use the base object's rotation as a factor in the axis. This stops the balls spinning incorrectly.
-            ballTransforms[ballID].Rotate((baseObjectRot * W).normalized,
+            ballTransforms[ballID].Rotate((baseObject.transform.rotation * W).normalized,
                 W.magnitude * FIXED_TIME_STEP * -Mathf.Rad2Deg, Space.World);
 
             uint ball_bit = 0x1U << ballID;
