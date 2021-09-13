@@ -44,7 +44,7 @@ Shader "CF-Pool/Fur"
                 #pragma vertex vert_surface
                 #pragma fragment frag_surface
                 #define FURSTEP 0.00
-                #include "cf-fur-helper.cginc"
+                #include "CottonFoxFur.cginc"
                 ENDCG
                 
             }
@@ -57,7 +57,7 @@ Shader "CF-Pool/Fur"
                 #pragma vertex vert_base
                 #pragma fragment frag_base
                 #define FURSTEP 0.10
-                #include "cf-fur-helper.cginc"
+                #include "CottonFoxFur.cginc"
                 
                 ENDCG
                 
@@ -70,7 +70,7 @@ Shader "CF-Pool/Fur"
                 #pragma vertex vert_base
                 #pragma fragment frag_base
                 #define FURSTEP 0.20
-                #include "cf-fur-helper.cginc"
+                #include "CottonFoxFur.cginc"
                 
                 ENDCG
                 
@@ -83,7 +83,7 @@ Shader "CF-Pool/Fur"
                 #pragma vertex vert_base
                 #pragma fragment frag_base
                 #define FURSTEP 0.30
-                #include "cf-fur-helper.cginc"
+                #include "CottonFoxFur.cginc"
                 
                 ENDCG
                 
@@ -96,7 +96,7 @@ Shader "CF-Pool/Fur"
                 #pragma vertex vert_base
                 #pragma fragment frag_base
                 #define FURSTEP 0.40
-                #include "cf-fur-helper.cginc"
+                #include "CottonFoxFur.cginc"
                 
                 ENDCG
                 
@@ -109,7 +109,7 @@ Shader "CF-Pool/Fur"
                 #pragma vertex vert_base
                 #pragma fragment frag_base
                 #define FURSTEP 0.50
-                #include "cf-fur-helper.cginc"
+                #include "CottonFoxFur.cginc"
                 
                 ENDCG
                 
@@ -122,7 +122,7 @@ Shader "CF-Pool/Fur"
                 #pragma vertex vert_base
                 #pragma fragment frag_base
                 #define FURSTEP 0.60
-                #include "cf-fur-helper.cginc"
+                #include "CottonFoxFur.cginc"
                 
                 ENDCG
                 
@@ -135,7 +135,7 @@ Shader "CF-Pool/Fur"
                 #pragma vertex vert_base
                 #pragma fragment frag_base
                 #define FURSTEP 0.70
-                #include "cf-fur-helper.cginc"
+                #include "CottonFoxFur.cginc"
                 
                 ENDCG
                 
@@ -148,7 +148,7 @@ Shader "CF-Pool/Fur"
                 #pragma vertex vert_base
                 #pragma fragment frag_base
                 #define FURSTEP 0.80
-                #include "cf-fur-helper.cginc"
+                #include "CottonFoxFur.cginc"
                 
                 ENDCG
                 
@@ -161,7 +161,7 @@ Shader "CF-Pool/Fur"
                 #pragma vertex vert_base
                 #pragma fragment frag_base
                 #define FURSTEP 0.90
-                #include "cf-fur-helper.cginc"
+                #include "CottonFoxFur.cginc"
                 
                 ENDCG
                 
@@ -174,7 +174,7 @@ Shader "CF-Pool/Fur"
                 #pragma vertex vert_base
                 #pragma fragment frag_base
                 #define FURSTEP 1.00
-                #include "cf-fur-helper.cginc"
+                #include "CottonFoxFur.cginc"
                 
                 ENDCG
                 
