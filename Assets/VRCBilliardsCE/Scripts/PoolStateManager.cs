@@ -184,26 +184,22 @@ namespace VRCBilliards
         [Tooltip("This value scales the clamp applied to the velocity of pocketted balls. Raising this will make pockets look less artificial at the cost of increasing the chance high-velocity balls will fly out of the table.")]
         public float pocketVelocityClamp = 0.5f;
 
-        [Header("Table Colours")] public Color tableBlue = new Color(0.0f, 0.75f, 1.75f, 1.0f);
-        public Color tableOrange = new Color(1.75f, 0.25f, 0.0f, 1.0f);
-        public Color tableRed = new Color(1.2f, 0.0f, 0.0f, 1.0f);
-        public Color tableWhite = new Color(1.0f, 1.0f, 1.0f, 1.0f);
-        public Color tableBlack = new Color(0.01f, 0.01f, 0.01f, 1.0f);
-        public Color tableYellow = new Color(2.0f, 1.0f, 0.0f, 1.0f);
-        public Color tablePink = new Color(2.0f, 0.0f, 1.5f, 1.0f);
-        public Color tableGreen = new Color(0.0f, 2.0f, 0.0f, 1.0f);
-        public Color tableLightBlue = new Color(0.3f, 0.6f, 1.0f, 1.0f);
+        [Header("Table Colours")]
+        [ColorUsage(true, true)] public Color tableBlue = new Color(0.0f, 0.75f, 1.75f, 1.0f);
+        [ColorUsage(true, true)] public Color tableOrange = new Color(1.75f, 0.25f, 0.0f, 1.0f);
+        [ColorUsage(true, true)] public Color tableRed = new Color(1.2f, 0.0f, 0.0f, 1.0f);
+        [ColorUsage(true, true)] public Color tableWhite = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+        [ColorUsage(true, true)] public Color tableBlack = new Color(0.01f, 0.01f, 0.01f, 1.0f);
+        [ColorUsage(true, true)] public Color tableYellow = new Color(2.0f, 1.0f, 0.0f, 1.0f);
+        [ColorUsage(true, true)] public Color tableLightBlue = new Color(0.3f, 0.6f, 1.0f, 1.0f);
         public Color markerOK = new Color(0.0f, 1.0f, 0.0f, 1.0f);
         public Color markerNotOK = new Color(1.0f, 0.0f, 0.0f, 1.0f);
         public Color gripColourActive = new Color(0.0f, 0.5f, 1.1f, 1.0f);
         public Color gripColourInactive = new Color(0.34f, 0.34f, 0.34f, 1.0f);
         public Color fabricGray = new Color(0.3f, 0.3f, 0.3f, 1.0f);
-        public Color fabricRed = new Color(0.9f, 0.2f, 0.1f, 1.0f);
         public Color fabricBlue = new Color(0.1f, 0.6f, 1.0f, 1.0f);
-        public Color fabricWhite = new Color(0.8f, 0.8f, 0.8f, 1.0f);
         public Color fabricGreen = new Color(0.15f, 0.75f, 0.3f, 1.0f);
-        public Color aimAiming = new Color(0.7f, 0.7f, 0.7f, 1.0f);
-        public Color aimLocked = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+        
 
         [Header("Cues")] public PoolCue[] poolCues;
 
@@ -247,7 +243,7 @@ namespace VRCBilliards
 
         public Texture[] sets;
 
-        //public Material guidelineMat;
+
         public Material[] cueGrips;
         //public Material markerMaterial;
 
@@ -1593,7 +1589,6 @@ namespace VRCBilliards
             }
 
             isArmed = false;
-            //guidelineMat.SetColor("_Colour", aimAiming);
         }
 
         /// <summary>
