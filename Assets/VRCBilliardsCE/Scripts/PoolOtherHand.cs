@@ -12,8 +12,7 @@ namespace VRCBilliards
 
         private bool isHolding;
         public bool isOtherBeingHeld;
-
-        private Vector3 originalOffset;
+        
         private Transform originalParent;
 
         private bool isLocked;
@@ -26,8 +25,7 @@ namespace VRCBilliards
                 gameObject.SetActive(false);
                 return;
             }
-
-            originalOffset = transform.position;
+            
             originalParent = transform.parent;
 
             cue = objPrimary.GetComponent<PoolCue>();
@@ -72,11 +70,6 @@ namespace VRCBilliards
         public override void OnPickupUseUp()
         {
             isLocked = false;
-        }
-
-        public void _Respawn()
-        {
-            transform.position = originalOffset;
         }
     }
 }
