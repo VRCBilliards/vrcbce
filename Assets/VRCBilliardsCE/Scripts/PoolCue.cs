@@ -11,6 +11,7 @@ namespace VRCBilliards
         private Transform targetTransform;
 
         private Vector3 cueRespawnPosition;
+        private Vector3 otherHandRespawnPosition;
 
         public Transform cueParent;
 
@@ -77,13 +78,14 @@ namespace VRCBilliards
                 return;
             }
 
-            cueRespawnPosition = transform.position;
+            cueRespawnPosition = transform.localPosition;
             playerApi = Networking.LocalPlayer;
             usingDesktop = !playerApi.IsUserInVR();
 
             ownCollider = GetComponent<Collider>();
 
             targetTransform = otherHand.transform;
+            otherHandRespawnPosition = targetTransform.localPosition;
 
             targetCollider = targetTransform.GetComponent<Collider>();
             if (!targetCollider)
@@ -111,7 +113,7 @@ namespace VRCBilliards
                 return;
             }
 
-            startingRotation = cueParent.rotation;
+            startingRotation = cueParent.localRotation;
 
             _DenyAccess();
 
@@ -274,18 +276,16 @@ namespace VRCBilliards
         /// </summary>
         public void _Respawn()
         {
-            transform.position = cueRespawnPosition;
-            cueParent.position = transform.position;
-            otherHand._Respawn();
+            Respawn();
+        }
 
-            if (usingDesktop)
-            {
-                cueParent.rotation = startingRotation;
-            }
-            else
-            {
-                cueParent.LookAt(targetTransform.position);
-            }
+        private void Respawn()
+        {
+            transform.localPosition = cueRespawnPosition;
+            cueParent.localPosition = transform.localPosition;
+            transform.localRotation = startingRotation;
+            targetTransform.localPosition = otherHandRespawnPosition;
+            cueParent.LookAt(targetTransform.position);
         }
 
         private void ResetTarget()
