@@ -168,6 +168,8 @@ namespace VRCBilliards
         [Header("Important Objects")]
         public Transform sunkBallsPositionRoot;
         public GameObject shadows;
+        public ParticleSystem plusOneParticleSystem;
+        public ParticleSystem minusOneParticleSystem;
 
         [Header("Shader Information")]
         public string uniformTableColour = "_EmissionColor";
@@ -615,7 +617,7 @@ namespace VRCBilliards
             {
                 if (logger)
                 {
-                    logger.Error(name, "The pool table attempted to access the root of the table, which should be an object two parents above its own transform. It was unable to do so, and the pool table will thus not function.");
+                    logger._Error(name, "The pool table attempted to access the root of the table, which should be an object two parents above its own transform. It was unable to do so, and the pool table will thus not function.");
                 }
                 else
                 {
@@ -630,7 +632,7 @@ namespace VRCBilliards
             {
                 if (logger)
                 {
-                    logger.Error(name, "The pool table attempted to find a PoolMenu inside the children of its base object (its parent's parent), but was unable to do so, and will not function.");
+                    logger._Error(name, "The pool table attempted to find a PoolMenu inside the children of its base object (its parent's parent), but was unable to do so, and will not function.");
                 }
                 else
                 {
@@ -745,7 +747,7 @@ namespace VRCBilliards
             ballShadowOffset = ballTransforms[0].position.y - ballShadowPosConstraintTransforms[0].position.y;
             if (logger)
             {
-                logger.Log(name, $"ball shadow offset is {ballShadowOffset}");
+                logger._Log(name, $"ball shadow offset is {ballShadowOffset}");
             }
 
             shadowRenders = shadows.GetComponentsInChildren<MeshRenderer>();
@@ -761,7 +763,7 @@ namespace VRCBilliards
             {
                 if (logger)
                 {
-                    logger.Warning(name,
+                    logger._Warning(name,
                         "You appear to have scaled this table in a non-uniform way. VRCBCE makes no guarantees of what might happen when you do this. May God have mercy on your soul.");
                 }
                 else
@@ -777,7 +779,7 @@ namespace VRCBilliards
                 forceMultiplier = DEFAULT_FORCE_MULTIPLIER * scaler;
                 if (logger)
                 {
-                    logger.Log(name,
+                    logger._Log(name,
                         $"Due to increased scale of {scaler} , setting force multiplier of hits to {DEFAULT_FORCE_MULTIPLIER} * {scaler} = {forceMultiplier}");
                 }
             }
@@ -802,42 +804,6 @@ namespace VRCBilliards
 
         public void Update()
         {
-            if (isParticleAlive)
-            {
-                float scale, s, v, e;
-
-                // Evaluate time
-                particleTime += Time.deltaTime * 0.25f;
-
-                // Sustained step
-                s = Mathf.Max(particleTime - 0.1f, 0.0f);
-                v = Mathf.Min(particleTime * particleTime * 100.0f, 21.0f * s * Mathf.Exp(-15.0f * s));
-
-                // Exponential step
-                e = Mathf.Exp(-17.0f * Mathf.Pow(Mathf.Max(particleTime - 1.2f, 0.0f), 3.0f));
-
-                scale = e * v * 2.0f;
-
-                // Set scale
-                point4BallTransform.localScale = new Vector3(scale, scale, scale);
-
-                // Set position
-                Vector3 temp = point4BallTransform.localPosition;
-                temp.y = particleTime * 0.5f;
-                point4BallTransform.localPosition = temp;
-
-                // Particle death
-                if (particleTime > 2.0f)
-                {
-                    isParticleAlive = false;
-
-                    if (point4Ball)
-                    {
-                        point4Ball.SetActive(false);
-                    }
-                }
-            }
-
             if (isInDesktopTopDownView)
             {
                 HandleUpdatingDesktopViewUI();
@@ -1197,7 +1163,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "UnlockTable");
+                logger._Log(name, "UnlockTable");
             }
 
             Networking.SetOwner(localPlayer, gameObject);
@@ -1210,7 +1176,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "LockTable");
+                logger._Log(name, "LockTable");
             }
 
             Networking.SetOwner(localPlayer, gameObject);
@@ -1223,7 +1189,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, $"JoinGame: {playerNumber}");
+                logger._Log(name, $"JoinGame: {playerNumber}");
             }
 
             if (!Pay(TotalPrice))
@@ -1263,7 +1229,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "LeaveGame");
+                logger._Log(name, "LeaveGame");
             }
 
             Networking.SetOwner(localPlayer, gameObject);
@@ -1320,7 +1286,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "IncreaseTimer");
+                logger._Log(name, "IncreaseTimer");
             }
 
             Networking.SetOwner(localPlayer, gameObject);
@@ -1336,7 +1302,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "DecreaseTimer");
+                logger._Log(name, "DecreaseTimer");
             }
 
             Networking.SetOwner(localPlayer, gameObject);
@@ -1352,7 +1318,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "SelectTeams");
+                logger._Log(name, "SelectTeams");
             }
 
             Networking.SetOwner(localPlayer, gameObject);
@@ -1365,7 +1331,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "DeselectTeams");
+                logger._Log(name, "DeselectTeams");
             }
 
             Networking.SetOwner(localPlayer, gameObject);
@@ -1378,7 +1344,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "EnableGuideline");
+                logger._Log(name, "EnableGuideline");
             }
 
             Networking.SetOwner(localPlayer, gameObject);
@@ -1390,7 +1356,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "DisableGuideline");
+                logger._Log(name, "DisableGuideline");
             }
 
             Networking.SetOwner(localPlayer, gameObject);
@@ -1405,7 +1371,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "StartNewGame");
+                logger._Log(name, "StartNewGame");
             }
 
             if (!isGameInMenus)
@@ -1528,7 +1494,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "Select8Ball");
+                logger._Log(name, "Select8Ball");
             }
 
             Networking.SetOwner(localPlayer, gameObject);
@@ -1541,7 +1507,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "Select9Ball");
+                logger._Log(name, "Select9Ball");
             }
 
             Networking.SetOwner(localPlayer, gameObject);
@@ -1557,7 +1523,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "Select4BallJapanese");
+                logger._Log(name, "Select4BallJapanese");
             }
 
             Networking.SetOwner(localPlayer, gameObject);
@@ -1575,7 +1541,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "Select4BallKorean");
+                logger._Log(name, "Select4BallKorean");
             }
 
             Networking.SetOwner(localPlayer, gameObject);
@@ -1594,7 +1560,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "StartHit");
+                logger._Log(name, "StartHit");
             }
 
             // lock aim variables
@@ -1613,7 +1579,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "EndHit");
+                logger._Log(name, "EndHit");
             }
 
             isArmed = false;
@@ -1626,14 +1592,14 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "PlaceBall");
+                logger._Log(name, "PlaceBall");
             }
 
             if (!IsCueContacting())
             {
                 if (logger)
                 {
-                    logger.Log(name, "disabling marker because the ball hase been placed");
+                    logger._Log(name, "disabling marker because the ball hase been placed");
                 }
 
                 isRepositioningCueBall = false;
@@ -1660,7 +1626,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "ForceReset");
+                logger._Log(name, "ForceReset");
             }
 
             if (
@@ -1684,7 +1650,7 @@ namespace VRCBilliards
             }
             else if (logger)
             {
-                logger.Log(name, "Cannot reset table: You must be a player, or the table must be in an invalid state.");
+                logger._Log(name, "Cannot reset table: You must be a player, or the table must be in an invalid state.");
             }
         }
 
@@ -1701,7 +1667,7 @@ namespace VRCBilliards
 
             if (logger)
             {
-                logger.Log(name, "Forcing a reset was successful.");
+                logger._Log(name, "Forcing a reset was successful.");
             }
         }
 
@@ -1709,7 +1675,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "OnDesktopTopDownViewStart");
+                logger._Log(name, "OnDesktopTopDownViewStart");
             }
 
             isInDesktopTopDownView = true;
@@ -1735,7 +1701,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "OnPutDownCueLocally");
+                logger._Log(name, "OnPutDownCueLocally");
             }
 
             OnDesktopTopDownViewExit();
@@ -2159,7 +2125,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "RefreshNetworkData");
+                logger._Log(name, "RefreshNetworkData");
             }
 
             newIsTeam2Turn = newIsTeam2Playing;
@@ -2176,7 +2142,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "ReadNetworkData");
+                logger._Log(name, "ReadNetworkData");
             }
 
             if (marker)
@@ -2194,7 +2160,7 @@ namespace VRCBilliards
                 {
                     if (logger)
                     {
-                        logger.Log(name, "enabling marker because it is the start of the game and we are breaking");
+                        logger._Log(name, "enabling marker because it is the start of the game and we are breaking");
                     }
 
                     isRepositioningCueBall = true;
@@ -2424,7 +2390,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "ApplyTableColour");
+                logger._Log(name, "ApplyTableColour");
             }
 
             if (isFourBall)
@@ -2494,41 +2460,37 @@ namespace VRCBilliards
             cueGrips[Convert.ToInt32(!newIsTeam2Turn)].SetColor(uniformMarkerColour, gripColourInactive);
         }
 
-        private void SpawnFloaty(Vector3 pos, Mesh m)
+
+        
+        private void SpawnPlusOne(Transform ball)
         {
             if (logger)
             {
-                logger.Log(name, "SpawnFloaty");
+                logger._Log(name, "SpawnPlusOne");
             }
 
-            if (point4Ball)
+            ParticleSystem.EmitParams emitParams = new ParticleSystem.EmitParams();
+            emitParams.position = ball.position;
+            plusOneParticleSystem.Emit(emitParams, 1);
+        }
+
+        private void SpawnMinusOne(Transform ball)
+        {
+            if (logger)
             {
-                point4Ball.SetActive(true);
+                logger._Log(name, "SpawnMinusOne");
             }
-
-            isParticleAlive = true;
-            particleTime = 0.1f;
-
-            // orient to be looking at player
-            Vector3 lpos = localPlayer.GetPosition();
-            Vector3 delta = lpos - transform.TransformPoint(pos);
-            float r = Mathf.Atan2(delta.x, delta.z);
-            point4BallTransform.localRotation = Quaternion.AngleAxis(r * Mathf.Rad2Deg, Vector3.up);
-
-            // set position
-            point4BallTransform.localPosition = pos;
-
-            // Set scale
-            point4BallTransform.localScale = vectorZero;
-
-            point4Ball.GetComponent<MeshFilter>().sharedMesh = m;
+            
+            ParticleSystem.EmitParams emitParams = new ParticleSystem.EmitParams();
+            emitParams.position = ball.position;
+            minusOneParticleSystem.Emit(emitParams, 1);
         }
 
         private void ResetTimer()
         {
             if (logger)
             {
-                logger.Log(name, "ResetTimer");
+                logger._Log(name, "ResetTimer");
             }
 
             if (timerType != 0)
@@ -2561,7 +2523,7 @@ namespace VRCBilliards
             }
         }
 
-        private void OnLocalCaromPoint(Vector3 p)
+        private void OnLocalCaromPoint(Transform ball)
         {
             isMadePoint = true;
             mainSrc.PlayOneShot(pointMadeSfx, 1.0f);
@@ -2573,7 +2535,7 @@ namespace VRCBilliards
                 scores[Convert.ToUInt32(newIsTeam2Turn)] = 10;
             }
 
-            SpawnFloaty(p, fourBallAdd);
+            SpawnPlusOne(ball);
         }
 
         /// <summary>
@@ -2583,7 +2545,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "OnRemoteGameOver");
+                logger._Log(name, "OnRemoteGameOver");
             }
 
             ApplyTableColour(isTeam2Winner);
@@ -2617,7 +2579,7 @@ namespace VRCBilliards
 
             if (logger)
             {
-                logger.Log(name, "disabling marker because the game is over");
+                logger._Log(name, "disabling marker because the game is over");
             }
 
             isRepositioningCueBall = false;
@@ -2661,7 +2623,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "OnRemoteTurnChange");
+                logger._Log(name, "OnRemoteTurnChange");
             }
 
             // Effects
@@ -2678,7 +2640,7 @@ namespace VRCBilliards
                 {
                     if (logger != null)
                     {
-                        logger.Log(name, "0 ball is 0 mesh, 9 ball is 1 mesh");
+                        logger._Log(name, "0 ball is 0 mesh, 9 ball is 1 mesh");
                     }
 
                     ballTransforms[0].GetComponent<MeshFilter>().sharedMesh = cueballMeshes[0];
@@ -2688,7 +2650,7 @@ namespace VRCBilliards
                 {
                     if (logger != null)
                     {
-                        logger.Log(name, "0 ball is 0 mesh, 9 ball is 1 mesh");
+                        logger._Log(name, "0 ball is 0 mesh, 9 ball is 1 mesh");
                     }
 
                     ballTransforms[9].GetComponent<MeshFilter>().sharedMesh = cueballMeshes[0];
@@ -2718,7 +2680,7 @@ namespace VRCBilliards
 
                     if (logger)
                     {
-                        logger.Log(name, "Enabling marker because it is our turn and there was a foul last turn");
+                        logger._Log(name, "Enabling marker because it is our turn and there was a foul last turn");
                     }
 
                     if (marker)
@@ -2750,7 +2712,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "GrantCueAccess");
+                logger._Log(name, "GrantCueAccess");
             }
 
             if (localPlayerID > -1)
@@ -2783,7 +2745,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "OnRemoteNewGame");
+                logger._Log(name, "OnRemoteNewGame");
             }
 
             poolMenu._EnableResetButton();
@@ -3040,7 +3002,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "PlaceSunkBallsIntoRestingPlace");
+                logger._Log(name, "PlaceSunkBallsIntoRestingPlace");
             }
 
             uint ball_bit = 0x1u;
@@ -3358,7 +3320,7 @@ namespace VRCBilliards
                                                 scores[Convert.ToUInt32(newIsTeam2Turn)] = 0;
                                             }
 
-                                            SpawnFloaty(currentBallPositions[i], fourBallMinus);
+                                            SpawnMinusOne(ballTransforms[i]);
                                         }
                                     }
                                     else if (isFirstHit == 0)
@@ -3370,7 +3332,7 @@ namespace VRCBilliards
                                         if (isSecondHit == 0)
                                         {
                                             isSecondHit = i;
-                                            OnLocalCaromPoint(currentBallPositions[i]);
+                                            OnLocalCaromPoint(ballTransforms[i]);
                                         }
                                     }
                                 }
@@ -3385,7 +3347,7 @@ namespace VRCBilliards
                                         if (i != isFirstHit)
                                         {
                                             isSecondHit = i;
-                                            OnLocalCaromPoint(currentBallPositions[i]);
+                                            OnLocalCaromPoint(ballTransforms[i]);
                                         }
                                     }
                                     else if (isThirdHit == 0)
@@ -3393,7 +3355,7 @@ namespace VRCBilliards
                                         if (i != isFirstHit && i != isSecondHit)
                                         {
                                             isThirdHit = i;
-                                            OnLocalCaromPoint(currentBallPositions[i]);
+                                            OnLocalCaromPoint(ballTransforms[i]);
                                         }
                                     }
                                 }
@@ -3538,7 +3500,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "OnTurnOverGameWon");
+                logger._Log(name, "OnTurnOverGameWon");
             }
 
             isGameInMenus = true;
@@ -3554,7 +3516,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "OnTurnOverFoul");
+                logger._Log(name, "OnTurnOverFoul");
             }
 
             isFoul = true;
@@ -3577,7 +3539,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "OnDesktopTopDownViewExit");
+                logger._Log(name, "OnDesktopTopDownViewExit");
             }
 
             isInDesktopTopDownView = false;
@@ -3764,7 +3726,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "disabling marker because the ball hase been hit");
+                logger._Log(name, "disabling marker because the ball hase been hit");
             }
 
             isRepositioningCueBall = false;
@@ -3809,7 +3771,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "UpdateScores");
+                logger._Log(name, "UpdateScores");
             }
 
             if (isFourBall)
@@ -3854,7 +3816,7 @@ namespace VRCBilliards
         {
             if (logger)
             {
-                logger.Log(name, "ResetScores");
+                logger._Log(name, "ResetScores");
             }
 
             poolMenu._SetScore(false, 0);
@@ -3960,7 +3922,7 @@ namespace VRCBilliards
 
             if (logger)
             {
-                logger.Log(name, $"Raise to {price * (raiseCount + 1)}");
+                logger._Log(name, $"Raise to {price * (raiseCount + 1)}");
             }
 
             if (!Pay(price))
@@ -3992,7 +3954,7 @@ namespace VRCBilliards
 
             if (logger)
             {
-                logger.Log(name, $"Payback {value}");
+                logger._Log(name, $"Payback {value}");
             }
 
             PlayAudioClip(paySound);
@@ -4013,12 +3975,12 @@ namespace VRCBilliards
 
             if (Money < value)
             {
-                if (logger) logger.Log(name, "Insufficient funds");
+                if (logger) logger._Log(name, "Insufficient funds");
                 PlayAudioClip(insufficientFundsSound);
                 return false;
             }
 
-            if (logger) logger.Log(name, $"Pay {value}");
+            if (logger) logger._Log(name, $"Pay {value}");
 
             PlayAudioClip(paySound);
             Money -= value;
@@ -4043,7 +4005,7 @@ namespace VRCBilliards
             var total = isSinglePlayer ? singlePlayPrize : prize * raiseCount;
             if (logger)
             {
-                logger.Log(name, $"Give rewards {total}");
+                logger._Log(name, $"Give rewards {total}");
             }
 
             PlayAudioClip(paySound);

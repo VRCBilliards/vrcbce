@@ -107,13 +107,13 @@ namespace VRCBilliards
                 {
                     //For 4 Ball Japanese
                     poolMenu._Select4BallJapanese();
-                    if (logger) logger.Log(name, "Switched to 4Ball JPN");
+                    if (logger) logger._Log(name, "Switched to 4Ball JPN");
                 }
                 else
                 {
                     //For 8Ball
                     poolMenu._Select8Ball();
-                    if (logger) logger.Log(name, "Switched to 8Ball");
+                    if (logger) logger._Log(name, "Switched to 8Ball");
                 }
             }
             else
@@ -121,13 +121,13 @@ namespace VRCBilliards
                 if (isGamemodeMenuSwitched)
                 {
                     poolMenu._Select4BallKorean();
-                    if (logger) logger.Log(name, "Switched to 4Ball KOR");
+                    if (logger) logger._Log(name, "Switched to 4Ball KOR");
                 }
                 else
                 {
                     //For 9Ball
                     poolMenu._Select9Ball();
-                    if (logger) logger.Log(name, "Switched to 9Ball");
+                    if (logger) logger._Log(name, "Switched to 9Ball");
                 }
             }
         }

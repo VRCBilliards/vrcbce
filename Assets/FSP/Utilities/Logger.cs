@@ -15,10 +15,10 @@ namespace FairlySadPanda
 
             public void Start()
             {
-                Log("TestLogger", "Start");
+                _Log("TestLogger", "Start");
             }
 
-            public void Log(string source, string log)
+            public void _Log(string source, string log)
             {
                 if (printLogsToConsole)
                 {
@@ -32,7 +32,7 @@ namespace FairlySadPanda
                 }
             }
 
-            public void Warning(string source, string log)
+            public void _Warning(string source, string log)
             {
                 Debug.LogWarning($"[{Time.timeSinceLevelLoad:N2}] [<color=red>{source}</color>] {log}");
                 text.text += $"\n[{Time.timeSinceLevelLoad:N2}] [<color=yellow>{source}</color>] {log}";
@@ -42,7 +42,7 @@ namespace FairlySadPanda
                 }
             }
 
-            public void Error(string source, string log)
+            public void _Error(string source, string log)
             {
                 Debug.LogError($"[{Time.timeSinceLevelLoad:N2}] [<color=red>{source}</color>] {log}");
                 text.text += $"\n[{Time.timeSinceLevelLoad:N2}] [<color=red>{source}</color>] {log}";
