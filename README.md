@@ -124,11 +124,15 @@ The VRCBilliards object, which contains the core PoolStateManager script, contai
 
 🌳 Ivylistar - Metal Table
 
+🦊 Juice - CottonFox Table
+
 🚗 Varneon - Optimization
 
 🧙‍♂️ Xiexe - Original Forker, Early refactor work
 
 🧙‍♀️ Silent - [Filamented](https://gitlab.com/s-ilent/filamented)
+
+🎨 Floatharr & Synergiance - Textures
 
 💻 Vowgan & Legoman99573 - Misc. commits
 
