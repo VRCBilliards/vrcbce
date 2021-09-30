@@ -49,7 +49,7 @@ namespace FairlySadPanda.UsefulThings
             {
                 if (networked)
                 {
-                    SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.All, nameof(_ActivateAnimation));
+                    SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.All, nameof(ActivateAnimation));
                 }
                 else
                 {
@@ -58,7 +58,7 @@ namespace FairlySadPanda.UsefulThings
             }
         }
 
-        public void _ActivateAnimation()
+        public void ActivateAnimation()
         {
             Debug.Log("ActivateAnimation");
 
