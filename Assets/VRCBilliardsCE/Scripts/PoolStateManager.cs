@@ -233,8 +233,6 @@ namespace VRCBilliards
         public GameObject marker9ball;
         //public GameObject tableCollisionParent;
         public GameObject pocketBlockers;
-        public GameObject point4Ball;
-        private Transform point4BallTransform;
         public MeshRenderer[] cueRenderObjs;
         private Material[] cueMaterials = new Material[2];
 
@@ -265,8 +263,6 @@ namespace VRCBilliards
 
         [Header("Meshes")] public Mesh[] cueballMeshes;
         public Mesh nineBall;
-        public Mesh fourBallAdd;
-        public Mesh fourBallMinus;
 
         private GameObject baseObject;
         private PoolMenu poolMenu;
@@ -691,7 +687,6 @@ namespace VRCBilliards
             desktopCamera = desktopBase.GetComponentInChildren<Camera>();
             desktopCamera.enabled = false;
 
-            point4BallTransform = point4Ball.transform;
             markerTransform = marker.transform;
 
             CopyGameStateToOldState();
@@ -732,11 +727,6 @@ namespace VRCBilliards
             if (marker9ball)
             {
                 marker9ball.SetActive(false);
-            }
-
-            if (point4Ball)
-            {
-                point4Ball.SetActive(false);
             }
 
             if (shadows)
