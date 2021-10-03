@@ -646,7 +646,7 @@ namespace VRCBilliards
             localPlayer = Networking.LocalPlayer;
             networkingLocalPlayerID = localPlayer.playerId;
 
-            if (Utilities.IsValid(localPlayer))
+            if (VRC.SDKBase.Utilities.IsValid(localPlayer))
             {
                 isPlayerInVR = localPlayer.IsUserInVR();
             }
@@ -3815,7 +3815,7 @@ namespace VRCBilliards
 
         public override void OnPlayerLeft(VRCPlayerApi player)
         {
-            if (!Networking.IsOwner(localPlayer, gameObject) || !Utilities.IsValid(player))
+            if (!Networking.IsOwner(localPlayer, gameObject) || !VRC.SDKBase.Utilities.IsValid(player))
             {
                 return;
             }
