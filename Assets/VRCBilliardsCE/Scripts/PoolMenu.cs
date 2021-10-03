@@ -317,12 +317,12 @@ namespace VRCBilliards
         {
             if (newIsTeams)
             {
-                if (Utilities.IsValid(teamsTxt)) teamsTxt.text = "Teams: YES";
+                if (VRC.SDKBase.Utilities.IsValid(teamsTxt)) teamsTxt.text = "Teams: YES";
                 isTeams = true;
             }
             else
             {
-                if (Utilities.IsValid(teamsTxt)) teamsTxt.text = "Teams: NO";
+                if (VRC.SDKBase.Utilities.IsValid(teamsTxt)) teamsTxt.text = "Teams: NO";
                 isTeams = false;
             }
             UpdateButtonColors(teamsButtons, newIsTeams ? 0 : 1);
@@ -330,24 +330,24 @@ namespace VRCBilliards
             switch (gameMode)
             {
                 case 0:
-                    if (Utilities.IsValid(gameModeTxt)) gameModeTxt.text = "American 8-Ball";
+                    if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = "American 8-Ball";
                     UpdateButtonColors(gameModeButtons, 0);
 
                     break;
                 case 1:
-                    if (Utilities.IsValid(gameModeTxt)) gameModeTxt.text = "American 9-Ball";
+                    if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = "American 9-Ball";
                     UpdateButtonColors(gameModeButtons, 1);
 
                     break;
                 case 2:
                     if (isKorean4Ball)
                     {
-                        if (Utilities.IsValid(gameModeTxt)) gameModeTxt.text = "Korean 4-Ball";
+                        if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = "Korean 4-Ball";
                         UpdateButtonColors(gameModeButtons, 3);
                     }
                     else
                     {
-                        if (Utilities.IsValid(gameModeTxt)) gameModeTxt.text = "Japanese 4-Ball";
+                        if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = "Japanese 4-Ball";
                         UpdateButtonColors(gameModeButtons, 2);
                     }
 
@@ -357,23 +357,23 @@ namespace VRCBilliards
             switch (timerMode)
             {
                 case 0:
-                    if (Utilities.IsValid(timer)) timer.text = noTimerText;
+                    if (VRC.SDKBase.Utilities.IsValid(timer)) timer.text = noTimerText;
                     break;
                 case 1:
-                    if (Utilities.IsValid(timer)) timer.text = timerValueText.Replace("{}", "10");
+                    if (VRC.SDKBase.Utilities.IsValid(timer)) timer.text = timerValueText.Replace("{}", "10");
                     break;
                 case 2:
-                    if (Utilities.IsValid(timer)) timer.text = timerValueText.Replace("{}", "15");
+                    if (VRC.SDKBase.Utilities.IsValid(timer)) timer.text = timerValueText.Replace("{}", "15");
                     break;
                 case 3:
-                    if (Utilities.IsValid(timer)) timer.text = timerValueText.Replace("{}", "30");
+                    if (VRC.SDKBase.Utilities.IsValid(timer)) timer.text = timerValueText.Replace("{}", "30");
                     break;
                 case 4:
-                    if (Utilities.IsValid(timer)) timer.text = timerValueText.Replace("{}", "60");
+                    if (VRC.SDKBase.Utilities.IsValid(timer)) timer.text = timerValueText.Replace("{}", "60");
                     break;
             }
-            if (Utilities.IsValid(timerButton)) timerButton.color = timerMode != 0 ? selectedColor : unselectedColor;
-            if (Utilities.IsValid(noTimerButton)) noTimerButton.color = timerMode == 0 ? selectedColor : unselectedColor;
+            if (VRC.SDKBase.Utilities.IsValid(timerButton)) timerButton.color = timerMode != 0 ? selectedColor : unselectedColor;
+            if (VRC.SDKBase.Utilities.IsValid(noTimerButton)) noTimerButton.color = timerMode == 0 ? selectedColor : unselectedColor;
 
             leaveButton.SetActive(false);
 
@@ -515,7 +515,7 @@ namespace VRCBilliards
                 }
 
                 UpdateButtonColors(guideLineButtons, 0);
-                if (Utilities.IsValid(guidelineStatus)) guidelineStatus.text = "Guideline On";
+                if (VRC.SDKBase.Utilities.IsValid(guidelineStatus)) guidelineStatus.text = "Guideline On";
             }
             else
             {
@@ -526,13 +526,13 @@ namespace VRCBilliards
                 }
 
                 UpdateButtonColors(guideLineButtons, 1);
-                if (Utilities.IsValid(guidelineStatus)) guidelineStatus.text = "Guideline Off";
+                if (VRC.SDKBase.Utilities.IsValid(guidelineStatus)) guidelineStatus.text = "Guideline Off";
             }
         }
 
         private bool HandlePlayerState(TextMeshProUGUI menuText, TextMeshProUGUI[] scores, VRCPlayerApi player)
         {
-            if (!Utilities.IsValid(player))
+            if (!VRC.SDKBase.Utilities.IsValid(player))
             {
                 return false;
             }
