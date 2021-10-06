@@ -1293,20 +1293,9 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3805221873936769424, guid: e0ea4875f333c744d89ce89444260060,
         type: 3}
-      propertyPath: m_Materials.Array.data[0]
-      value: 
-      objectReference: {fileID: 2100000, guid: 6647a242dec6ae24c9b6aa0049f61e22, type: 2}
-    - target: {fileID: 3805221873936769424, guid: e0ea4875f333c744d89ce89444260060,
-        type: 3}
       propertyPath: m_Materials.Array.data[1]
       value: 
       objectReference: {fileID: 0}
-    - target: {fileID: 3805221873936769430, guid: e0ea4875f333c744d89ce89444260060,
-        type: 3}
-      propertyPath: m_Mesh
-      value: 
-      objectReference: {fileID: 4494777128613706206, guid: 08a7e912191c04a4ab077210ffb25fcb,
-        type: 3}
     - target: {fileID: 3805221873993749373, guid: e0ea4875f333c744d89ce89444260060,
         type: 3}
       propertyPath: m_Materials.Array.size
@@ -1712,12 +1701,6 @@ PrefabInstance:
       propertyPath: serializedProgramAsset
       value: 
       objectReference: {fileID: 0}
-    - target: {fileID: 4696092811447454703, guid: e0ea4875f333c744d89ce89444260060,
-        type: 3}
-      propertyPath: m_Mesh
-      value: 
-      objectReference: {fileID: 542190568814574802, guid: 00a3bdbe5cced664697a72dda75c04dd,
-        type: 3}
     - target: {fileID: 8658868485224426084, guid: e0ea4875f333c744d89ce89444260060,
         type: 3}
       propertyPath: m_AnchorMax.x
