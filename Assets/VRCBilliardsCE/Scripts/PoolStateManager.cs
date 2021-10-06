@@ -184,7 +184,7 @@ namespace VRCBilliards
         public bool scaleHitForceWithScaleBeyond1;
 
         [Tooltip("This value scales the clamp applied to the velocity of pocketted balls. Raising this will make pockets look less artificial at the cost of increasing the chance high-velocity balls will fly out of the table.")]
-        public float pocketVelocityClamp = 0.5f;
+        public float pocketVelocityClamp = 1.0f;
 
         [Header("Table Colours")]
         [ColorUsage(true, true)] public Color tableBlue = new Color(0.0f, 0.75f, 1.75f, 1.0f);
