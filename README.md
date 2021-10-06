@@ -2,9 +2,10 @@
 
 <p align="center"><img src="https://avatars.githubusercontent.com/u/50210138?s=200&v=4" alt="Prefabs Logo"></p>
 
+
 <p align="center"><i>This prefab could not have been constructed without the kind support of the Prefabs community. <3</i></p>
 
-![Header](https://user-images.githubusercontent.com/6299186/131258753-f80c6d26-7b23-47ab-83d4-ead661d806ea.jpg)
+![Header](https://user-images.githubusercontent.com/6299186/136136789-f195e2ef-0cce-4807-8313-f62c39159b2f.png)
 
 A pool table for VRChat SDK3 worlds. Want to play 8 Ball, 9 Ball, or Japanese / Korean 4 Ball? This is the prefab for you! With the power of the Udon Networking Update, you can even have several tables in the same world without issue!
 
