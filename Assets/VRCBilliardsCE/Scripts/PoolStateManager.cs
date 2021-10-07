@@ -187,13 +187,13 @@ namespace VRCBilliards
         public float pocketVelocityClamp = 1.0f;
 
         [Header("Table Colours")]
-        [ColorUsage(true, true)] public Color tableBlue = new Color(0.0f, 0.75f, 1.75f, 1.0f);
-        [ColorUsage(true, true)] public Color tableOrange = new Color(1.75f, 0.25f, 0.0f, 1.0f);
-        [ColorUsage(true, true)] public Color tableRed = new Color(1.2f, 0.0f, 0.0f, 1.0f);
+        [ColorUsage(true, true)] public Color tableBlue = new Color(0.0f, 0.5f, 1.5f, 1.0f);
+        [ColorUsage(true, true)] public Color tableOrange = new Color(1.5f, 0.5f, 0.0f, 1.0f);
+        [ColorUsage(true, true)] public Color tableRed = new Color(1.4f, 0.0f, 0.0f, 1.0f);
         [ColorUsage(true, true)] public Color tableWhite = new Color(1.0f, 1.0f, 1.0f, 1.0f);
         [ColorUsage(true, true)] public Color tableBlack = new Color(0.01f, 0.01f, 0.01f, 1.0f);
         [ColorUsage(true, true)] public Color tableYellow = new Color(2.0f, 1.0f, 0.0f, 1.0f);
-        [ColorUsage(true, true)] public Color tableLightBlue = new Color(0.3f, 0.6f, 1.0f, 1.0f);
+        [ColorUsage(true, true)] public Color tableLightBlue = new Color(0.45f, 0.9f, 1.5f, 1.0f);
         public Color markerOK = new Color(0.0f, 1.0f, 0.0f, 1.0f);
         public Color markerNotOK = new Color(1.0f, 0.0f, 0.0f, 1.0f);
         public Color gripColourActive = new Color(0.0f, 0.5f, 1.1f, 1.0f);
