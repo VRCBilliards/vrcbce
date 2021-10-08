@@ -1,13 +1,14 @@
-<p align="center">🗾 🇯🇵 -> https://github.com/FairlySadPanda/vrcbce/blob/master/README_ja.md</p>
+<p align="center">🗾 🇯🇵 -> https://github.com/VRCBilliards/vrcbce/blob/master/README_ja.md</p>
 
 <p align="center"><img src="https://avatars.githubusercontent.com/u/50210138?s=200&v=4" alt="Prefabs Logo"></p>
-
 
 <p align="center"><i>This prefab could not have been constructed without the kind support of the Prefabs community. <3</i></p>
 
 ![Header](https://user-images.githubusercontent.com/6299186/136136789-f195e2ef-0cce-4807-8313-f62c39159b2f.png)
 
 A pool table for VRChat SDK3 worlds. Want to play 8 Ball, 9 Ball, or Japanese / Korean 4 Ball? This is the prefab for you! With the power of the Udon Networking Update, you can even have several tables in the same world without issue!
+
+This prefab exists as a "Community Edition" of the original ht8b pool table. It simplifies the code a lot and makes it easier to edit. It is also provided under MIT, and the maintainers of this codebase commit to being open and inclusive to anyone who would like to modify the prefab, add additional modes, fix bugs, and use the prefab as a learning tool. We **strongly** encourage anyone to have a go modifying and/or contributing to this prefab!
 
 This prefab has no limitations in terms of its use. It can be:
 
@@ -43,10 +44,27 @@ Recommended:
 
 Installation Steps:
 
-1. Download the latest release's unitpackage: https://github.com/FairlySadPanda/vrcbce/releases
-2. Open the unitypackage in your VRChat world's scene.
-3. Import all the assets.
-4. In your Project folder, find "PoolTable" inside the VRCBilliards folder and drag-and-drop it into the scene.
+1. [Download the latest release's unitypackage](https://github.com/VRCBilliards/vrcbce/releases/latest).
+2. Import the unitypackage.
+3. Inside the VRCBilliardsCE folder, select any of the table prefabs and drag-n-drop it into the scene.
+4. Profit!
+
+# UdonChips Integration
+
+With 1.2.1, VRCBCE supports [UdonChips](https://lura.booth.pm/items/3060394)!
+
+To enable UdonChips support, you need to do two things:
+
+  1. Have the UdonChips UdonBehaviour in the project, with the object it's on called "UdonChips".
+  2. Tick the "Enable UdonChips" option on your pool table's VRCBilliards object.
+
+The VRCBilliards object, which contains the core PoolStateManager script, contains a number of options. At the moment, the following is supported:
+
+  1. Paying UC to join a game of pool.
+  2. If Allow Raising is enabled, you can pay to join multiple times - the more you pay in, the more the table can pay out!
+  3. You can also earn UC for winning versus yourself.
+  4. All costs and rewards are modifiable via the PoolStateManager script.
+  5. The exact message to display on each join button is customizable in the PoolMenu script.
 
 # Getting Support
 
@@ -68,23 +86,7 @@ Afterwards, add your bug report or issue into the box and click Submit New Issue
 
 DMing a contributor might get you a faster response, but writing an issue means that all contributors can see the issue, bugs can be tracked and referenced, and overall it's a lot easier to fix things!
 
-# Known Unity-Related Bugs
-
-Problem: The prefab has giant text!
-
-Solution: Go into the TextMeshPro text component on each of the objects with giant text and scale down the text size (which has likely been reset to TMP's default of 36) to about 3. This will be fixed via not changing text size from the default in a future patch.
-
-Problem: I upgraded to a newer version and players now collide with the table (or other "I upgraded and something broke!" issues)
-
-Solution: Delete the version of the table in the scene and replace it with one of the prefab versions. Unity can be quite messy when upgrading prefabs - if you've recently updated, and something has broken, always see if it's an issue on a fresh version of the table first. Obviously, this is a little annoying to do if you've modified the prefab a lot: let us know if this is the case!
-
-# Notes on "Community"
-
-This prefab exists as a "Community Edition" of the original ht8b pool table. It simplifies the code a lot and makes it easier to edit. It is also provided under MIT, and the maintainers of this codebase commit to being open and inclusive to anyone who would like to modify the prefab, add additional modes, fix bugs, and use the prefab as a learning tool.
-
-We encourage anyone to have a go modifying this prefab!
-
-# Note on Pull Requests to this repo
+# Making Pull Requests to this repo
 
 The code in this project is written to look like normal Unity/C# code. C# has several standards (and teams tend to set their own) but for reference, refer to the Unity documentation, Unity example scripts, and [Microsoft's best practice guidelines](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/inside-a-program/coding-conventions).
 
@@ -93,31 +95,18 @@ The code in this project is written to look like normal Unity/C# code. C# has se
   - Avoid using underscore ahead of properties and methods unless it's a public method that needs to be non-RPCable for security reasons (an Udon-specific use of the underscore).
   - Use camelCase for properties and arguments, and use PascalCase for everything else.
 
+# Crediting in your Worlds
+
+As VRCBCE is a complex multi-layered project, we've recieved help on it from many fronts over the span of its development. As the amount of people who contribute to this project increases, it is only fair to everyone involved that the group as a whole gets representation when being credited in worlds. The easiest and most inclusive way to credit us would be to credit the organization "VRCBilliards", or perhaps you could write "VRCBCE Team" or something. If you ABSOLUTELY insist on naming names: "FairlySadPanda & Table" works as a bare minimum, and it is **highly recommended** that you also credit the creator of the table mesh you are using as well (the name of the UI's creator is already included in the info section of each table, but it can't hurt to re-credit them as well!). Other contributors to credit can be found in the credits below.
+
 # Original Creator
 
-The original creator of this prefab was Harry_T. Harry_T did (unsuccessfully) attempt to DMCA this repo off of Github, but didn't realize that they were releasing the exact same assets on their own Github as public domain. They are currently MIA after nuking their Github/Twitter. Despite this, it's only fair to cite them as the original source, and pay credit to the impressive bit of physics code that drives this entire prefab. They also made a small contribution directly to this repo.
-
-# UdonChips Integration
-
-With 1.2.1, VRCBCE supports [UdonChips](https://lura.booth.pm/items/3060394)!
-
-To enable UdonChips support, you need to do two things:
-
-  1. Have the UdonChips UdonBehaviour in the project, with the object it's on called "UdonChips".
-  2. Tick the "Enable UdonChips" option on your pool table's VRCBilliards object.
-
-The VRCBilliards object, which contains the core PoolStateManager script, contains a number of options. At the moment, the following is supported:
-
-  1. Paying UC to join a game of pool.
-  2. If Allow Raising is enabled, you can pay to join multiple times - the more you pay in, the more the table can pay out!
-  3. You can also earn UC for winning versus yourself.
-  4. All costs and rewards are modifiable via the PoolStateManager script.
-  5. The exact message to display on each join button is customizable in the PoolMenu script.
+The original creator of this prefab was harry_t. harry_t did (unsuccessfully) attempt to DMCA this repo off of Github, but didn't realize that they were releasing the exact same assets on their own Github as public domain. They are currently MIA after nuking their Github/Twitter. Despite this, it's only fair to cite them as the original source, and pay credit to the impressive bit of physics code that drives this entire prefab. They also made a small contribution directly to this repo.
 
 # Credits
 🐼 FairlySadPanda - Maintainer, Lead Programmer, Networking, Refactoring
 
-😺 Table - Maintainer, Designer, Optimization, General polish
+😺 Table - Maintainer, Designer, Optimization, General polish, QA
 
 ✨ esnya - UI, UdonChips implementation, misc. fixes
 
