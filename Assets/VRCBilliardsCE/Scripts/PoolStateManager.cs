@@ -175,11 +175,11 @@ namespace VRCBilliards
         public string uniformTableColour = "_EmissionColor";
         public string uniformMarkerColour = "_Color";
         public string uniformCueColour = "_EmissionColor";
-        //akalink added
+        //akalink added, various property names of the custom shader.
         public string uniformBallColour = "_BallColour";
         public string uniformBallFloat = "_CustomColor";
         public string BallMaskToggle = "_Turnoff";
-        public bool BallCustomColours = false; //bypasses ball colour options for UI that doesn't use it. Add the behaviours and shader when in use
+       
         //end
 
         [Tooltip("Change the length of the intro ball-drop animation. If you set this to zero, the animation will not play at all.")]
@@ -207,8 +207,10 @@ namespace VRCBilliards
         public Color fabricGray = new Color(0.3f, 0.3f, 0.3f, 1.0f);
         public Color fabricBlue = new Color(0.1f, 0.6f, 1.0f, 1.0f);
         public Color fabricGreen = new Color(0.15f, 0.75f, 0.3f, 1.0f);
-        //akalink added
-        [Header("Color Sliders")] public colorpicker BlueTeamSliders;
+        //akalink added, the behaviors of the color panels, as well as the shader toggle.
+        [Header("Colour Options")]  
+        public bool BallCustomColours = false; //bypasses ball colour options for UI that doesn't use it. Add the behaviours and shader when in use
+        public colorpicker BlueTeamSliders;
         public colorpicker OrangeTeamSliders;
         [Range(-1, 0)] private float ShaderToggleFloat = 0; //disables the colourization on the shader for 4 & 9 ball.
         //end
@@ -1208,7 +1210,7 @@ namespace VRCBilliards
             {
                 case 0:
                     player1ID = networkingLocalPlayerID;
-                    EnableCustomBallColorSlider(true); //akalink added
+                    EnableCustomBallColorSlider(true); //akalink added, makes color panel able to be interacted with.
                     break;
                 case 1:
                     player2ID = networkingLocalPlayerID;
@@ -1229,7 +1231,7 @@ namespace VRCBilliards
             RefreshNetworkData(false);
         }
         
-        //akalink added
+        //akalink added, toggles a bool on this behavior, this behavior allows players to interact with it while true.
         private void EnableCustomBallColorSlider(bool enabledState)
         {
             if (BallCustomColours)
@@ -1276,7 +1278,7 @@ namespace VRCBilliards
 
             RefreshNetworkData(false);
             
-            //akalink added
+            //akalink added, makes the color panel not able to be interacted with
             EnableCustomBallColorSlider(false);
             //end
         }
@@ -1318,7 +1320,7 @@ namespace VRCBilliards
             if (timerType < 4)
             {
                 //akalink found a bug, mainSRC plays audio when the timerType variable changes its value in both the increase and decrease functions.
-                // this makes it so the sound doesn't play, the audio source is reinitialized when the game starts
+                // this makes it so the sound doesn't play, the audio source is turned back on when the game starts
                 mainSrc.enabled = false;
                 //end
                 timerType++;
@@ -1338,7 +1340,7 @@ namespace VRCBilliards
             if (timerType > 0)
             {
                 //akalink found a bug, mainSRC plays audio when the timerType variable changes its value in both the increase and decrease functions.
-                // this makes it so the sound doesn't play, the audio source is reinitialized when the game starts
+                // this makes it so the sound doesn't play, the audio source is turned back on when the game starts
                 mainSrc.enabled = false;
                 //end
                 timerType--;
@@ -2495,7 +2497,7 @@ namespace VRCBilliards
 
             cueGrips[Convert.ToInt32(newIsTeam2Turn)].SetColor(uniformMarkerColour, gripColourActive);
             cueGrips[Convert.ToInt32(!newIsTeam2Turn)].SetColor(uniformMarkerColour, gripColourInactive);
-            //akalink added
+            //akalink added, changes the color of the balls. Also toggles off the shader effect when in 4 and 9 ball mode.
             if (BallCustomColours)
             {
                 if (isFourBall || isNineBall)
@@ -2688,7 +2690,7 @@ namespace VRCBilliards
 
             poolCues[0]._Respawn();
             poolCues[1]._Respawn();
-            //akalink added
+            //akalink added, make the color panel unable to be interacted with.
             EnableCustomBallColorSlider(false);
             // end
         }

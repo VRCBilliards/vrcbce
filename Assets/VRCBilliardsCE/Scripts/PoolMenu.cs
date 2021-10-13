@@ -32,17 +32,12 @@ namespace VRCBilliards
         public TextMeshProUGUI gameModeTxt;
         public Image[] gameModeButtons = { };
         //akalink added, allows you to override the name given when their respecive button is clicked.
-        public string USA8BallString = "American 8-Ball";
-        public string USA9BallString = "American 9-Ball";
-        public string JP4BallString = "Japanese 4-Ball";
-        public string KN4BallString = "Korean 4-Ball";
+        public string uSA8BallString = "American 8-Ball";
+        public string uSA9BallString = "American 9-Ball";
+        public string jP4BallString = "Japanese 4-Ball";
+        public string kN4BallString = "Korean 4-Ball";
         //end
-        //akalink added, allows color toggle on main pool table menu
-        [Header("Ball Color")] public TextMeshProUGUI ballColorTxt;
-        public Image[] ballColorButtons = { };
-        public string twoColor = "Two Colors";
-        public string tradColor = "Traditional Colors";
-        
+
 
         [Header("Guide Line")]
         public bool toggleGuideLineButtonsActive = true;
@@ -361,24 +356,24 @@ namespace VRCBilliards
             switch (gameMode)
             {
                 case 0:
-                    if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = USA8BallString; //"American 8-Ball";
+                    if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = uSA8BallString; //"American 8-Ball";
                     UpdateButtonColors(gameModeButtons, 0);
 
                     break;
                 case 1:
-                    if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = USA9BallString; //"American 9-Ball";
+                    if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = uSA9BallString; //"American 9-Ball";
                     UpdateButtonColors(gameModeButtons, 1);
 
                     break;
                 case 2:
                     if (isKorean4Ball)
                     {
-                        if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = KN4BallString;//"Korean 4-Ball";
+                        if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = kN4BallString;//"Korean 4-Ball";
                         UpdateButtonColors(gameModeButtons, 3);
                     }
                     else
                     {
-                        if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = JP4BallString;//"Japanese 4-Ball";
+                        if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = jP4BallString;//"Japanese 4-Ball";
                         UpdateButtonColors(gameModeButtons, 2);
                     }
 
