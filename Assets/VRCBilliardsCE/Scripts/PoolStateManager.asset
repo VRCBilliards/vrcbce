@@ -2512,71 +2512,13 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: BallCustomColours
+      Data: introAnimationLength
     - Name: $v
       Entry: 7
       Data: 140|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: fieldSymbol
       Entry: 7
       Data: 141|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
-    - Name: internalType
-      Entry: 9
-      Data: 95
-    - Name: declarationType
-      Entry: 3
-      Data: 1
-    - Name: syncMode
-      Entry: 3
-      Data: 0
-    - Name: symbolResolvedTypeName
-      Entry: 1
-      Data: SystemBoolean
-    - Name: symbolOriginalName
-      Entry: 1
-      Data: BallCustomColours
-    - Name: symbolUniqueName
-      Entry: 1
-      Data: BallCustomColours
-    - Name: symbolDefaultValue
-      Entry: 6
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: fieldAttributes
-      Entry: 7
-      Data: 142|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
-        mscorlib
-    - Name: 
-      Entry: 12
-      Data: 0
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: userBehaviourSource
-      Entry: 6
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 7
-      Data: 
-    - Name: $k
-      Entry: 1
-      Data: introAnimationLength
-    - Name: $v
-      Entry: 7
-      Data: 143|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
-    - Name: fieldSymbol
-      Entry: 7
-      Data: 144|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
       Data: 4
@@ -2603,14 +2545,14 @@ MonoBehaviour:
       Data: 
     - Name: fieldAttributes
       Entry: 7
-      Data: 145|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
+      Data: 142|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 2
     - Name: 
       Entry: 7
-      Data: 146|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
+      Data: 143|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
     - Name: tooltip
       Entry: 1
       Data: Change the length of the intro ball-drop animation. If you set this to
@@ -2620,7 +2562,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 147|UnityEngine.RangeAttribute, UnityEngine.CoreModule
+      Data: 144|UnityEngine.RangeAttribute, UnityEngine.CoreModule
     - Name: min
       Entry: 4
       Data: 0
@@ -2653,10 +2595,10 @@ MonoBehaviour:
       Data: scaleHitForceWithScaleBeyond1
     - Name: $v
       Entry: 7
-      Data: 148|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+      Data: 145|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: fieldSymbol
       Entry: 7
-      Data: 149|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
+      Data: 146|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
       Data: 95
@@ -2683,14 +2625,14 @@ MonoBehaviour:
       Data: 
     - Name: fieldAttributes
       Entry: 7
-      Data: 150|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
+      Data: 147|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 151|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
+      Data: 148|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
     - Name: tooltip
       Entry: 1
       Data: If enabled, worldspace table scales beyond 1 in x or z will increase
@@ -2722,10 +2664,10 @@ MonoBehaviour:
       Data: pocketVelocityClamp
     - Name: $v
       Entry: 7
-      Data: 152|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+      Data: 149|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: fieldSymbol
       Entry: 7
-      Data: 153|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
+      Data: 150|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
       Data: 4
@@ -2752,14 +2694,14 @@ MonoBehaviour:
       Data: 
     - Name: fieldAttributes
       Entry: 7
-      Data: 154|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
+      Data: 151|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 155|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
+      Data: 152|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
     - Name: tooltip
       Entry: 1
       Data: This value scales the clamp applied to the velocity of pocketted balls.
@@ -2791,13 +2733,13 @@ MonoBehaviour:
       Data: tableBlue
     - Name: $v
       Entry: 7
-      Data: 156|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+      Data: 153|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: fieldSymbol
       Entry: 7
-      Data: 157|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
+      Data: 154|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 7
-      Data: 158|System.RuntimeType, mscorlib
+      Data: 155|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
       Data: UnityEngine.Color, UnityEngine.CoreModule
@@ -2827,14 +2769,14 @@ MonoBehaviour:
       Data: 
     - Name: fieldAttributes
       Entry: 7
-      Data: 159|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
+      Data: 156|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 2
     - Name: 
       Entry: 7
-      Data: 160|UnityEngine.HeaderAttribute, UnityEngine.CoreModule
+      Data: 157|UnityEngine.HeaderAttribute, UnityEngine.CoreModule
     - Name: header
       Entry: 1
       Data: Table Colours
@@ -2843,7 +2785,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 161|UnityEngine.ColorUsageAttribute, UnityEngine.CoreModule
+      Data: 158|UnityEngine.ColorUsageAttribute, UnityEngine.CoreModule
     - Name: showAlpha
       Entry: 5
       Data: true
@@ -2888,13 +2830,13 @@ MonoBehaviour:
       Data: tableOrange
     - Name: $v
       Entry: 7
-      Data: 162|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+      Data: 159|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: fieldSymbol
       Entry: 7
-      Data: 163|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
+      Data: 160|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
-      Data: 158
+      Data: 155
     - Name: declarationType
       Entry: 3
       Data: 1
@@ -2918,14 +2860,14 @@ MonoBehaviour:
       Data: 
     - Name: fieldAttributes
       Entry: 7
-      Data: 164|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
+      Data: 161|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 165|UnityEngine.ColorUsageAttribute, UnityEngine.CoreModule
+      Data: 162|UnityEngine.ColorUsageAttribute, UnityEngine.CoreModule
     - Name: showAlpha
       Entry: 5
       Data: true
@@ -2970,13 +2912,13 @@ MonoBehaviour:
       Data: tableRed
     - Name: $v
       Entry: 7
-      Data: 166|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+      Data: 163|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: fieldSymbol
       Entry: 7
-      Data: 167|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
+      Data: 164|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
-      Data: 158
+      Data: 155
     - Name: declarationType
       Entry: 3
       Data: 1
@@ -3000,14 +2942,14 @@ MonoBehaviour:
       Data: 
     - Name: fieldAttributes
       Entry: 7
-      Data: 168|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
+      Data: 165|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 169|UnityEngine.ColorUsageAttribute, UnityEngine.CoreModule
+      Data: 166|UnityEngine.ColorUsageAttribute, UnityEngine.CoreModule
     - Name: showAlpha
       Entry: 5
       Data: true
@@ -3052,13 +2994,13 @@ MonoBehaviour:
       Data: tableWhite
     - Name: $v
       Entry: 7
-      Data: 170|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+      Data: 167|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: fieldSymbol
       Entry: 7
-      Data: 171|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
+      Data: 168|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
-      Data: 158
+      Data: 155
     - Name: declarationType
       Entry: 3
       Data: 1
@@ -3082,14 +3024,14 @@ MonoBehaviour:
       Data: 
     - Name: fieldAttributes
       Entry: 7
-      Data: 172|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
+      Data: 169|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 173|UnityEngine.ColorUsageAttribute, UnityEngine.CoreModule
+      Data: 170|UnityEngine.ColorUsageAttribute, UnityEngine.CoreModule
     - Name: showAlpha
       Entry: 5
       Data: true
@@ -3134,13 +3076,13 @@ MonoBehaviour:
       Data: tableBlack
     - Name: $v
       Entry: 7
-      Data: 174|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+      Data: 171|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: fieldSymbol
       Entry: 7
-      Data: 175|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
+      Data: 172|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
-      Data: 158
+      Data: 155
     - Name: declarationType
       Entry: 3
       Data: 1
@@ -3164,14 +3106,14 @@ MonoBehaviour:
       Data: 
     - Name: fieldAttributes
       Entry: 7
-      Data: 176|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
+      Data: 173|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 177|UnityEngine.ColorUsageAttribute, UnityEngine.CoreModule
+      Data: 174|UnityEngine.ColorUsageAttribute, UnityEngine.CoreModule
     - Name: showAlpha
       Entry: 5
       Data: true
@@ -3216,13 +3158,13 @@ MonoBehaviour:
       Data: tableYellow
     - Name: $v
       Entry: 7
-      Data: 178|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+      Data: 175|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: fieldSymbol
       Entry: 7
-      Data: 179|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
+      Data: 176|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
-      Data: 158
+      Data: 155
     - Name: declarationType
       Entry: 3
       Data: 1
@@ -3246,14 +3188,14 @@ MonoBehaviour:
       Data: 
     - Name: fieldAttributes
       Entry: 7
-      Data: 180|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
+      Data: 177|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 181|UnityEngine.ColorUsageAttribute, UnityEngine.CoreModule
+      Data: 178|UnityEngine.ColorUsageAttribute, UnityEngine.CoreModule
     - Name: showAlpha
       Entry: 5
       Data: true
@@ -3298,13 +3240,13 @@ MonoBehaviour:
       Data: tableLightBlue
     - Name: $v
       Entry: 7
-      Data: 182|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+      Data: 179|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: fieldSymbol
       Entry: 7
-      Data: 183|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
+      Data: 180|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
-      Data: 158
+      Data: 155
     - Name: declarationType
       Entry: 3
       Data: 1
@@ -3328,14 +3270,14 @@ MonoBehaviour:
       Data: 
     - Name: fieldAttributes
       Entry: 7
-      Data: 184|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
+      Data: 181|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 185|UnityEngine.ColorUsageAttribute, UnityEngine.CoreModule
+      Data: 182|UnityEngine.ColorUsageAttribute, UnityEngine.CoreModule
     - Name: showAlpha
       Entry: 5
       Data: true
@@ -3378,6 +3320,64 @@ MonoBehaviour:
     - Name: $k
       Entry: 1
       Data: markerOK
+    - Name: $v
+      Entry: 7
+      Data: 183|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+    - Name: fieldSymbol
+      Entry: 7
+      Data: 184|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
+    - Name: internalType
+      Entry: 9
+      Data: 155
+    - Name: declarationType
+      Entry: 3
+      Data: 1
+    - Name: syncMode
+      Entry: 3
+      Data: 0
+    - Name: symbolResolvedTypeName
+      Entry: 1
+      Data: UnityEngineColor
+    - Name: symbolOriginalName
+      Entry: 1
+      Data: markerOK
+    - Name: symbolUniqueName
+      Entry: 1
+      Data: markerOK
+    - Name: symbolDefaultValue
+      Entry: 6
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: fieldAttributes
+      Entry: 7
+      Data: 185|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: userBehaviourSource
+      Entry: 6
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 
+    - Name: $k
+      Entry: 1
+      Data: markerNotOK
     - Name: $v
       Entry: 7
       Data: 186|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -3386,7 +3386,7 @@ MonoBehaviour:
       Data: 187|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
-      Data: 158
+      Data: 155
     - Name: declarationType
       Entry: 3
       Data: 1
@@ -3398,10 +3398,10 @@ MonoBehaviour:
       Data: UnityEngineColor
     - Name: symbolOriginalName
       Entry: 1
-      Data: markerOK
+      Data: markerNotOK
     - Name: symbolUniqueName
       Entry: 1
-      Data: markerOK
+      Data: markerNotOK
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
@@ -3435,7 +3435,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: markerNotOK
+      Data: gripColourActive
     - Name: $v
       Entry: 7
       Data: 189|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -3444,7 +3444,7 @@ MonoBehaviour:
       Data: 190|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
-      Data: 158
+      Data: 155
     - Name: declarationType
       Entry: 3
       Data: 1
@@ -3456,10 +3456,10 @@ MonoBehaviour:
       Data: UnityEngineColor
     - Name: symbolOriginalName
       Entry: 1
-      Data: markerNotOK
+      Data: gripColourActive
     - Name: symbolUniqueName
       Entry: 1
-      Data: markerNotOK
+      Data: gripColourActive
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
@@ -3493,7 +3493,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: gripColourActive
+      Data: gripColourInactive
     - Name: $v
       Entry: 7
       Data: 192|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -3502,7 +3502,7 @@ MonoBehaviour:
       Data: 193|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
-      Data: 158
+      Data: 155
     - Name: declarationType
       Entry: 3
       Data: 1
@@ -3514,10 +3514,10 @@ MonoBehaviour:
       Data: UnityEngineColor
     - Name: symbolOriginalName
       Entry: 1
-      Data: gripColourActive
+      Data: gripColourInactive
     - Name: symbolUniqueName
       Entry: 1
-      Data: gripColourActive
+      Data: gripColourInactive
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
@@ -3551,7 +3551,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: gripColourInactive
+      Data: fabricGray
     - Name: $v
       Entry: 7
       Data: 195|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -3560,7 +3560,7 @@ MonoBehaviour:
       Data: 196|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
-      Data: 158
+      Data: 155
     - Name: declarationType
       Entry: 3
       Data: 1
@@ -3572,10 +3572,10 @@ MonoBehaviour:
       Data: UnityEngineColor
     - Name: symbolOriginalName
       Entry: 1
-      Data: gripColourInactive
+      Data: fabricGray
     - Name: symbolUniqueName
       Entry: 1
-      Data: gripColourInactive
+      Data: fabricGray
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
@@ -3609,7 +3609,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: fabricGray
+      Data: fabricBlue
     - Name: $v
       Entry: 7
       Data: 198|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -3618,7 +3618,7 @@ MonoBehaviour:
       Data: 199|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
-      Data: 158
+      Data: 155
     - Name: declarationType
       Entry: 3
       Data: 1
@@ -3630,10 +3630,10 @@ MonoBehaviour:
       Data: UnityEngineColor
     - Name: symbolOriginalName
       Entry: 1
-      Data: fabricGray
+      Data: fabricBlue
     - Name: symbolUniqueName
       Entry: 1
-      Data: fabricGray
+      Data: fabricBlue
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
@@ -3667,7 +3667,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: fabricBlue
+      Data: fabricGreen
     - Name: $v
       Entry: 7
       Data: 201|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -3676,7 +3676,7 @@ MonoBehaviour:
       Data: 202|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
-      Data: 158
+      Data: 155
     - Name: declarationType
       Entry: 3
       Data: 1
@@ -3688,10 +3688,10 @@ MonoBehaviour:
       Data: UnityEngineColor
     - Name: symbolOriginalName
       Entry: 1
-      Data: fabricBlue
+      Data: fabricGreen
     - Name: symbolUniqueName
       Entry: 1
-      Data: fabricBlue
+      Data: fabricGreen
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
@@ -3725,7 +3725,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: fabricGreen
+      Data: BallCustomColours
     - Name: $v
       Entry: 7
       Data: 204|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -3734,7 +3734,7 @@ MonoBehaviour:
       Data: 205|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
-      Data: 158
+      Data: 95
     - Name: declarationType
       Entry: 3
       Data: 1
@@ -3743,13 +3743,13 @@ MonoBehaviour:
       Data: 0
     - Name: symbolResolvedTypeName
       Entry: 1
-      Data: UnityEngineColor
+      Data: SystemBoolean
     - Name: symbolOriginalName
       Entry: 1
-      Data: fabricGreen
+      Data: BallCustomColours
     - Name: symbolUniqueName
       Entry: 1
-      Data: fabricGreen
+      Data: BallCustomColours
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
@@ -3762,7 +3762,16 @@ MonoBehaviour:
         mscorlib
     - Name: 
       Entry: 12
-      Data: 0
+      Data: 1
+    - Name: 
+      Entry: 7
+      Data: 207|UnityEngine.HeaderAttribute, UnityEngine.CoreModule
+    - Name: header
+      Entry: 1
+      Data: Colour Options
+    - Name: 
+      Entry: 8
+      Data: 
     - Name: 
       Entry: 13
       Data: 
@@ -3786,13 +3795,13 @@ MonoBehaviour:
       Data: BlueTeamSliders
     - Name: $v
       Entry: 7
-      Data: 207|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+      Data: 208|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: fieldSymbol
       Entry: 7
-      Data: 208|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
+      Data: 209|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 7
-      Data: 209|System.RuntimeType, mscorlib
+      Data: 210|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
       Data: VRCBilliards.colorpicker, Assembly-CSharp
@@ -3822,20 +3831,11 @@ MonoBehaviour:
       Data: 
     - Name: fieldAttributes
       Entry: 7
-      Data: 210|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
+      Data: 211|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
         mscorlib
     - Name: 
       Entry: 12
-      Data: 1
-    - Name: 
-      Entry: 7
-      Data: 211|UnityEngine.HeaderAttribute, UnityEngine.CoreModule
-    - Name: header
-      Entry: 1
-      Data: Color Sliders
-    - Name: 
-      Entry: 8
-      Data: 
+      Data: 0
     - Name: 
       Entry: 13
       Data: 
@@ -3865,7 +3865,7 @@ MonoBehaviour:
       Data: 213|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
-      Data: 209
+      Data: 210
     - Name: declarationType
       Entry: 3
       Data: 1
@@ -9916,7 +9916,7 @@ MonoBehaviour:
       Data: 561|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
-      Data: 158
+      Data: 155
     - Name: declarationType
       Entry: 3
       Data: 2
@@ -9974,7 +9974,7 @@ MonoBehaviour:
       Data: 564|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
-      Data: 158
+      Data: 155
     - Name: declarationType
       Entry: 3
       Data: 2
@@ -10032,7 +10032,7 @@ MonoBehaviour:
       Data: 567|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
-      Data: 158
+      Data: 155
     - Name: declarationType
       Entry: 3
       Data: 2
@@ -10090,7 +10090,7 @@ MonoBehaviour:
       Data: 570|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
-      Data: 158
+      Data: 155
     - Name: declarationType
       Entry: 3
       Data: 2
@@ -10148,7 +10148,7 @@ MonoBehaviour:
       Data: 573|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
-      Data: 158
+      Data: 155
     - Name: declarationType
       Entry: 3
       Data: 2
@@ -10206,7 +10206,7 @@ MonoBehaviour:
       Data: 576|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
-      Data: 158
+      Data: 155
     - Name: declarationType
       Entry: 3
       Data: 2
@@ -10264,7 +10264,7 @@ MonoBehaviour:
       Data: 579|UdonSharp.Compiler.SymbolDefinition, UdonSharp.Editor
     - Name: internalType
       Entry: 9
-      Data: 158
+      Data: 155
     - Name: declarationType
       Entry: 3
       Data: 2

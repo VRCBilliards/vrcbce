@@ -509,6 +509,7 @@ GameObject:
   - component: {fileID: 1279629792012587139}
   - component: {fileID: 1279629792012587143}
   - component: {fileID: 2949100366626785164}
+  - component: {fileID: 2474193088081473039}
   m_Layer: 0
   m_Name: ColorPicker Blue
   m_TagString: Untagged
@@ -652,6 +653,19 @@ MonoBehaviour:
   - {fileID: 8121206974590149089}
   - {fileID: 5276201195597913892}
   publicVariablesSerializationDataFormat: 0
+--- !u!65 &2474193088081473039
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1279629792012587136}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 250, y: 200, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1279629792114043942
 GameObject:
   m_ObjectHideFlags: 0
@@ -815,7 +829,7 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 2949100366626785164}
         m_MethodName: SendCustomEvent
         m_Mode: 5
         m_Arguments:
@@ -1423,7 +1437,7 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 2949100366626785164}
         m_MethodName: SendCustomEvent
         m_Mode: 5
         m_Arguments:
@@ -1742,7 +1756,7 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 2949100366626785164}
         m_MethodName: SendCustomEvent
         m_Mode: 5
         m_Arguments:
@@ -3529,7 +3543,7 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 6182280674305909736}
         m_MethodName: SendCustomEvent
         m_Mode: 5
         m_Arguments:
@@ -3628,6 +3642,7 @@ GameObject:
   - component: {fileID: 7846598933645980903}
   - component: {fileID: 7846598933645980899}
   - component: {fileID: 6182280674305909736}
+  - component: {fileID: 4426543115791636276}
   m_Layer: 0
   m_Name: ColorPicker Orange
   m_TagString: Untagged
@@ -3771,6 +3786,19 @@ MonoBehaviour:
   - {fileID: 978057490477958533}
   - {fileID: 3755515711042976576}
   publicVariablesSerializationDataFormat: 0
+--- !u!65 &4426543115791636276
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7846598933645980900}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 250, y: 200, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &7846598933720770765
 GameObject:
   m_ObjectHideFlags: 0
@@ -3930,7 +3958,7 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 6182280674305909736}
         m_MethodName: SendCustomEvent
         m_Mode: 5
         m_Arguments:
@@ -4101,7 +4129,7 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 6182280674305909736}
         m_MethodName: SendCustomEvent
         m_Mode: 5
         m_Arguments:
