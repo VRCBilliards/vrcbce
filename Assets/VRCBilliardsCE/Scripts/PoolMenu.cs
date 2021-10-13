@@ -31,6 +31,18 @@ namespace VRCBilliards
         [Header("Game Mode")]
         public TextMeshProUGUI gameModeTxt;
         public Image[] gameModeButtons = { };
+        //akalink added, allows you to override the name given when their respecive button is clicked.
+        public string USA8BallString = "American 8-Ball";
+        public string USA9BallString = "American 9-Ball";
+        public string JP4BallString = "Japanese 4-Ball";
+        public string KN4BallString = "Korean 4-Ball";
+        //end
+        //akalink added, allows color toggle on main pool table menu
+        [Header("Ball Color")] public TextMeshProUGUI ballColorTxt;
+        public Image[] ballColorButtons = { };
+        public string twoColor = "Two Colors";
+        public string tradColor = "Traditional Colors";
+        
 
         [Header("Guide Line")]
         public bool toggleGuideLineButtonsActive = true;
@@ -38,6 +50,10 @@ namespace VRCBilliards
         public GameObject guideLineDisableButton;
         public TextMeshProUGUI guidelineStatus;
         public Image[] guideLineButtons = { };
+        //akalink added
+        public string guidelineEnabledString = "Guideline On";
+        public string guidelineDisabledString = "Guideline Off";
+        //end
 
         [Header("Timer")]
         public TextMeshProUGUI timer;
@@ -51,6 +67,10 @@ namespace VRCBilliards
         [Header("Teams")]
         public TextMeshProUGUI teamsTxt;
         public Image[] teamsButtons = { };
+        //akalink added
+        public string oneVOneString = "Teams: NO";
+        public string twoVTwoString = "Teams: YES";
+        //end
 
         [Header("Players")]
         public GameObject player1Button;
@@ -87,6 +107,9 @@ namespace VRCBilliards
         private TextMeshProUGUI[] teamBScores;
 
         public TextMeshProUGUI winnerText;
+        //akalink added
+        public string gameResetText = "The game was ended!";
+        //
 
         [Header("UdonChips Integration")]
         public string defaultEmptyplayerSlotTextWithUdonChips = "{}uc to play";
@@ -306,6 +329,7 @@ namespace VRCBilliards
             bool newIsTeams,
             bool isTeam2Playing,
             int gameMode,
+            //bool colorBalls,
             bool isKorean4Ball,
             int timerMode,
             int player1ID,
@@ -315,44 +339,52 @@ namespace VRCBilliards
             bool guideline
         )
         {
+            //akalink edited, original code is commented out
             if (newIsTeams)
             {
-                if (VRC.SDKBase.Utilities.IsValid(teamsTxt)) teamsTxt.text = "Teams: YES";
+                if (VRC.SDKBase.Utilities.IsValid(teamsTxt)) teamsTxt.text = twoVTwoString; //"Teams: YES";
                 isTeams = true;
             }
             else
             {
-                if (VRC.SDKBase.Utilities.IsValid(teamsTxt)) teamsTxt.text = "Teams: NO";
+                if (VRC.SDKBase.Utilities.IsValid(teamsTxt)) teamsTxt.text = oneVOneString; //"Teams: NO";
                 isTeams = false;
             }
+            //end
             UpdateButtonColors(teamsButtons, newIsTeams ? 0 : 1);
-
+            
+            //akalink added
+            //UpdateButtonColors(ballColorButtons, colorBalls ? 0 : 1);
+            //end
+            
+            //akalink edited, original code is commented out
             switch (gameMode)
             {
                 case 0:
-                    if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = "American 8-Ball";
+                    if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = USA8BallString; //"American 8-Ball";
                     UpdateButtonColors(gameModeButtons, 0);
 
                     break;
                 case 1:
-                    if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = "American 9-Ball";
+                    if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = USA9BallString; //"American 9-Ball";
                     UpdateButtonColors(gameModeButtons, 1);
 
                     break;
                 case 2:
                     if (isKorean4Ball)
                     {
-                        if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = "Korean 4-Ball";
+                        if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = KN4BallString;//"Korean 4-Ball";
                         UpdateButtonColors(gameModeButtons, 3);
                     }
                     else
                     {
-                        if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = "Japanese 4-Ball";
+                        if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = JP4BallString;//"Japanese 4-Ball";
                         UpdateButtonColors(gameModeButtons, 2);
                     }
 
                     break;
             }
+            //end
 
             switch (timerMode)
             {
@@ -505,7 +537,7 @@ namespace VRCBilliards
                     }
                 }
             }
-
+            //akalink edited, original code is commented out
             if (guideline)
             {
                 if (toggleGuideLineButtonsActive && !useUnityUI)
@@ -515,7 +547,8 @@ namespace VRCBilliards
                 }
 
                 UpdateButtonColors(guideLineButtons, 0);
-                if (VRC.SDKBase.Utilities.IsValid(guidelineStatus)) guidelineStatus.text = "Guideline On";
+                if (VRC.SDKBase.Utilities.IsValid(guidelineStatus))
+                    guidelineStatus.text = guidelineEnabledString;  //"Guideline On";
             }
             else
             {
@@ -526,8 +559,10 @@ namespace VRCBilliards
                 }
 
                 UpdateButtonColors(guideLineButtons, 1);
-                if (VRC.SDKBase.Utilities.IsValid(guidelineStatus)) guidelineStatus.text = "Guideline Off";
+                if (VRC.SDKBase.Utilities.IsValid(guidelineStatus))
+                    guidelineStatus.text = guidelineDisabledString; //"Guideline Off";
             }
+            //end
         }
 
         private bool HandlePlayerState(TextMeshProUGUI menuText, TextMeshProUGUI[] scores, VRCPlayerApi player)
@@ -604,7 +639,9 @@ namespace VRCBilliards
 
         public void _GameWasReset()
         {
-            winnerText.text = "The game was ended!";
+            //akalink edited, original code is commented out
+            winnerText.text = gameResetText; //"The game was ended!";
+            //end
         }
 
         public void _TeamWins(bool isTeam2)
