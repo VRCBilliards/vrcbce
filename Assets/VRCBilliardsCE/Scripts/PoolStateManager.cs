@@ -176,6 +176,12 @@ namespace VRCBilliards
         public string uniformTableColour = "_EmissionColor";
         public string uniformMarkerColour = "_Color";
         public string uniformCueColour = "_EmissionColor";
+        //akalink added
+        public string uniformBallColour = "_BallColour";
+        public string uniformBallFloat = "_CustomColor";
+        public string BallMaskToggle = "_Turnoff";
+        public bool BallCustomColours = false; //bypasses ball colour options for UI that doesn't use it. Add the behaviours and shader when in use
+        //end
 
         [Tooltip("Change the length of the intro ball-drop animation. If you set this to zero, the animation will not play at all.")]
         [Range(0f, 5f)]
@@ -202,7 +208,11 @@ namespace VRCBilliards
         public Color fabricGray = new Color(0.3f, 0.3f, 0.3f, 1.0f);
         public Color fabricBlue = new Color(0.1f, 0.6f, 1.0f, 1.0f);
         public Color fabricGreen = new Color(0.15f, 0.75f, 0.3f, 1.0f);
-
+        //akalink added
+        [Header("Color Sliders")] public colorpicker BlueTeamSliders;
+        public colorpicker OrangeTeamSliders;
+        [Range(-1, 0)] private float ShaderToggleFloat = 0; //disables the colourization on the shader for 4 & 9 ball.
+        //end
 
         [Header("Cues")] public PoolCue[] poolCues;
 
@@ -1199,15 +1209,19 @@ namespace VRCBilliards
             {
                 case 0:
                     player1ID = networkingLocalPlayerID;
+                    EnableCustomBallColorSlider(true); //akalink added
                     break;
                 case 1:
                     player2ID = networkingLocalPlayerID;
+                    EnableCustomBallColorSlider(true); //akalink added
                     break;
                 case 2:
                     player3ID = networkingLocalPlayerID;
+                    EnableCustomBallColorSlider(true); //akalink added
                     break;
                 case 3:
                     player4ID = networkingLocalPlayerID;
+                    EnableCustomBallColorSlider(true); //akalink added
                     break;
                 default:
                     return;
@@ -1215,6 +1229,22 @@ namespace VRCBilliards
 
             RefreshNetworkData(false);
         }
+        
+        //akalink added
+        private void EnableCustomBallColorSlider(bool enabledState)
+        {
+            if (BallCustomColours)
+            {
+                if ((BlueTeamSliders == null) || (OrangeTeamSliders == null))
+                {
+                    Debug.Log("At least one of color behaviours are not assigned, did you include the color panels prefab?");
+                    //leaves this message if unassignment crashes the PoolStateMananger
+                }
+                BlueTeamSliders._EnableDisable(enabledState);
+                OrangeTeamSliders._EnableDisable(enabledState);     
+            }
+        } 
+        //end
 
         public void _LeaveGame()
         {
@@ -1246,6 +1276,10 @@ namespace VRCBilliards
             localPlayerID = -1;
 
             RefreshNetworkData(false);
+            
+            //akalink added
+            EnableCustomBallColorSlider(false);
+            //end
         }
 
         private void RemovePlayerFromGame(int playerID)
@@ -1284,6 +1318,10 @@ namespace VRCBilliards
 
             if (timerType < 4)
             {
+                //akalink found a bug, mainSRC plays audio when the timerType variable changes its value in both the increase and decrease functions.
+                // this makes it so the sound doesn't play, the audio source is reinitialized when the game starts
+                mainSrc.enabled = false;
+                //end
                 timerType++;
                 RefreshNetworkData(false);
             }
@@ -1300,6 +1338,10 @@ namespace VRCBilliards
 
             if (timerType > 0)
             {
+                //akalink found a bug, mainSRC plays audio when the timerType variable changes its value in both the increase and decrease functions.
+                // this makes it so the sound doesn't play, the audio source is reinitialized when the game starts
+                mainSrc.enabled = false;
+                //end
                 timerType--;
                 RefreshNetworkData(false);
             }
@@ -1364,6 +1406,9 @@ namespace VRCBilliards
             {
                 logger._Log(name, "StartNewGame");
             }
+            //akalink added to avoid timer sound bug while still making prefab work.
+            mainSrc.enabled = true;
+            //end
 
             if (!isGameInMenus)
             {
@@ -1416,6 +1461,7 @@ namespace VRCBilliards
             Networking.SetOwner(localPlayer, gameObject);
 
             RefreshNetworkData(false);
+            
         }
 
         private void Initialize9Ball()
@@ -2221,6 +2267,7 @@ namespace VRCBilliards
                 isTeams,
                 newIsTeam2Turn,
                 (int)gameMode,
+                //colorBalls,
                 isKorean,
                 (int)timerType,
                 player1ID,
@@ -2449,6 +2496,39 @@ namespace VRCBilliards
 
             cueGrips[Convert.ToInt32(newIsTeam2Turn)].SetColor(uniformMarkerColour, gripColourActive);
             cueGrips[Convert.ToInt32(!newIsTeam2Turn)].SetColor(uniformMarkerColour, gripColourInactive);
+            //akalink added
+            if (BallCustomColours)
+            {
+                if (isFourBall || isNineBall)
+                {
+                    float MaskToggle = 1; //disable
+                    for (int i = 0; i < ballRenderers.Length; i++)
+                    {
+                        ballRenderers[i].material.SetFloat(BallMaskToggle, MaskToggle);
+                    }
+                }
+                else
+                {
+
+                    float MaskToggle = 0; //enable
+                    for (int i = 2; i < ballTransforms.Length; i++)
+                    {
+                        if (i < 9) //9 is where it switches to stripes
+                        {
+                            ballRenderers[i].material.SetFloat(BallMaskToggle, MaskToggle);
+                            ballRenderers[i].material.SetColor(uniformBallColour, tableBlue);
+                            ballRenderers[i].material.SetFloat(uniformBallFloat, ShaderToggleFloat);
+                        }
+                        else
+                        {
+                            ballRenderers[i].material.SetFloat(BallMaskToggle, MaskToggle);
+                            ballRenderers[i].material.SetColor(uniformBallColour, tableOrange);
+                            ballRenderers[i].material.SetFloat(uniformBallFloat, ShaderToggleFloat);
+                        }
+                    }
+                }
+            }
+            //end
         }
 
 
@@ -2595,6 +2675,7 @@ namespace VRCBilliards
                 isTeams,
                 newIsTeam2Turn,
                 (int)gameMode,
+                //colorBalls,
                 isKorean,
                 (int)timerType,
                 player1ID,
@@ -2608,6 +2689,9 @@ namespace VRCBilliards
 
             poolCues[0]._Respawn();
             poolCues[1]._Respawn();
+            //akalink added
+            EnableCustomBallColorSlider(false);
+            // end
         }
 
         private void OnRemoteTurnChange()

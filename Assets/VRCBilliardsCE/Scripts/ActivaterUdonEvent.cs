@@ -22,6 +22,14 @@ namespace FairlySadPanda.UsefulThings
         public string stateName;
         public bool boolStateValue;
 
+        //akalink added
+        [Header("Trigger a sound when interacted with, uses clip from AudioSource")]
+        public bool DebugUseAudio = false;
+        public AudioSource audioSource;
+        //end
+
+
+
         public override void Interact()
         {
             if (behaviour != null)
@@ -56,6 +64,20 @@ namespace FairlySadPanda.UsefulThings
                     animator.SetBool(stateName, boolStateValue);
                 }
             }
+
+            //akalink added
+            if (audioSource != null)
+            {
+                if (networked)
+                {
+                    SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.All, nameof(PlayAudio));
+                }
+                else
+                {
+                    audioSource.Play();
+                }
+            }
+            //end
         }
 
         public void ActivateAnimation()
@@ -80,5 +102,16 @@ namespace FairlySadPanda.UsefulThings
                 animator.SetBool(stateName, false);
             }
         }
+
+        //akalink added
+        public void PlayAudio()
+        {
+            if (audioSource.clip != null)
+            {
+                audioSource.Play();
+            }
+        }
+        //end
     }
+
 }
