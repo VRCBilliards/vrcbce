@@ -382,7 +382,7 @@ namespace VRCBilliards
 
         // Cached data to use when checking for update.
 
-        private bool[] oldPocketed;
+        private bool[] oldBallPocketedState;
         private bool oldIsTeam2Turn;
         private bool oldOpen;
         private bool oldIsGameInMenus;
@@ -1424,7 +1424,7 @@ namespace VRCBilliards
                 Initialize8Ball();
             }
 
-            oldPocketed = ballPocketedState;
+            oldBallPocketedState = ballPocketedState;
 
             ApplyTableColour(false);
 
@@ -1945,16 +1945,6 @@ namespace VRCBilliards
             Networking.SetOwner(Networking.LocalPlayer, gameObject);
 
             // Owner state checks
-
-            /*
-            FSP note: For clarity, I've moved Harry's bitmasking here to use binary notation (0b) rather than hex (0x).
-
-            Some notes on what's going on below:
-            &= is bitwise AND. 0b0101 &= 0b0100 is 0b0100
-            |= is bitwise OR. 0b0101 |= 0b0100 is 0b0101
-            << is a bitshift leftwards.
-            */
-            
             
             int offset = newIsTeam2Turn ^ isPlayer2Blue ? 7 : 0; //offset for stripes
 
@@ -1984,14 +1974,19 @@ namespace VRCBilliards
             if (is8Ball) // Standard 8 ball
             {
                 bool isWrongHit = false;
-                int previousCount = 0, currentCount = 0;
-                for (int i = (isOpen ? 1 : (1 + offset)) - (isSetComplete ? 1 : 0) ; i < (isOpen ? 16 : (8 + offset)); i++)
+                
+                int previousCount = 0; // balls sunk in previous turn.
+                int currentCount = 0; // balls sunk in current turn
+                // Masking the for loop to a small part of the array
+                int startOffset = isOpen ? 2 : 2 + offset - (isSetComplete ? 1 : 0);
+                int endOffset = isOpen ? NUMBER_OF_SIMULATED_BALLS : 8 + offset;
+                for (int i = startOffset ; i < endOffset; i++) // TODO: UnHaumt this loop. oldBallPocketedState is updating when it shouldnt, or current and previousCount are haumted
                 {
                     if (ballPocketedState[i])
                     {
                         currentCount++;
                     }
-                    if (oldPocketed[i])
+                    if (oldBallPocketedState[i])
                     {
                         previousCount++;
                     }
@@ -2001,7 +1996,7 @@ namespace VRCBilliards
                 currentCount = 0;
                 if (!isOpen)
                 {
-                    for (int i = 9 - offset ; i < 16 - offset; i--)
+                    for (int i = 9 - offset ; i < NUMBER_OF_SIMULATED_BALLS - offset; i++)
                     {
                         if (isFirstHit == 1)
                         {
@@ -2011,7 +2006,7 @@ namespace VRCBilliards
                         {
                             currentCount++;
                         }
-                        if (oldPocketed[i])
+                        if (oldBallPocketedState[i])
                         {
                             previousCount++;
                         }
@@ -2034,7 +2029,7 @@ namespace VRCBilliards
                 // Rules are from: https://www.youtube.com/watch?v=U0SbHOXCtFw
 
                 // Rule #1: Cueball must strike the lowest number ball, first
-                bool isWrongHit = GetLowestNumberedBall(oldPocketed) != isFirstHit;
+                bool isWrongHit = GetLowestNumberedBall(oldBallPocketedState) != isFirstHit;
 
                 // Rule #2: Pocketing cueball, is a foul
 
@@ -2050,7 +2045,7 @@ namespace VRCBilliards
                         currentCount++;
                     }
 
-                    if (oldPocketed[i])
+                    if (oldBallPocketedState[i])
                     {
                         previousCount++;
                     }
@@ -2128,7 +2123,7 @@ namespace VRCBilliards
 
                     }
 
-                    for (int i = 10; i < 17; i++)
+                    for (int i = 9; i < 16; i++)
                     {
                         if (ballPocketedState[i])
                         {
@@ -3793,8 +3788,8 @@ namespace VRCBilliards
 
             // Commit changes
             gameIsSimulating = true;
-            oldPocketed = ballPocketedState;
-
+            oldBallPocketedState = ballPocketedState;
+            
             // Make sure we definately are the network owner
             Networking.SetOwner(localPlayer, gameObject);
 

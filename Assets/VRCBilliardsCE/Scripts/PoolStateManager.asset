@@ -7569,7 +7569,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: oldPocketed
+      Data: oldBallPocketedState
     - Name: $v
       Entry: 7
       Data: 432|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -7590,10 +7590,10 @@ MonoBehaviour:
       Data: SystemBooleanArray
     - Name: symbolOriginalName
       Entry: 1
-      Data: oldPocketed
+      Data: oldBallPocketedState
     - Name: symbolUniqueName
       Entry: 1
-      Data: oldPocketed
+      Data: oldBallPocketedState
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
