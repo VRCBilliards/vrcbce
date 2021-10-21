@@ -275,7 +275,7 @@ namespace VRCBilliards
         /// <summary>
         /// Timer ID 2 bit	{ 0: inf, 1: 10s, 2: 15s, 3: 30s, 4: 60s, 5: undefined }
         /// </summary>
-        [UdonSynced] private uint timerType;
+        [UdonSynced] private int timerType;
 
         /// <summary>
         /// Permission for player to play
@@ -314,7 +314,26 @@ namespace VRCBilliards
         /// <summary>
         /// 18:0 (0xffff)	Each bit represents each ball, if it has been pocketed or not
         /// </summary>
-        [UdonSynced] private uint ballPocketedState;
+        ///
+        /* Balls
+         * 0 White Cue
+         * 1 8 Ball
+         * 2 1 ball Solids
+         * 3 2 ball
+         * 4 3 ball
+         * 5 4 ball
+         * 6 5 ball
+         * 7 6 ball
+         * 8 7 ball
+         * 9 9 ball //stripes
+         * 10 10 ball
+         * 11 11 ball
+         * 12 12 ball
+         * 13 13 ball
+         * 14 14 ball
+         * 15 15 ball
+         */
+        [UdonSynced] private bool[] ballPocketedState = new bool[NUMBER_OF_SIMULATED_BALLS];
 
         /// <summary>
         /// 19:1 (0x02)		Whos turn is it, 0 or 1
@@ -359,15 +378,15 @@ namespace VRCBilliards
         /// <summary>
         /// 21:0 (0xffff)	Game number
         /// </summary>
-        [UdonSynced] private uint gameID;
+        [UdonSynced] private int gameID;
 
         // Cached data to use when checking for update.
 
-        private uint oldPocketed;
+        private bool[] oldPocketed;
         private bool oldIsTeam2Turn;
         private bool oldOpen;
         private bool oldIsGameInMenus;
-        private uint oldGameID;
+        private int oldGameID;
 
         /// <summary>
         /// We are waiting for our local simulation to finish, before we unpack data
@@ -488,7 +507,7 @@ namespace VRCBilliards
         private Vector3 cueArmedShotDirection;
         private float cueFDir;
         private Vector3 raySphereOutput;
-        private uint lastTimerType;
+        private int lastTimerType;
         private float accumulation;
         private float shootAmt;
         private int[] rackOrder8Ball = { 9, 2, 10, 11, 1, 3, 4, 12, 5, 13, 14, 6, 15, 7, 8 };
@@ -498,7 +517,7 @@ namespace VRCBilliards
         /// <summary>
         /// 19:8 (0x700)	Gamemode ID 3 bit	{ 0: 8 ball, 1: 9 ball, 2+: undefined }
         /// </summary>
-        [UdonSynced] private uint gameMode;
+        [UdonSynced] private int gameMode;
 
         // Additional synced data added by the port to Manual Sync
 
@@ -531,8 +550,8 @@ namespace VRCBilliards
         private string timerOutputFormat;
         private UnityEngine.UI.Image timerCountdown;
 
-        private UInt32 oldDesktopCue;
-        private UInt32 newDesktopCue;
+        private int oldDesktopCue;
+        private int newDesktopCue;
 
         /// <summary>
         /// Force inflicted on non-kinematic pool balls from the center of the table outwards. Helps prevent bounce-back.
@@ -672,8 +691,7 @@ namespace VRCBilliards
 
             mainSrc = GetComponent<AudioSource>();
 
-            if (
-                audioSourcePoolContainer) // Xiexe: Use a pool for audio instead of using the PlayClipAtPoint method because PlayClipAtPoint is buggy and VRC audio controls do not modify it.
+            if (audioSourcePoolContainer) // Xiexe: Use a pool for audio instead of using the PlayClipAtPoint method because PlayClipAtPoint is buggy and VRC audio controls do not modify it.
             {
                 ballPool = audioSourcePoolContainer.GetComponentsInChildren<AudioSource>();
                 ballPoolTransforms = new Transform[ballPool.Length];
@@ -835,15 +853,13 @@ namespace VRCBilliards
             // Everything below this line only runs when the game is active.
 
             // Update rendering objects positions
-            uint ballBit = 0x1u;
             for (int i = 0; i < NUMBER_OF_SIMULATED_BALLS; i++)
             {
-                if ((ballBit & ballPocketedState) == 0x0u)
+                // If ball is not pocketed
+                if (!(ballPocketedState[i]))
                 {
                     ballTransforms[i].localPosition = currentBallPositions[i];
                 }
-
-                ballBit <<= 1;
             }
 
             localSpacePositionOfCueTip = transform.InverseTransformPoint(cueTip.transform.position);
@@ -1419,8 +1435,8 @@ namespace VRCBilliards
 
         private void Initialize9Ball()
         {
-            ballPocketedState = 0xFC00u;
-
+            ballPocketedState = new bool[NUMBER_OF_SIMULATED_BALLS];
+            
             for (int i = 0, k = 0; i < 5; i++)
             {
                 int rown = brearows_9ball[i];
@@ -1441,8 +1457,9 @@ namespace VRCBilliards
 
         private void Initialize4Ball()
         {
-            ballPocketedState = 0xFDF2u;
-
+            ballPocketedState = new bool[NUMBER_OF_SIMULATED_BALLS];
+            //ballPocketedState = new bool[NUMBER_OF_SIMULATED_BALLS] {true,true,true,true,true,true,false,true,true,true,true,true,false,false,true,false};
+            
             currentBallPositions[0] = new Vector3(-SPOT_CAROM_X, 0.0f, 0.0f);
             currentBallPositions[9] = new Vector3(SPOT_CAROM_X, 0.0f, 0.0f);
             currentBallPositions[2] = new Vector3(SPOT_POSITION_X, 0.0f, 0.0f);
@@ -1461,7 +1478,7 @@ namespace VRCBilliards
 
         private void Initialize8Ball()
         {
-            ballPocketedState = 0x00u; // No balls are pocketed.
+            ballPocketedState = new bool[NUMBER_OF_SIMULATED_BALLS]; // No balls are pocketed.
 
             for (int i = 0, k = 0; i < 5; i++)
             {
@@ -1489,7 +1506,7 @@ namespace VRCBilliards
 
             Networking.SetOwner(localPlayer, gameObject);
 
-            gameMode = 0u;
+            gameMode = 0;
             RefreshNetworkData(false);
         }
 
@@ -1502,7 +1519,7 @@ namespace VRCBilliards
 
             Networking.SetOwner(localPlayer, gameObject);
 
-            gameMode = 1u;
+            gameMode = 1;
             RefreshNetworkData(false);
         }
 
@@ -1520,7 +1537,7 @@ namespace VRCBilliards
 
             isKorean = false;
 
-            gameMode = 2u;
+            gameMode = 2;
             RefreshNetworkData(false);
         }
 
@@ -1538,7 +1555,7 @@ namespace VRCBilliards
 
             isKorean = true;
 
-            gameMode = 2u;
+            gameMode = 2;
             RefreshNetworkData(false);
         }
 
@@ -1701,10 +1718,8 @@ namespace VRCBilliards
         {
             ballsMoving = false;
 
-            uint ballBit = 0x1u;
 
             // Cue angular velocity
-            if ((ballPocketedState & 0x1U) == 0) // If cueball is not sunk
             {
                 if (!IsCollisionWithCueBallInevitable())
                 {
@@ -1718,9 +1733,7 @@ namespace VRCBilliards
             // Run main simulation / inter-ball collision
             for (int i = 1; i < NUMBER_OF_SIMULATED_BALLS; i++)
             {
-                ballBit <<= 1;
-
-                if ((ballBit & ballPocketedState) == 0U) // If the ball in question is not sunk
+                if (!ballPocketedState[i]) // If the ball in question is not sunk
                 {
                     currentBallPositions[i] += currentBallVelocities[i] * FIXED_TIME_STEP;
 
@@ -1760,12 +1773,11 @@ namespace VRCBilliards
                 return;
             }
 
-            ballBit = 0x1U;
 
             // Run edge collision
             for (int index = 0; index < NUMBER_OF_SIMULATED_BALLS; index++)
             {
-                if ((ballBit & ballPocketedState) == 0U)
+                if (!ballPocketedState[index])
                 {
                     float zy, zx, zk, zw, d, k, i, j, l, r;
                     Vector3 A, N;
@@ -1849,16 +1861,12 @@ namespace VRCBilliards
                         }
                     }
                 }
-
-                ballBit <<= 1;
             }
-
-            ballBit = 0x1U;
 
             // Run triggers
             for (int i = 0; i < NUMBER_OF_SIMULATED_BALLS; i++)
             {
-                if ((ballBit & ballPocketedState) == 0U)
+                if (!ballPocketedState[i])
                 {
                     float zz, zx;
                     Vector3 A = currentBallPositions[i];
@@ -1873,13 +1881,13 @@ namespace VRCBilliards
                         A.z * zz > (A.x * -zx) + TABLE_WIDTH + TABLE_HEIGHT + POCKET_DEPTH
                     )
                     {
-                        uint total = 0U;
+                        int total = 0;
 
                         // Get total for X positioning
                         int count_extent = isNineBall ? 10 : NUMBER_OF_SIMULATED_BALLS;
                         for (int j = 1; j < count_extent; j++)
                         {
-                            total += (ballPocketedState >> j) & 0x1U;
+                            total += ballPocketedState[i] ? 1 : 0;
                         }
 
                         // set this for later
@@ -1887,15 +1895,24 @@ namespace VRCBilliards
                         currentBallPositions[i].z = 0.768f;
 
                         // This is where we actually save the pocketed/non-pocketed state of balls.
-                        ballPocketedState ^= 1U << i;
+                        ballPocketedState[i] = true;
 
-                        uint bmask = 0x1FCU <<
-                                     ((int)(Convert.ToUInt32(newIsTeam2Turn) ^ Convert.ToUInt32(isPlayer2Blue)) * 7);
                         mainSrc.PlayOneShot(sinkSfx, 1.0f);
-
-                        // If good pocket
-                        if (((0x1U << i) & (bmask | (isOpen ? 0xFFFCU : 0x0000U) |
-                                            ((bmask & ballPocketedState) == bmask ? 0x2U : 0x0U))) > 0)
+            
+                        int offset = newIsTeam2Turn ^ isPlayer2Blue ? 7 : 0; //offset for stripes
+                        if (isOpen)
+                        {
+                            if (i > 1 && i < 16)
+                            {
+                                // Make a bright flash
+                                tableCurrentColour *= 1.9f;
+                            }
+                            else
+                            {
+                                tableCurrentColour = pointerColourErr;
+                            }
+                        }
+                        else if (i < 9 + offset && i > 1 + offset) //score was for correct team
                         {
                             // Make a bright flash
                             tableCurrentColour *= 1.9f;
@@ -1904,7 +1921,7 @@ namespace VRCBilliards
                         {
                             tableCurrentColour = pointerColourErr;
                         }
-
+                        
                         // VFX ( make ball move )
                         Rigidbody body = ballTransforms[i].GetComponent<Rigidbody>();
                         body.isKinematic = false;
@@ -1917,8 +1934,6 @@ namespace VRCBilliards
                         // Debug.Log("Ball sunk velocity, " + body.velocity);
                     }
                 }
-
-                ballBit <<= 1;
             }
         }
 
@@ -1939,28 +1954,23 @@ namespace VRCBilliards
             |= is bitwise OR. 0b0101 |= 0b0100 is 0b0101
             << is a bitshift leftwards.
             */
-
-            uint bmask = 0b1111111111111100;
-            uint emask = 0b0000000000000000;
-
-            // Quash down the mask if table has closed
-            if (!isOpen)
-            {
-                bmask &= 0x1FCu << ((int)(Convert.ToUInt32(isPlayer2Blue) ^ Convert.ToUInt32(newIsTeam2Turn)) * 7);
-                emask = 0x1FCu << ((int)(Convert.ToUInt32(isPlayer2Blue) ^ Convert.ToUInt32(!newIsTeam2Turn)) * 7);
-            }
+            
+            
+            int offset = newIsTeam2Turn ^ isPlayer2Blue ? 7 : 0; //offset for stripes
 
             // Common informations
-            bool isSetComplete = (ballPocketedState & bmask) == bmask;
-
-            bool isScratch = (ballPocketedState & 0x1U) == 0x1U;
-
-            // Append black to mask if set is done
-            if (isSetComplete)
+            bool isSetComplete = true;
+            
+            for (int i = isOpen ? 1 : (1 + offset) ; i < (isOpen ? 16 : (8 + offset)); i++)
             {
-                bmask |= 0x2U;
+                if (!ballPocketedState[i])
+                {
+                    isSetComplete = false;
+                    break;
+                }
             }
-
+            bool isScratch = ballPocketedState[0];
+            
             // These are the resultant states we can set for each mode
             // then the rest is taken care of
             bool
@@ -1973,11 +1983,48 @@ namespace VRCBilliards
 
             if (is8Ball) // Standard 8 ball
             {
-                isObjectiveSink = (ballPocketedState & bmask) > (oldPocketed & bmask);
-                isOpponentSink = (ballPocketedState & emask) > (oldPocketed & emask);
+                bool isWrongHit = false;
+                int previousCount = 0, currentCount = 0;
+                for (int i = (isOpen ? 1 : (1 + offset)) - (isSetComplete ? 1 : 0) ; i < (isOpen ? 16 : (8 + offset)); i++)
+                {
+                    if (ballPocketedState[i])
+                    {
+                        currentCount++;
+                    }
+                    if (oldPocketed[i])
+                    {
+                        previousCount++;
+                    }
+                }
+                isObjectiveSink = currentCount > previousCount;
+                previousCount = 0;
+                currentCount = 0;
+                if (!isOpen)
+                {
+                    for (int i = 9 - offset ; i < 16 - offset; i--)
+                    {
+                        if (isFirstHit == 1)
+                        {
+                            isWrongHit = true;
+                        }
+                        if (ballPocketedState[i])
+                        {
+                            currentCount++;
+                        }
+                        if (oldPocketed[i])
+                        {
+                            previousCount++;
+                        }
+                        
+                    }
+                    isOpponentSink = currentCount > previousCount;
+                }
+                else
+                {
+                    isOpponentSink = false;
+                }
                 // Calculate if objective was not hit first
-                bool isWrongHit = ((0x1U << isFirstHit) & bmask) == 0;
-                bool is8Sink = (ballPocketedState & 0x2U) == 0x2U;
+                bool is8Sink = ballPocketedState[1];
                 winCondition = isSetComplete && is8Sink;
                 foulCondition = isScratch || isWrongHit;
                 deferLossCondition = is8Sink;
@@ -1992,11 +2039,23 @@ namespace VRCBilliards
                 // Rule #2: Pocketing cueball, is a foul
 
                 // Win condition: Pocket 9 ball ( at anytime )
-                winCondition = (ballPocketedState & 0x200u) == 0x200u;
+                winCondition = ballPocketedState[9];
 
                 // this video is hard to follow so im just gonna guess this is right
-                isObjectiveSink = (ballPocketedState & 0x3FEu) > (oldPocketed & 0x3FEu);
+                int previousCount = 0, currentCount = 0;
+                for (int i = 1; i < 11; i++)
+                {
+                    if (ballPocketedState[i])
+                    {
+                        currentCount++;
+                    }
 
+                    if (oldPocketed[i])
+                    {
+                        previousCount++;
+                    }
+                }
+                isObjectiveSink = currentCount > previousCount;
                 isOpponentSink = false;
                 deferLossCondition = false;
 
@@ -2021,7 +2080,7 @@ namespace VRCBilliards
                 foulCondition = false;
                 deferLossCondition = false;
 
-                if ((ballPocketedState & 0x1u) == 0x1u)
+                if (ballPocketedState[1])
                 {
                     isFoul = true;
                     OnRemoteTurnChange();
@@ -2057,28 +2116,25 @@ namespace VRCBilliards
                 // Close table if it was open ( 8 ball specific )
                 if (is8Ball && isOpen)
                 {
-                    uint sunkOranges = 0;
-                    uint sunkBlues = 0;
-                    uint pmask = ballPocketedState >> 2;
+                    int sunkOranges = 0;
+                    int sunkBlues = 0;
 
-                    for (int i = 0; i < 7; i++)
+                    for (int i = 2; i < 9; i++)
                     {
-                        if ((pmask & 0x1u) == 0x1u)
+                        if (ballPocketedState[i])
                         {
                             sunkBlues++;
                         }
 
-                        pmask >>= 1;
                     }
 
-                    for (int i = 0; i < 7; i++)
+                    for (int i = 10; i < 17; i++)
                     {
-                        if ((pmask & 0x1u) == 0x1u)
+                        if (ballPocketedState[i])
                         {
                             sunkOranges++;
                         }
 
-                        pmask >>= 1;
                     }
 
                     if (sunkBlues != sunkOranges)
@@ -2296,7 +2352,9 @@ namespace VRCBilliards
 
             if (isFourBall)
             {
-                ballPocketedState = 0xFDF2u;
+                //ballPocketedState = new bool[NUMBER_OF_SIMULATED_BALLS] {true,true,true,true,true,true,false,true,true,true,true,true,false,false,true,false};
+                ballPocketedState = new bool[NUMBER_OF_SIMULATED_BALLS];
+
             }
 
             // Check this every read
@@ -2518,11 +2576,11 @@ namespace VRCBilliards
             isMadePoint = true;
             mainSrc.PlayOneShot(pointMadeSfx, 1.0f);
 
-            scores[Convert.ToUInt32(newIsTeam2Turn)]++;
+            scores[Convert.ToInt32(newIsTeam2Turn)]++;
 
-            if (scores[Convert.ToUInt32(newIsTeam2Turn)] > 10)
+            if (scores[Convert.ToInt32(newIsTeam2Turn)] > 10)
             {
-                scores[Convert.ToUInt32(newIsTeam2Turn)] = 10;
+                scores[Convert.ToInt32(newIsTeam2Turn)] = 10;
             }
 
             SpawnPlusOne(ball);
@@ -2621,7 +2679,7 @@ namespace VRCBilliards
             mainSrc.PlayOneShot(newTurnSfx, 1.0f);
 
             // Register correct cuetip
-            cueTip = cueTips[Convert.ToUInt32(newIsTeam2Turn)];
+            cueTip = cueTips[Convert.ToInt32(newIsTeam2Turn)];
 
             bool isOurTurn = ((localPlayerID >= 0) && (playerIsTeam2 == newIsTeam2Turn)) || isGameModePractice;
             if (isFourBall) // 4 ball
@@ -2650,13 +2708,13 @@ namespace VRCBilliards
             else
             {
                 // White was pocketed
-                if ((ballPocketedState & 0x1u) == 0x1u)
+                if (ballPocketedState[0])
                 {
                     currentBallPositions[0] = vectorZero;
                     currentBallVelocities[0] = vectorZero;
                     currentAngularVelocities[0] = vectorZero;
 
-                    ballPocketedState &= 0xFFFFFFFEu;
+                    ballPocketedState[0] = false;
                 }
             }
 
@@ -2995,7 +3053,6 @@ namespace VRCBilliards
                 logger._Log(name, "PlaceSunkBallsIntoRestingPlace");
             }
 
-            uint ball_bit = 0x1u;
             int numberOfSunkBalls = 0;
             float posX = sunkBallsPositionRoot.localPosition.x;
             float posY = sunkBallsPositionRoot.localPosition.y;
@@ -3005,13 +3062,11 @@ namespace VRCBilliards
             {
                 ballTransforms[i].GetComponent<Rigidbody>().isKinematic = true;
 
-                if ((ball_bit & ballPocketedState) == ball_bit)
+                if (ballPocketedState[i])
                 {
                     ballTransforms[i].localPosition = new Vector3(posX + numberOfSunkBalls * BALL_DIAMETER, posY, posZ);
                     numberOfSunkBalls++;
                 }
-
-                ball_bit <<= 1;
             }
         }
 
@@ -3251,16 +3306,13 @@ namespace VRCBilliards
             // FSP [22/03/21]: Use the base object's rotation as a factor in the axis. This stops the balls spinning incorrectly.
             ballTransforms[ballID].Rotate((baseObject.transform.rotation * W).normalized,
                 W.magnitude * FIXED_TIME_STEP * -Mathf.Rad2Deg, Space.World);
-
-            uint ball_bit = 0x1U << ballID;
-
+            
             // ball/ball collisions
             for (int i = ballID + 1; i < NUMBER_OF_SIMULATED_BALLS; i++)
             {
-                ball_bit <<= 1;
 
                 // If the ball has been pocketed it cannot be collided with.
-                if ((ball_bit & ballPocketedState) != 0U)
+                if (ballPocketedState[i])
                 {
                     continue;
                 }
@@ -3303,11 +3355,11 @@ namespace VRCBilliards
                                         if (!isMadeFoul)
                                         {
                                             isMadeFoul = true;
-                                            scores[Convert.ToUInt32(newIsTeam2Turn)]--;
+                                            scores[Convert.ToInt32(newIsTeam2Turn)]--;
 
-                                            if (scores[Convert.ToUInt32(newIsTeam2Turn)] < 0)
+                                            if (scores[Convert.ToInt32(newIsTeam2Turn)] < 0)
                                             {
-                                                scores[Convert.ToUInt32(newIsTeam2Turn)] = 0;
+                                                scores[Convert.ToInt32(newIsTeam2Turn)] = 0;
                                             }
 
                                             SpawnMinusOne(ballTransforms[i]);
@@ -3377,14 +3429,12 @@ namespace VRCBilliards
             int minid = 0;
             float mins = 0;
 
-            uint ball_bit = 0x1U;
 
             // Loop balls look for collisions
             for (int i = 1; i < NUMBER_OF_SIMULATED_BALLS; i++)
             {
-                ball_bit <<= 1;
 
-                if ((ball_bit & ballPocketedState) != 0U)
+                if (!ballPocketedState[i])
                 {
                     continue;
                 }
@@ -3459,24 +3509,24 @@ namespace VRCBilliards
         /// since 8 has id 1, the search needs to be split
         /// </summary>
         /// <param name="field"></param>
-        private int GetLowestNumberedBall(uint field)
+        private int GetLowestNumberedBall(bool[] field)
         {
             for (int i = 2; i <= 8; i++)
             {
-                if (((field >> i) & 0x1U) == 0x00U)
+                if (!field[i])
                 {
                     return i;
                 }
             }
 
-            if ((field & 0x2U) == 0x00U)
+            if (!field[1]) //8 ball
             {
                 return 1;
             }
 
             for (int i = 9; i < NUMBER_OF_SIMULATED_BALLS; i++)
             {
-                if (((field >> i) & 0x1U) == 0x00U)
+                if (!field[i])
                 {
                     return i;
                 }
@@ -3585,7 +3635,7 @@ namespace VRCBilliards
                 Vector3 ncursor = deskTopCursor;
                 ncursor.y = 0.0f;
                 Vector3 delta = ncursor - currentBallPositions[0];
-                newDesktopCue = Convert.ToUInt32(newIsTeam2Turn);
+                newDesktopCue = Convert.ToInt32(newIsTeam2Turn);
                 GameObject cue = desktopCueParents[newDesktopCue];
 
                 if (isGameModePractice && newDesktopCue != oldDesktopCue)
@@ -3774,27 +3824,31 @@ namespace VRCBilliards
                 poolMenu._SetScore(false, -1);
                 poolMenu._SetScore(true, -1);
             }
-            else
+            else // 8 Ball
             {
                 int[] counters = new int[2];
-                uint temp = ballPocketedState;
 
                 for (int i = 0; i < counters.Length; i++)
                 {
-                    for (int j = 0; j < 7; j++)
+                    for (int j = 2; j < 9; j++)
                     {
-                        if ((temp & 0x4) > 0)
+                        if (ballPocketedState[i])
                         {
-                            counters[i ^ Convert.ToUInt32(isPlayer2Blue)]++;
+                            counters[isPlayer2Blue ? 0 : 1]++;
                         }
-
-                        temp >>= 1;
+                    }
+                    for (int j = 10; j < 16; j++)
+                    {
+                        if (ballPocketedState[i])
+                        {
+                            counters[isPlayer2Blue ? 1 : 0]++;
+                        }
                     }
                 }
 
                 if (isGameInMenus)
                 {
-                    counters[Convert.ToUInt32(isTeam2Winner)] += (int)((ballPocketedState & 0x2) >> 1);
+                    counters[isTeam2Winner ? 1 : 0] += ballPocketedState[2] ? 1 : 0;
                 }
 
                 poolMenu._SetScore(false, counters[0]);
