@@ -1979,7 +1979,7 @@ namespace VRCBilliards
                 int currentCount = 0; // balls sunk in current turn
                 // Masking the for loop to a small part of the array
                 int startOffset = isOpen ? 2 : 2 + offset - (isSetComplete ? 1 : 0);
-                int endOffset = isOpen ? NUMBER_OF_SIMULATED_BALLS : 8 + offset;
+                int endOffset = isOpen ? NUMBER_OF_SIMULATED_BALLS : 9 + offset;
                 for (int i = startOffset ; i < endOffset; i++) // TODO: UnHaumt this loop. oldBallPocketedState is updating when it shouldnt, or current and previousCount are haumted
                 {
                     if (ballPocketedState[i])
@@ -2793,9 +2793,9 @@ namespace VRCBilliards
 
             poolMenu._EnableResetButton();
 
-            is8Ball = gameMode == 0u;
-            isNineBall = gameMode == 1u;
-            isFourBall = gameMode == 2u;
+            is8Ball = gameMode == 0;
+            isNineBall = gameMode == 1;
+            isFourBall = gameMode == 2;
 
             if (localPlayerID >= 0)
             {
@@ -3788,15 +3788,15 @@ namespace VRCBilliards
 
             // Commit changes
             gameIsSimulating = true;
-            oldBallPocketedState = ballPocketedState;
-            
+            oldBallPocketedState = (bool[])ballPocketedState.Clone();
+
             // Make sure we definately are the network owner
             Networking.SetOwner(localPlayer, gameObject);
 
             RefreshNetworkData(newIsTeam2Turn);
 
             isSimulatedByUs = true;
-
+            
             float vol = Mathf.Clamp(currentBallVelocities[0].magnitude * 0.1f, 0f, 0.6f);
             cueTipSrc.transform.position = cueTipTransform.position;
             cueTipSrc.PlayOneShot(hitBallSfx, vol);
@@ -3823,21 +3823,20 @@ namespace VRCBilliards
             {
                 int[] counters = new int[2];
 
-                for (int i = 0; i < counters.Length; i++)
+
+                for (int j = 2; j < 9; j++) //Solids
                 {
-                    for (int j = 2; j < 9; j++)
+                    if (ballPocketedState[j])
                     {
-                        if (ballPocketedState[i])
-                        {
-                            counters[isPlayer2Blue ? 0 : 1]++;
-                        }
+                        counters[isPlayer2Blue ? 0 : 1]++;
                     }
-                    for (int j = 10; j < 16; j++)
+                }
+
+                for (int j = 10; j < 16; j++) //Stripes
+                {
+                    if (ballPocketedState[j])
                     {
-                        if (ballPocketedState[i])
-                        {
-                            counters[isPlayer2Blue ? 1 : 0]++;
-                        }
+                        counters[isPlayer2Blue ? 1 : 0]++;
                     }
                 }
 
