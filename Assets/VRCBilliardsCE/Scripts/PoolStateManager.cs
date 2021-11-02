@@ -128,6 +128,7 @@ namespace VRCBilliards
         /// </summary>
         private const float RACK_HEIGHT = -0.0702f;
 
+        private const float CUE_VELOCITY_CLAMP = 20f;
         /// <summary>
         /// Vectors cannot be const.
         /// </summary>
@@ -828,7 +829,7 @@ namespace VRCBilliards
                     _OnDesktopTopDownViewStart();
                 }
             }
-
+            
             // Run sim only if things are moving
             if (gameIsSimulating)
             {
@@ -849,7 +850,6 @@ namespace VRCBilliards
             {
                 return;
             }
-
             // Everything below this line only runs when the game is active.
 
             // Update rendering objects positions
@@ -895,6 +895,7 @@ namespace VRCBilliards
 
                 if (isArmed)
                 {
+                    float cueDistance = (copyOfLocalSpacePositionOfCueTip - cueballPosition).sqrMagnitude;
                     float sweepTimeBall = Vector3.Dot(cueballPosition - localSpacePositionOfCueTipLastFrame,
                         cueLocalForwardDirection);
 
@@ -907,7 +908,7 @@ namespace VRCBilliards
                     }
 
                     // Hit condition is when cuetip is gone inside ball
-                    if ((copyOfLocalSpacePositionOfCueTip - cueballPosition).sqrMagnitude < BALL_RADIUS_SQUARED)
+                    if (cueDistance < BALL_RADIUS_SQUARED)
                     {
                         Vector3 horizontalForce =
                             copyOfLocalSpacePositionOfCueTip - localSpacePositionOfCueTipLastFrame;
@@ -917,7 +918,7 @@ namespace VRCBilliards
                         float vel = forceMultiplier * (horizontalForce.magnitude / Time.deltaTime);
 
                         // Clamp velocity input to 20 m/s ( moderate break speed )
-                        currentBallVelocities[0] = cueArmedShotDirection * Mathf.Min(vel, 20.0f);
+                        currentBallVelocities[0] = cueArmedShotDirection * Mathf.Min(vel, CUE_VELOCITY_CLAMP);
 
                         // Angular velocity: L=r(normalized)×p
                         Vector3 r = (raySphereOutput - cueballPosition) * BALL_1OR;
@@ -925,6 +926,16 @@ namespace VRCBilliards
                         currentAngularVelocities[0] = Vector3.Cross(r, p) * -50.0f;
 
                         HitBallWithCue();
+                    }
+                    else
+                    {
+                        if (isPreviewSimEnabled && Mathf.Abs(cueDistance - previewPreviousCueDistance) > PREVIEW_MIN_POWER_DISTANCE)
+                        {
+                            StartPreviewSim(cueDistance);
+                        }
+
+                        previewPreviousCueDistance = cueDistance;
+                        RunPreviewSim();
                     }
                 }
                 else
@@ -4055,8 +4066,11 @@ namespace VRCBilliards
         //Run the sim before the shot for ball prediction
         #region preShotSSim
 
-        private float minPowerDistance = 0.1f;
+        private const float PREVIEW_MIN_POWER_DISTANCE = 0.1f;
+        private bool isPreviewSimEnabled = false;
         private bool isPreviewSimRunning = false;
+
+        private float previewPreviousCueDistance = 0;
         //Number of times to run the sim per frame
         private const int PREVIEW_MAX_ITERATIONS_FRAME = 15;
         private const int PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT = 1000;
@@ -4065,9 +4079,13 @@ namespace VRCBilliards
         private Vector3[][] previewBallVelocity;
         private Vector3[][] previewBallPosition;
         private Vector3[][] previewAngularVelocities;
-        private void StartPreviewSim()
+        private void StartPreviewSim(float cueDistance)
         {
-            if (logger)
+            if (!isPreviewSimEnabled)
+            {
+                return;
+            }
+            else if (logger)
             {
                 logger._Log(name,"StartPreviewSim");
             }
@@ -4076,7 +4094,7 @@ namespace VRCBilliards
             previewBallVelocity = new Vector3[PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT][];
             previewBallPosition = new Vector3[PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT][];
             previewAngularVelocities = new Vector3[PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT][];
-            //Copy current state
+            // Copy current state
             previewPocketedState[0] = (bool[]) ballPocketedState.Clone();
             previewBallPosition[0] = (Vector3[]) currentBallPositions.Clone();
             previewBallVelocity[0] = new Vector3[NUMBER_OF_SIMULATED_BALLS];
@@ -4084,9 +4102,17 @@ namespace VRCBilliards
 
             previewTotalIterations = 0;
             isPreviewSimRunning = true;
-            //TODO: Calculate initial colision velocity
-        }
+            // 1 meter = 20m/s
+            float previewInitialCueVelocity = Mathf.Min(cueDistance * 20,CUE_VELOCITY_CLAMP);
 
+            previewBallVelocity[0][0] = cueArmedShotDirection * previewInitialCueVelocity;
+
+            // Angular velocity: L=r(normalized)×p
+            Vector3 r = (raySphereOutput - previewBallPosition[0][0]) * BALL_1OR;
+            Vector3 p = cueLocalForwardDirection * previewInitialCueVelocity;
+            previewAngularVelocities[0][0] = Vector3.Cross(r, p) * -50.0f;
+        }
+        
         private void RunPreviewSim()
         {
             int loops = 0;
@@ -4105,7 +4131,9 @@ namespace VRCBilliards
                     (Vector3[])previewAngularVelocities[previewTotalIterations - 1].Clone();
                 
                 PreviewAdvancePhysicsStep();
-
+                //TODO: end if balls are not moving!
+                //TODO: Simulate ball moving with trails
+                //TODO: Simulate cue movement to achive velocity
                 //End if sim runs too long
                 if (PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT < previewTotalIterations)
                 {
@@ -4115,7 +4143,7 @@ namespace VRCBilliards
             }
         }
 
-        //TODO: Merge into a single version
+        //TODO: Merge into a single version. Preferable with ref/out in U# 1.0
         
         private void PreviewAdvancePhysicsStep()
         {
