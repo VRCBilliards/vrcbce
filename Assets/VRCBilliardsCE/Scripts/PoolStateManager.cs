@@ -4051,5 +4051,642 @@ namespace VRCBilliards
         }
 
         #endregion
+        
+        //Run the sim before the shot for ball prediction
+        #region preShotSSim
+
+        private float minPowerDistance = 0.1f;
+        private bool isPreviewSimRunning = false;
+        //Number of times to run the sim per frame
+        private const int PREVIEW_MAX_ITERATIONS_FRAME = 15;
+        private const int PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT = 1000;
+        private int previewTotalIterations = 0;
+        private bool[][] previewPocketedState;
+        private Vector3[][] previewBallVelocity;
+        private Vector3[][] previewBallPosition;
+        private Vector3[][] previewAngularVelocities;
+        private void StartPreviewSim()
+        {
+            if (logger)
+            {
+                logger._Log(name,"StartPreviewSim");
+            }
+            //Init Jagged arrays
+            previewPocketedState = new bool[PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT][];
+            previewBallVelocity = new Vector3[PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT][];
+            previewBallPosition = new Vector3[PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT][];
+            previewAngularVelocities = new Vector3[PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT][];
+            //Copy current state
+            previewPocketedState[0] = (bool[]) ballPocketedState.Clone();
+            previewBallPosition[0] = (Vector3[]) currentBallPositions.Clone();
+            previewBallVelocity[0] = new Vector3[NUMBER_OF_SIMULATED_BALLS];
+            previewAngularVelocities[0] = new Vector3[NUMBER_OF_SIMULATED_BALLS];
+
+            previewTotalIterations = 0;
+            isPreviewSimRunning = true;
+            //TODO: Calculate initial colision velocity
+        }
+
+        private void RunPreviewSim()
+        {
+            int loops = 0;
+            while (isPreviewSimRunning && loops < PREVIEW_MAX_ITERATIONS_FRAME)
+            {
+                loops++;
+                previewTotalIterations++;
+                //return previous state
+                previewBallPosition[previewTotalIterations] =
+                    (Vector3[])previewBallPosition[previewTotalIterations - 1].Clone();
+                previewBallVelocity[previewTotalIterations] =
+                    (Vector3[])previewBallVelocity[previewTotalIterations - 1].Clone();
+                previewPocketedState[previewTotalIterations] =
+                    (bool[])previewPocketedState[previewTotalIterations - 1].Clone();
+                previewAngularVelocities[previewTotalIterations] =
+                    (Vector3[])previewAngularVelocities[previewTotalIterations - 1].Clone();
+                
+                PreviewAdvancePhysicsStep();
+
+                //End if sim runs too long
+                if (PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT < previewTotalIterations)
+                {
+                    isPreviewSimRunning = false;
+                    break;
+                }
+            }
+        }
+
+        //TODO: Merge into a single version
+        
+        private void PreviewAdvancePhysicsStep()
+        {
+            ballsMoving = false; //TODO: Isolate
+
+
+            // Cue angular velocity
+            {
+                if (!PreviewIsCollisionWithCueBallInevitable())
+                {
+                    // Apply movement
+                    previewBallPosition[previewTotalIterations][0] += previewBallVelocity[previewTotalIterations][0] * FIXED_TIME_STEP;
+                }
+                PreviewAdvanceSimulationForBall(0);
+            }
+
+            // Run main simulation / inter-ball collision
+            for (int i = 1; i < NUMBER_OF_SIMULATED_BALLS; i++)
+            {
+                if (!previewPocketedState[previewTotalIterations][i]) // If the ball in question is not sunk
+                {
+                    previewBallPosition[previewTotalIterations][i] += previewBallVelocity[previewTotalIterations][i] * FIXED_TIME_STEP;
+
+                    PreviewAdvanceSimulationForBall(i);
+                }
+            }
+
+            // Check if simulation has settled
+            if (!ballsMoving && isPreviewSimRunning)
+            {
+                isPreviewSimRunning = false;
+                return;
+            }
+
+            if (isFourBall)
+            {
+                PreviewBounceBallOffCushionIfApplicable(0);
+                PreviewBounceBallOffCushionIfApplicable(2);
+                PreviewBounceBallOffCushionIfApplicable(3);
+                PreviewBounceBallOffCushionIfApplicable(9);
+
+                return;
+            }
+
+
+            // Run edge collision
+            for (int index = 0; index < NUMBER_OF_SIMULATED_BALLS; index++)
+            {
+                if (!previewPocketedState[previewTotalIterations][index])
+                {
+                    float zy, zx, zk, zw, d, k, i, j, l, r;
+                    Vector3 A, N;
+
+                    A = previewBallPosition[previewTotalIterations][index];
+
+                    // REGIONS
+                    /*
+                        *  QUADS:							SUBSECTION:				SUBSECTION:
+                        *    zx, zy:							zz:						zw:
+                        *
+                        *  o----o----o  +:  1			\_________/				\_________/
+                        *  | -+ | ++ |  -: -1		     |	    /		              /  /
+                        *  |----+----|					  -  |  +   |		      -     /   |
+                        *  | -- | +- |						  |	   |		          /  +  |
+                        *  o----o----o						  |      |             /       |
+                        *
+                        */
+
+                    // Setup major regions
+                    zx = Mathf.Sign(A.x);
+                    zy = Mathf.Sign(A.z);
+
+                    // within pocket regions
+                    if ((A.z * zy > (TABLE_HEIGHT - POCKET_RADIUS)) &&
+                        (A.x * zx > (TABLE_WIDTH - POCKET_RADIUS) || A.x * zx < POCKET_RADIUS))
+                    {
+                        // Subregions
+                        zw = A.z * zy > (A.x * zx) - TABLE_WIDTH + TABLE_HEIGHT ? 1.0f : -1.0f;
+
+                        // Normalization / line coefficients change depending on sub-region
+                        if (A.x * zx > TABLE_WIDTH * 0.5f)
+                        {
+                            zk = 1.0f;
+                            r = ONE_OVER_ROOT_TWO;
+                        }
+                        else
+                        {
+                            zk = -2.0f;
+                            r = ONE_OVER_ROOT_FIVE;
+                        }
+
+                        // Collider line EQ
+                        d = zx * zy * zk; // Coefficient
+                        k = (-(TABLE_WIDTH * Mathf.Max(zk, 0.0f)) + (POCKET_RADIUS * zw * Mathf.Abs(zk)) +
+                             TABLE_HEIGHT) * zy; // Konstant
+
+                        // Check if colliding
+                        l = zw * zy;
+                        if (A.z * l > ((A.x * d) + k) * l)
+                        {
+                            // Get line normal
+                            N.x = zx * zk;
+                            N.z = -zy;
+                            N.y = 0.0f;
+                            N *= zw * r;
+
+                            // New position
+                            i = ((A.x * d) + A.z - k) / (2.0f * d);
+                            j = (i * d) + k;
+
+                            previewBallPosition[previewTotalIterations][index].x = i;
+                            previewBallPosition[previewTotalIterations][index].z = j;
+
+                            // Reflect velocity
+                            PreviewApplyBounceCushion(index, N);
+                        }
+                    }
+                    else // edges
+                    {
+                        if (A.x * zx > TABLE_WIDTH)
+                        {
+                            previewBallPosition[previewTotalIterations][index].x = TABLE_WIDTH * zx;
+                            PreviewApplyBounceCushion(index, Vector3.left * zx);
+                        }
+
+                        if (A.z * zy > TABLE_HEIGHT)
+                        {
+                            previewBallPosition[previewTotalIterations][index].z = TABLE_HEIGHT * zy;
+                            PreviewApplyBounceCushion(index, Vector3.back * zy);
+                        }
+                    }
+                }
+            }
+
+            // Run triggers
+            for (int i = 0; i < NUMBER_OF_SIMULATED_BALLS; i++)
+            {
+                if (!previewPocketedState[previewTotalIterations][i])
+                {
+                    float zz, zx;
+                    Vector3 A = previewBallPosition[previewTotalIterations][i];
+
+                    // Setup major regions
+                    zx = Mathf.Sign(A.x);
+                    zz = Mathf.Sign(A.z);
+
+                    // Its in a pocket
+                    if (
+                        A.z * zz > TABLE_HEIGHT + POCKET_DEPTH ||
+                        A.z * zz > (A.x * -zx) + TABLE_WIDTH + TABLE_HEIGHT + POCKET_DEPTH
+                    )
+                    {
+                        int total = 0;
+
+                        // Get total for X positioning
+                        int count_extent = isNineBall ? 10 : NUMBER_OF_SIMULATED_BALLS;
+                        for (int j = 1; j < count_extent; j++)
+                        {
+                            total += previewPocketedState[previewTotalIterations][i] ? 1 : 0;
+                        }
+
+                        // set this for later
+                        previewBallPosition[previewTotalIterations][i].x = -0.9847f + (total * BALL_DIAMETER);
+                        previewBallPosition[previewTotalIterations][i].z = 0.768f;
+
+                        // This is where we actually save the pocketed/non-pocketed state of balls.
+                        previewPocketedState[previewTotalIterations][i] = true;
+
+                        //mainSrc.PlayOneShot(sinkSfx, 1.0f);
+            
+                        //int offset = newIsTeam2Turn ^ isPlayer2Blue ? 7 : 0; //offset for stripes
+
+                        // VFX ( make ball move )
+                        //Rigidbody body = ballTransforms[i].GetComponent<Rigidbody>();
+                        //body.isKinematic = false;
+
+                        //body.velocity = baseObject.transform.rotation * new Vector3(
+                        //    Mathf.Clamp(currentBallVelocities[i].x, (pocketVelocityClamp * -1), pocketVelocityClamp),
+                        //    0.0f,
+                        //    Mathf.Clamp(currentBallVelocities[i].z, (pocketVelocityClamp * -1), pocketVelocityClamp)
+                        //);
+                        // Debug.Log("Ball sunk velocity, " + body.velocity);
+                    }
+                }
+            }
+        }
+
+        private void PreviewAdvanceSimulationForBall(int ballID)
+        {
+            // Since v1.5.0
+            Vector3 V = previewBallVelocity[previewTotalIterations][ballID];
+            Vector3 W = previewAngularVelocities[previewTotalIterations][ballID];
+
+            // Equations derived from: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.89.4627&rep=rep1&type=pdf
+            //
+            // R: Contact location with ball and floor aka: (0,-r,0)
+            // µₛ: Slipping friction coefficient
+            // µᵣ: Rolling friction coefficient
+            // i: Up vector aka: (0,1,0)
+            // g: Planet Earth's gravitation acceleration ( 9.80665 )
+            //
+            // Relative contact velocity (marlow):
+            //   c = v + R✕ω
+            //
+            // Ball is classified as 'rolling' or 'slipping'. Rolling is when the relative velocity is none and the ball is
+            // said to be in pure rolling motion
+            //
+            // When ball is classified as rolling:
+            //   Δv = -µᵣ∙g∙Δt∙(v/|v|)
+            //
+            // Angular momentum can therefore be derived as:
+            //   ωₓ = -vᵤ/R
+            //   ωᵧ =  0
+            //   ωᵤ =  vₓ/R
+            //
+            // In the slipping state:
+            //   Δω = ((-5∙µₛ∙g)/(2/R))∙Δt∙i✕(c/|c|)
+            //   Δv = -µₛ∙g∙Δt(c/|c|)
+
+            // Relative contact velocity of ball and table
+            Vector3 cv = V + Vector3.Cross(CONTACT_POINT, W);
+
+            // Rolling is achieved when cv's length is approaching 0
+            // The epsilon is quite high here because of the fairly large timestep we are working with
+            if (cv.magnitude <= 0.1f)
+            {
+                //V += -F_ROLL * GRAVITY * FIXED_TIME_STEP * V.normalized;
+                // (baked):
+                V += -0.00122583125f * V.normalized;
+
+                // Calculate rolling angular velocity
+                W.x = -V.z * BALL_1OR;
+
+                if (0.3f > Mathf.Abs(W.y))
+                {
+                    W.y = 0.0f;
+                }
+                else
+                {
+                    W.y -= Mathf.Sign(W.y) * 0.3f;
+                }
+
+                W.z = V.x * BALL_1OR;
+
+                // Stopping scenario
+                if (V.magnitude < 0.01f && W.magnitude < 0.2f)
+                {
+                    W = vectorZero;
+                    V = vectorZero;
+                }
+                else
+                {
+                    ballsMoving = true;
+                }
+            }
+            else // Slipping
+            {
+                Vector3 nv = cv.normalized;
+
+                // Angular slipping friction
+                //W += ((-5.0f * F_SLIDE * 9.8f)/(2.0f * 0.03f)) * FIXED_TIME_STEP * Vector3.Cross( Vector3.up, nv );
+                // (baked):
+                W += -2.04305208f * Vector3.Cross(Vector3.up, nv);
+                V += -F_SLIDE * 9.8f * FIXED_TIME_STEP * nv;
+
+                ballsMoving = true;
+            }
+
+            previewBallVelocity[previewTotalIterations][ballID] = W;
+            previewBallVelocity[previewTotalIterations][ballID] = V;
+
+            // FSP [22/03/21]: Use the base object's rotation as a factor in the axis. This stops the balls spinning incorrectly.
+            ballTransforms[ballID].Rotate((baseObject.transform.rotation * W).normalized,
+                W.magnitude * FIXED_TIME_STEP * -Mathf.Rad2Deg, Space.World);
+
+            // ball/ball collisions
+            for (int i = ballID + 1; i < NUMBER_OF_SIMULATED_BALLS; i++)
+            {
+                // If the ball has been pocketed it cannot be collided with.
+                if (previewPocketedState[previewTotalIterations][i])
+                {
+                    continue;
+                }
+
+                Vector3 delta = previewBallPosition[previewTotalIterations][i] -
+                                previewBallPosition[previewTotalIterations][ballID];
+                float dist = delta.magnitude;
+
+                if (dist < BALL_DIAMETER)
+                {
+                    Vector3 normal = delta / dist;
+
+                    Vector3 velocityDelta = previewBallVelocity[previewTotalIterations][ballID] -
+                                            previewBallVelocity[previewTotalIterations][i];
+
+                    float dot = Vector3.Dot(velocityDelta, normal);
+
+                    if (dot > 0.0f)
+                    {
+                        Vector3 reflection = normal * dot;
+                        previewBallVelocity[previewTotalIterations][ballID] -= reflection;
+                        previewBallVelocity[previewTotalIterations][i] += reflection;
+
+                        // Prevent sound spam if it happens
+                        if (previewBallVelocity[previewTotalIterations][ballID].sqrMagnitude > 0 &&
+                            previewBallVelocity[previewTotalIterations][i].sqrMagnitude > 0)
+                        {
+                            int clip = UnityEngine.Random.Range(0, hitsSfx.Length - 1);
+                            float vol = Mathf.Clamp01(previewBallVelocity[previewTotalIterations][ballID].magnitude *
+                                                      reflection.magnitude);
+                            //TODO: Simulate movement with fake balls
+                            //ballPoolTransforms[ballID].position = ballTransforms[ballID].position;
+                            ballPool[ballID].PlayOneShot(hitsSfx[clip], vol);
+                        }
+
+                        /*// First hit detected
+                        if (ballID == 0)
+                        {
+                            if (isFourBall)
+                            {
+                                if (isKorean) // KR 사구 ( Sagu )
+                                {
+                                    if (i == 9)
+                                    {
+                                        if (!isMadeFoul)
+                                        {
+                                            isMadeFoul = true;
+                                            scores[Convert.ToInt32(newIsTeam2Turn)]--;
+
+                                            if (scores[Convert.ToInt32(newIsTeam2Turn)] < 0)
+                                            {
+                                                scores[Convert.ToInt32(newIsTeam2Turn)] = 0;
+                                            }
+
+                                            SpawnMinusOne(ballTransforms[i]);
+                                        }
+                                    }
+                                    else if (isFirstHit == 0)
+                                    {
+                                       isFirstHit = i;
+                                    }
+                                    else if (i != isFirstHit)
+                                    {
+                                        if (isSecondHit == 0)
+                                        {
+                                            isSecondHit = i;
+                                            OnLocalCaromPoint(ballTransforms[i]);
+                                        }
+                                    }
+                                }
+                                else // JP 四つ玉 ( Yotsudama )
+                                {
+                                    if (isFirstHit == 0)
+                                    {
+                                        isFirstHit = i;
+                                    }
+                                    else if (isSecondHit == 0)
+                                    {
+                                        if (i != isFirstHit)
+                                        {
+                                            isSecondHit = i;
+                                            OnLocalCaromPoint(ballTransforms[i]);
+                                        }
+                                    }
+                                    else if (isThirdHit == 0)
+                                    {
+                                        if (i != isFirstHit && i != isSecondHit)
+                                        {
+                                            isThirdHit = i;
+                                            OnLocalCaromPoint(ballTransforms[i]);
+                                        }
+                                    }
+                                }
+                            }
+                            else if (isFirstHit == 0)
+                            {
+                                isFirstHit = i;
+                            }
+                        }*/
+                    }
+                }
+            }
+        }
+
+        private bool PreviewIsCollisionWithCueBallInevitable()
+        {
+            // Get what will be the next position
+            Vector3 originalDelta = previewBallVelocity[previewTotalIterations][0] * FIXED_TIME_STEP;
+            Vector3 norm = previewBallVelocity[previewTotalIterations][0].normalized;
+
+            Vector3 h;
+            float lf, s, nmag;
+
+            // Closest found values
+            float minlf = 9999999.0f;
+            int minid = 0;
+            float mins = 0;
+
+
+            // Loop balls look for collisions
+            for (int i = 1; i < NUMBER_OF_SIMULATED_BALLS; i++)
+            {
+                if (!ballPocketedState[i])
+                {
+                    continue;
+                }
+
+                h = previewBallPosition[previewTotalIterations][i] - previewBallPosition[previewTotalIterations][0];
+                lf = Vector3.Dot(norm, h);
+                s = BALL_DSQRPE - Vector3.Dot(h, h) + (lf * lf);
+
+                if (s < 0.0f)
+                {
+                    continue;
+                }
+
+                if (lf < minlf)
+                {
+                    minlf = lf;
+                    minid = i;
+                    mins = s;
+                }
+            }
+
+            if (minid > 0)
+            {
+                nmag = minlf - Mathf.Sqrt(mins);
+
+                // Assign new position if got appropriate magnitude
+                if (nmag * nmag < originalDelta.sqrMagnitude)
+                {
+                    previewBallPosition[previewTotalIterations][0] += norm * nmag;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        private bool PreviewIsCueContacting()
+        {
+            // 8 ball, practice, portal
+            if (gameMode != 1)
+            {
+                // Check all
+                for (int i = 1; i < NUMBER_OF_SIMULATED_BALLS; i++)
+                {
+                    if ((previewBallPosition[previewTotalIterations][0] -
+                         previewBallPosition[previewTotalIterations][i]).sqrMagnitude < BALL_DSQR)
+                    {
+                        return true;
+                    }
+                }
+            }
+            else // 9 ball
+            {
+                // Only check to 9 ball
+                for (int i = 1; i <= 9; i++)
+                {
+                    if ((previewBallPosition[previewTotalIterations][0] -
+                         previewBallPosition[previewTotalIterations][i]).sqrMagnitude < BALL_DSQR)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+        
+        private void PreviewApplyBounceCushion(int id, Vector3 N)
+        {
+            // Mathematical expressions derived from: https://billiards.colostate.edu/physics_articles/Mathavan_IMechE_2010.pdf
+            //
+            // (Note): subscript gamma, u, are used in replacement of Y and Z in these expressions because
+            // unicode does not have them.
+            //
+            // f = 2/7
+            // f₁ = 5/7
+            //
+            // Velocity delta:
+            //   Δvₓ = −vₓ∙( f∙sin²θ + (1+e)∙cos²θ ) − Rωᵤ∙sinθ
+            //   Δvᵧ = 0
+            //   Δvᵤ = f₁∙vᵤ + fR( ωₓ∙sinθ - ωᵧ∙cosθ ) - vᵤ
+            //
+            // Aux:
+            //   Sₓ = vₓ∙sinθ - vᵧ∙cosθ+ωᵤ
+            //   Sᵧ = 0
+            //   Sᵤ = -vᵤ - ωᵧ∙cosθ + ωₓ∙cosθ
+            //
+            //   k = (5∙Sᵤ) / ( 2∙mRA );
+            //   c = vₓ∙cosθ - vᵧ∙cosθ
+            //
+            // Angular delta:
+            //   ωₓ = k∙sinθ
+            //   ωᵧ = k∙cosθ
+            //   ωᵤ = (5/(2m))∙(-Sₓ / A + ((sinθ∙c∙(e+1)) / B)∙(cosθ - sinθ));
+            //
+            // These expressions are in the reference frame of the cushion, so V and ω inputs need to be rotated
+
+            // Reject bounce if velocity is going the same way as normal
+            // this state means we tunneled, but it happens only on the corner
+            // vertexes
+            Vector3 source_v = previewBallVelocity[previewTotalIterations][id];
+            if (Vector3.Dot(source_v, N) > 0.0f)
+            {
+                return;
+            }
+
+            // Rotate V, W to be in the reference frame of cushion
+            Quaternion rq = Quaternion.AngleAxis(Mathf.Atan2(-N.z, -N.x) * Mathf.Rad2Deg, Vector3.up);
+            Quaternion rb = Quaternion.Inverse(rq);
+            Vector3 V = rq * source_v;
+            Vector3 W = rq * previewAngularVelocities[previewTotalIterations][id];
+
+            Vector3 V1;
+            Vector3 W1;
+            float k, c, s_x, s_z;
+
+            //V1.x = -V.x * ((2.0f/7.0f) * SINA2 + EP1 * COSA2) - (2.0f/7.0f) * BALL_PL_X * W.z * SINA;
+            //V1.z = (5.0f/7.0f)*V.z + (2.0f/7.0f) * BALL_PL_X * (W.x * SINA - W.y * COSA) - V.z;
+            //V1.y = 0.0f;
+            // (baked):
+            V1.x = (-V.x * F) - (0.00240675711f * W.z);
+            V1.z = (0.71428571428f * V.z) + (0.00857142857f * ((W.x * SIN_A) - (W.y * COS_A))) - V.z;
+            V1.y = 0.0f;
+
+            // s_x = V.x * SINA - V.y * COSA + W.z;
+            // (baked): y component not used:
+            s_x = (V.x * SIN_A) + W.z;
+            s_z = -V.z - (W.y * COS_A) + (W.x * SIN_A);
+
+            // k = (5.0f * s_z) / ( 2 * BALL_MASS * A );
+            // (baked):
+            k = s_z * 0.71428571428f;
+
+            // c = V.x * COSA - V.y * COSA;
+            // (baked): y component not used
+            c = V.x * COS_A;
+
+            W1.x = k * SIN_A;
+
+            //W1.z = (5.0f / (2.0f * BALL_MASS)) * (-s_x / A + ((SINA * c * EP1) / B) * (COSA - SINA));
+            // (baked):
+            W1.z = 15.625f * ((-s_x * 0.04571428571f) + (c * 0.0546021744f));
+            W1.y = k * COS_A;
+
+            // Unrotate result
+            previewBallVelocity[previewTotalIterations][id] += rb * V1;
+            previewAngularVelocities[previewTotalIterations][id] += rb * W1;
+        }
+        private void PreviewBounceBallOffCushionIfApplicable(int id)
+        {
+            float zz, zx;
+            Vector3 A = previewBallPosition[previewTotalIterations][id];
+
+            // Setup major regions
+            zx = Mathf.Sign(A.x);
+            zz = Mathf.Sign(A.z);
+
+            if (A.x * zx > TABLE_WIDTH)
+            {
+                previewBallPosition[previewTotalIterations][id].x = TABLE_WIDTH * zx;
+                PreviewApplyBounceCushion(id, Vector3.left * zx);
+            }
+
+            if (A.z * zz > TABLE_HEIGHT)
+            {
+                previewBallPosition[previewTotalIterations][id].z = TABLE_HEIGHT * zz;
+                PreviewApplyBounceCushion(id, Vector3.back * zz);
+            }
+        }
+        #endregion
     }
 }
