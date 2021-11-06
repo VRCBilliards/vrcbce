@@ -203,7 +203,9 @@ namespace VRCBilliards
         public Color fabricBlue = new Color(0.1f, 0.6f, 1.0f, 1.0f);
         public Color fabricGreen = new Color(0.15f, 0.75f, 0.3f, 1.0f);
 
-
+        [Header("Ball Colors (9 Ball)")] [ColorUsage(true, true)]
+        public Color[] ballColors = new Color[NUMBER_OF_SIMULATED_BALLS];
+        
         [Header("Cues")] public PoolCue[] poolCues;
 
         /// <summary>
@@ -461,16 +463,16 @@ namespace VRCBilliards
         [UdonSynced] private Vector3[] currentAngularVelocities = new Vector3[NUMBER_OF_SIMULATED_BALLS];
         
         /// <summary>
-        /// Shot Repaly values
+        /// Shot Replay values
         /// </summary>
-        private Vector3 initialCueBallVelocity;
-        private Vector3 initialCueBallAngularVelocity;
-        
+        private Vector3[] initialCueBallVelocity = new Vector3[MAX_TURNS];
+        private Vector3[] initialCueBallAngularVelocity = new Vector3[MAX_TURNS];
+        private bool isReplaying = false;
         /// <summary>
         /// Shot Undo System
         /// </summary>
-        [UdonSynced()] private int currentTurn = 0;
-        [UdonSynced] private int latestTurn = 0; //for redo feature
+        [UdonSynced] [HideInInspector] public int currentTurn = 0;
+        [UdonSynced] [HideInInspector] public int latestTurn = 0; //for redo feature
         private const int MAX_TURNS = 10000;
         private Vector3[][] previousBallPositions = new Vector3[MAX_TURNS][];
         private bool[][] previousBallPocketedState = new bool[MAX_TURNS][];
@@ -504,7 +506,7 @@ namespace VRCBilliards
         /// No team / open / 9 ball
         /// </summary>
         private Color pointerColour2;
-
+        
         private Color pointerColourErr;
         private Color pointerClothColour;
         private Vector3 deskTopCursor = new Vector3(0.0f, 2.0f, 0.0f);
@@ -950,12 +952,13 @@ namespace VRCBilliards
                         Vector3 r = (raySphereOutput - cueballPosition) * BALL_1OR;
                         Vector3 p = cueLocalForwardDirection * vel;
                         currentAngularVelocities[0] = Vector3.Cross(r, p) * -50.0f;
-                        
+                        StoreCurrentTurn();
                         HitBallWithCue();
                     }
                     else
                     {
                         StartPreviewSim(cueDistance);
+                        
                     }
                 }
                 else
@@ -1461,12 +1464,16 @@ namespace VRCBilliards
             Networking.SetOwner(localPlayer, gameObject);
 
             RefreshNetworkData(false);
+            if (isGameModePractice)
+            {
+                poolPracticeMenu._EnablePracticeMenu();
+            }
         }
 
         private void Initialize9Ball()
         {
             ballPocketedState = new bool[NUMBER_OF_SIMULATED_BALLS];
-            for (int i = 9; i < NUMBER_OF_SIMULATED_BALLS; i++)
+            for (int i = 10; i < NUMBER_OF_SIMULATED_BALLS; i++)
             {
                 ballPocketedState[i] = true;
             }
@@ -1711,6 +1718,10 @@ namespace VRCBilliards
         private void _Reset()
         {
             isGameInMenus = true;
+            isReplaying = false;
+            currentTurn = 0;
+            latestTurn = 0;
+            poolPracticeMenu._DisablePracticeMenu();
             poolCues[0].tableIsActive = false;
             poolCues[1].tableIsActive = false;
             isPlayerAllowedToPlay = false;
@@ -1785,7 +1796,6 @@ namespace VRCBilliards
                 if (isSimulatedByUs)
                 {
                     HandleEndOfTurn();
-                    StoreCurrentTurn();
                 }
 
                 // Check if there was a network update on hold
@@ -2420,7 +2430,7 @@ namespace VRCBilliards
                 if (isNineBall)
                 {
                     int target = GetLowestNumberedBall(ballPocketedState);
-
+                    ApplyTableColour(newIsTeam2Turn);
                     if (marker9ball)
                     {
                         marker9ball.SetActive(true);
@@ -2501,10 +2511,12 @@ namespace VRCBilliards
             }
             else if (isNineBall)
             {
-                cueRenderObjs[Convert.ToInt32(newIsTeam2Turn)].materials[0].SetColor(uniformCueColour, tableWhite);
+                int target = GetLowestNumberedBall(ballPocketedState);
+                Color color = ballColors[target];
+                cueRenderObjs[Convert.ToInt32(newIsTeam2Turn)].materials[0].SetColor(uniformCueColour, color);
                 cueRenderObjs[Convert.ToInt32(!newIsTeam2Turn)].materials[0].SetColor(uniformCueColour, tableBlack);
 
-                tableSrcColour = pointerColour2;
+                tableSrcColour = color;
             }
             else if (!isOpen)
             {
@@ -3096,7 +3108,6 @@ namespace VRCBilliards
             {
                 logger._Log(name, "PlaceSunkBallsIntoRestingPlace");
             }
-
             int numberOfSunkBalls = 0;
             float posX = sunkBallsPositionRoot.localPosition.x;
             float posY = sunkBallsPositionRoot.localPosition.y;
@@ -3743,7 +3754,7 @@ namespace VRCBilliards
                             currentAngularVelocities[0] = Vector3.Cross(r_1, p) * -25.0f;
                             cue.transform.localPosition = new Vector3(2000.0f, 2000.0f, 2000.0f);
                             isDesktopLocalTurn = false;
-                            
+                            StoreCurrentTurn();
                             HitBallWithCue();
                         }
 
@@ -3854,7 +3865,6 @@ namespace VRCBilliards
 
             isSimulatedByUs = true;
             
-            StoreCurrentTurn();
             
             float vol = Mathf.Clamp(currentBallVelocities[0].magnitude * 0.1f, 0f, 0.6f);
             cueTipSrc.transform.position = cueTipTransform.position;
@@ -4700,40 +4710,56 @@ namespace VRCBilliards
             RefreshNetworkData(false);
         }
         #endregion
-
+        /// <summary>
+        /// Rerun s the simulation for the current turn.
+        /// </summary>
         public void _ReplayPhysics()
         {
-            if (!gameIsSimulating && !isGameInMenus && currentTurn > 1)
+            if (!gameIsSimulating && currentTurn > 0)
             {
                 if (logger)
                 {
                     logger._Log(name, "ReplayPhysics");
                 }
+                isReplaying = true;
                 gameIsSimulating = true;
-                currentBallPositions = previousBallPositions[currentTurn - 1];
-                currentBallVelocities[0] = initialCueBallVelocity;
-                currentAngularVelocities[0] = initialCueBallAngularVelocity;
-                ballPocketedState = (bool[])oldBallPocketedState.Clone();
+                currentAngularVelocities = new Vector3[NUMBER_OF_SIMULATED_BALLS];
+                currentBallVelocities = new Vector3[NUMBER_OF_SIMULATED_BALLS];
+                currentBallPositions = (Vector3[])previousBallPositions[currentTurn].Clone();
+                currentBallVelocities[0] = initialCueBallVelocity[currentTurn];
+                currentAngularVelocities[0] = initialCueBallAngularVelocity[currentTurn];
+                ballPocketedState = (bool[])previousBallPocketedState[currentTurn].Clone();
             }
         }
-        
+
         #region turnUndo
+        /// <summary>
+        /// Store the state of the game at the start of the current turn.
+        /// </summary>
         private void StoreCurrentTurn()
         {
+            if (isReplaying)
+            {
+                isReplaying = false;
+                return;
+            }
             currentTurn++;
             latestTurn = currentTurn;
             //for physics replay, store initial state that matters
             previousBallPositions[currentTurn] = (Vector3[])currentBallPositions.Clone();
-            initialCueBallVelocity = currentBallVelocities[0];
-            initialCueBallAngularVelocity = currentAngularVelocities[0];
-            
+            initialCueBallVelocity[currentTurn] = currentBallVelocities[0];
+            initialCueBallAngularVelocity[currentTurn] = currentAngularVelocities[0];
             //For turn undo
             previousIsOpen[currentTurn] = isOpen;
             previousPlayerTeam2[currentTurn] = playerIsTeam2;
             previousIsPlayer2Blue[currentTurn] = isPlayer2Blue;
             previousIsTeam2Turn[currentTurn] = newIsTeam2Turn;
-        }
+            previousBallPocketedState[currentTurn] = (bool[])ballPocketedState.Clone();
 
+        }
+        /// <summary>
+        /// Undo the last turn.
+        /// </summary>
         public void _UndoTurn()
         {
             if (!gameIsSimulating && !isGameInMenus && currentTurn > 1)
@@ -4748,11 +4774,13 @@ namespace VRCBilliards
                 isPlayer2Blue = previousIsPlayer2Blue[currentTurn];
                 newIsTeam2Turn = previousIsTeam2Turn[currentTurn];
                 currentBallPositions = previousBallPositions[currentTurn];
-                ballPocketedState = (bool[])oldBallPocketedState.Clone();
+                ballPocketedState = (bool[])previousBallPocketedState[currentTurn].Clone();
                 RefreshNetworkData(false);
             }
         }
-
+        /// <summary>
+        /// Go forward one turn.
+        /// </summary>
         public void _RedoTurn()
         {
             if (!gameIsSimulating && !isGameInMenus && currentTurn > 0 && currentTurn < latestTurn)
@@ -4767,11 +4795,13 @@ namespace VRCBilliards
                 isPlayer2Blue = previousIsPlayer2Blue[currentTurn];
                 newIsTeam2Turn = previousIsTeam2Turn[currentTurn];
                 currentBallPositions = previousBallPositions[currentTurn];
-                ballPocketedState = (bool[])oldBallPocketedState.Clone();
+                ballPocketedState = (bool[])previousBallPocketedState[currentTurn].Clone();
                 RefreshNetworkData(false);
             }
         }
-
+        /// <summary>
+        /// Toggle the turn undo/redo status.
+        /// </summary>
         public void _SwitchPreShotMode()
         {
             isPreviewSimEnabled = !isPreviewSimEnabled;

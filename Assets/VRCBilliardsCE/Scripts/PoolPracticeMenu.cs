@@ -16,7 +16,8 @@ public class PoolPracticeMenu : UdonSharpBehaviour
     public Button redoButton;
     [Header("Preview Sim")]
     public Animator previewAnimator;
-
+    [Header("Replay Shot")]
+    public Button replayShotButton;
     public void _UndoTurn()
     {
         manager._UndoTurn();
@@ -35,11 +36,11 @@ public class PoolPracticeMenu : UdonSharpBehaviour
         manager._SwitchPreShotMode();
     }
     public void _UpdateMenu(int currentTurn, int latestTurn, bool isPractice,bool preShotMode) {
-        gameObject.SetActive(isPractice);
         undoButton.interactable = currentTurn > 1;
         redoButton.interactable = currentTurn < latestTurn;
         undoStatusText.text = $"{latestTurn - currentTurn} turn(s) behind";
-        previewAnimator.SetBool("Toggle",preShotMode);
+        if (gameObject.activeSelf) previewAnimator.SetBool("Toggle",preShotMode);
+        replayShotButton.interactable = currentTurn > 0;
     }
     public void _EnablePracticeMenu() {
         gameObject.SetActive(true);
