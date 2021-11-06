@@ -2313,9 +2313,7 @@ namespace VRCBilliards
                 player2ID,
                 player3ID,
                 player4ID,
-                guideLineEnabled,
-                isPreviewSimEnabled
-            );
+                guideLineEnabled);
             poolPracticeMenu._UpdateMenu(currentTurn,latestTurn,isGameModePractice,isPreviewSimEnabled);
             if (isGameInMenus)
             {
@@ -2703,9 +2701,7 @@ namespace VRCBilliards
                 player2ID,
                 player3ID,
                 player4ID,
-                guideLineEnabled,
-                isPreviewSimEnabled
-            );
+                guideLineEnabled);
             poolPracticeMenu._UpdateMenu(currentTurn,latestTurn,isGameModePractice,isPreviewSimEnabled);
 
             poolMenu._EnableMainMenu();
