@@ -39,7 +39,7 @@ namespace VRCBilliards
         /// <summary>
         /// time step in seconds per iteration
         /// </summary>
-        private const float FIXED_TIME_STEP = 0.0125f;
+        private const float FIXED_TIME_STEP = 0.0125f / 2f;
 
         /// <summary>
         /// horizontal span of table
@@ -267,7 +267,8 @@ namespace VRCBilliards
 
         private GameObject baseObject;
         private PoolMenu poolMenu;
-
+        private PoolPracticeMenu poolPracticeMenu;
+        
         /// <summary>
         /// True whilst balls are rolling
         /// </summary>
@@ -458,7 +459,27 @@ namespace VRCBilliards
         [UdonSynced] private Vector3[] currentBallPositions = new Vector3[NUMBER_OF_SIMULATED_BALLS];
         [UdonSynced] private Vector3[] currentBallVelocities = new Vector3[NUMBER_OF_SIMULATED_BALLS];
         [UdonSynced] private Vector3[] currentAngularVelocities = new Vector3[NUMBER_OF_SIMULATED_BALLS];
+        
+        /// <summary>
+        /// Shot Repaly values
+        /// </summary>
+        private Vector3 initialCueBallVelocity;
+        private Vector3 initialCueBallAngularVelocity;
+        
+        /// <summary>
+        /// Shot Undo System
+        /// </summary>
+        [UdonSynced()] private int currentTurn = 0;
+        [UdonSynced] private int latestTurn = 0; //for redo feature
+        private const int MAX_TURNS = 10000;
+        private Vector3[][] previousBallPositions = new Vector3[MAX_TURNS][];
+        private bool[][] previousBallPocketedState = new bool[MAX_TURNS][];
+        private bool[] previousIsOpen = new bool[MAX_TURNS];
+        private bool[] previousIsTeam2Turn = new bool[MAX_TURNS];
+        private bool[] previousIsPlayer2Blue = new bool[MAX_TURNS];
+        private bool[] previousPlayerTeam2 = new bool[MAX_TURNS];
 
+        
         /// <summary>
         /// Runtime target colour
         /// </summary>
@@ -657,6 +678,7 @@ namespace VRCBilliards
                 gameObject.SetActive(false);
                 return;
             }
+            poolPracticeMenu = baseObject.GetComponentInChildren<PoolPracticeMenu>(true);
 
             if (Networking.LocalPlayer == null)
             {
@@ -840,10 +862,13 @@ namespace VRCBilliards
                     accumulation = MAX_DELTA;
                 }
 
-                while (accumulation >= FIXED_TIME_STEP)
+                while (accumulation >= FIXED_TIME_STEP * 2)
                 {
                     AdvancePhysicsStep();
-                    accumulation -= FIXED_TIME_STEP;
+#if UNITY_ANDROID //Only run the sim twice on pc to preserve framerate. Simulation would be at half speed
+                    AdvancePhysicsStep();
+#endif
+                    accumulation -= FIXED_TIME_STEP * 2;
                 }
             }
             else if (isGameInMenus)
@@ -862,6 +887,7 @@ namespace VRCBilliards
                 }
             }
 
+            RunPreviewSim();
             localSpacePositionOfCueTip = transform.InverseTransformPoint(cueTip.transform.position);
             Vector3 copyOfLocalSpacePositionOfCueTip = localSpacePositionOfCueTip;
 
@@ -924,18 +950,12 @@ namespace VRCBilliards
                         Vector3 r = (raySphereOutput - cueballPosition) * BALL_1OR;
                         Vector3 p = cueLocalForwardDirection * vel;
                         currentAngularVelocities[0] = Vector3.Cross(r, p) * -50.0f;
-
+                        
                         HitBallWithCue();
                     }
                     else
                     {
-                        if (isPreviewSimEnabled && Mathf.Abs(cueDistance - previewPreviousCueDistance) > PREVIEW_MIN_POWER_DISTANCE)
-                        {
-                            StartPreviewSim(cueDistance);
-                        }
-
-                        previewPreviousCueDistance = cueDistance;
-                        RunPreviewSim();
+                        StartPreviewSim(cueDistance);
                     }
                 }
                 else
@@ -1132,7 +1152,6 @@ namespace VRCBilliards
                 {
                     continue;
                 }
-
                 Vector3 differenceNormalized = poolBall.position - referencePosition;
                 differenceNormalized = Vector3.Normalize(differenceNormalized) * repulsionForce;
 
@@ -1447,6 +1466,10 @@ namespace VRCBilliards
         private void Initialize9Ball()
         {
             ballPocketedState = new bool[NUMBER_OF_SIMULATED_BALLS];
+            for (int i = 9; i < NUMBER_OF_SIMULATED_BALLS; i++)
+            {
+                ballPocketedState[i] = true;
+            }
             
             for (int i = 0, k = 0; i < 5; i++)
             {
@@ -1469,8 +1492,21 @@ namespace VRCBilliards
         private void Initialize4Ball()
         {
             ballPocketedState = new bool[NUMBER_OF_SIMULATED_BALLS];
-            //ballPocketedState = new bool[NUMBER_OF_SIMULATED_BALLS] {true,true,true,true,true,true,false,true,true,true,true,true,false,false,true,false};
             
+            // Slowly dies inside
+            ballPocketedState[1] = true;
+            ballPocketedState[4] = true;
+            ballPocketedState[5] = true;
+            ballPocketedState[6] = true;
+            ballPocketedState[7] = true;
+            ballPocketedState[8] = true;
+            ballPocketedState[10] = true;
+            ballPocketedState[11] = true;
+            ballPocketedState[12] = true;
+            ballPocketedState[13] = true;
+            ballPocketedState[14] = true;
+            ballPocketedState[15] = true;
+
             currentBallPositions[0] = new Vector3(-SPOT_CAROM_X, 0.0f, 0.0f);
             currentBallPositions[9] = new Vector3(SPOT_CAROM_X, 0.0f, 0.0f);
             currentBallPositions[2] = new Vector3(SPOT_POSITION_X, 0.0f, 0.0f);
@@ -1680,7 +1716,7 @@ namespace VRCBilliards
             isPlayerAllowedToPlay = false;
             gameIsSimulating = false;
             newIsTeam2Turn = false;
-
+            isGameModePractice = false;
             RefreshNetworkData(newIsTeam2Turn);
 
             if (logger)
@@ -1728,21 +1764,9 @@ namespace VRCBilliards
         private void AdvancePhysicsStep()
         {
             ballsMoving = false;
-
-
-            // Cue angular velocity
-            {
-                if (!IsCollisionWithCueBallInevitable())
-                {
-                    // Apply movement
-                    currentBallPositions[0] += currentBallVelocities[0] * FIXED_TIME_STEP;
-                }
-
-                AdvanceSimulationForBall(0);
-            }
-
+            
             // Run main simulation / inter-ball collision
-            for (int i = 1; i < NUMBER_OF_SIMULATED_BALLS; i++)
+            for (int i = 0; i < NUMBER_OF_SIMULATED_BALLS; i++)
             {
                 if (!ballPocketedState[i]) // If the ball in question is not sunk
                 {
@@ -1761,6 +1785,7 @@ namespace VRCBilliards
                 if (isSimulatedByUs)
                 {
                     HandleEndOfTurn();
+                    StoreCurrentTurn();
                 }
 
                 // Check if there was a network update on hold
@@ -2288,9 +2313,10 @@ namespace VRCBilliards
                 player2ID,
                 player3ID,
                 player4ID,
-                guideLineEnabled
+                guideLineEnabled,
+                isPreviewSimEnabled
             );
-
+            poolPracticeMenu._UpdateMenu(currentTurn,latestTurn,isGameModePractice,isPreviewSimEnabled);
             if (isGameInMenus)
             {
                 if (lastTimerType != timerType)
@@ -2360,6 +2386,19 @@ namespace VRCBilliards
             {
                 //ballPocketedState = new bool[NUMBER_OF_SIMULATED_BALLS] {true,true,true,true,true,true,false,true,true,true,true,true,false,false,true,false};
                 ballPocketedState = new bool[NUMBER_OF_SIMULATED_BALLS];
+                // Slowly dies inside
+                ballPocketedState[1] = true;
+                ballPocketedState[4] = true;
+                ballPocketedState[5] = true;
+                ballPocketedState[6] = true;
+                ballPocketedState[7] = true;
+                ballPocketedState[8] = true;
+                ballPocketedState[10] = true;
+                ballPocketedState[11] = true;
+                ballPocketedState[12] = true;
+                ballPocketedState[13] = true;
+                ballPocketedState[14] = true;
+                ballPocketedState[15] = true;
 
             }
 
@@ -2664,11 +2703,14 @@ namespace VRCBilliards
                 player2ID,
                 player3ID,
                 player4ID,
-                guideLineEnabled
+                guideLineEnabled,
+                isPreviewSimEnabled
             );
+            poolPracticeMenu._UpdateMenu(currentTurn,latestTurn,isGameModePractice,isPreviewSimEnabled);
 
             poolMenu._EnableMainMenu();
-
+            poolPracticeMenu._DisablePracticeMenu();
+            
             poolCues[0]._Respawn();
             poolCues[1]._Respawn();
         }
@@ -3684,6 +3726,8 @@ namespace VRCBilliards
                     {
                         desktopCursorObject.SetActive(false);
                     }
+                    float vel = Mathf.Pow(shootAmt * 2.0f, 1.4f) * 9.0f;
+                    StartPreviewSim(shootAmt);
                 }
                 else
                 {
@@ -3703,6 +3747,7 @@ namespace VRCBilliards
                             currentAngularVelocities[0] = Vector3.Cross(r_1, p) * -25.0f;
                             cue.transform.localPosition = new Vector3(2000.0f, 2000.0f, 2000.0f);
                             isDesktopLocalTurn = false;
+                            
                             HitBallWithCue();
                         }
 
@@ -3792,6 +3837,11 @@ namespace VRCBilliards
                 guideline.gameObject.SetActive(false);
             }
 
+            if (isPreviewSimEnabled)
+            {
+                PreviewCleanup();
+            }
+
             // Remove locks
             _EndHit();
             isPlayerAllowedToPlay = false;
@@ -3807,6 +3857,8 @@ namespace VRCBilliards
             RefreshNetworkData(newIsTeam2Turn);
 
             isSimulatedByUs = true;
+            
+            StoreCurrentTurn();
             
             float vol = Mathf.Clamp(currentBallVelocities[0].magnitude * 0.1f, 0f, 0.6f);
             cueTipSrc.transform.position = cueTipTransform.position;
@@ -4064,24 +4116,32 @@ namespace VRCBilliards
         #endregion
         
         //Run the sim before the shot for ball prediction
-        #region preShotSSim
-
-        private const float PREVIEW_MIN_POWER_DISTANCE = 0.1f;
-        private bool isPreviewSimEnabled = false;
+        #region preShotSim
+        [Header("Preview Simulation")]
+        [UdonSynced()] public bool isPreviewSimEnabled = true;
+        private const float PREVIEW_MIN_POWER_DISTANCE = 0.005f;
         private bool isPreviewSimRunning = false;
 
         private float previewPreviousCueDistance = 0;
         //Number of times to run the sim per frame
-        private const int PREVIEW_MAX_ITERATIONS_FRAME = 15;
-        private const int PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT = 1000;
-        private int previewTotalIterations = 0;
+        [Tooltip("Affects Performance")]
+        [Range(1,20)]
+        public int previewMAXIterationsFrame = 15;
+        private const int PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT = 500;
+        private int previewCurrentIteration = 0;
         private bool[][] previewPocketedState;
         private Vector3[][] previewBallVelocity;
         private Vector3[][] previewBallPosition;
         private Vector3[][] previewAngularVelocities;
+
+        public TrailRenderer[] previewTrails;
         private void StartPreviewSim(float cueDistance)
         {
             if (!isPreviewSimEnabled)
+            {
+                return;
+            }
+            else if (Mathf.Abs(cueDistance - previewPreviousCueDistance) <= PREVIEW_MIN_POWER_DISTANCE)
             {
                 return;
             }
@@ -4089,6 +4149,7 @@ namespace VRCBilliards
             {
                 logger._Log(name,"StartPreviewSim");
             }
+            previewPreviousCueDistance = cueDistance;
             //Init Jagged arrays
             previewPocketedState = new bool[PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT][];
             previewBallVelocity = new Vector3[PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT][];
@@ -4100,44 +4161,82 @@ namespace VRCBilliards
             previewBallVelocity[0] = new Vector3[NUMBER_OF_SIMULATED_BALLS];
             previewAngularVelocities[0] = new Vector3[NUMBER_OF_SIMULATED_BALLS];
 
-            previewTotalIterations = 0;
+            for (int i = 0; i < NUMBER_OF_SIMULATED_BALLS; i++) //TODO: remove cue lock
+            {
+                previewTrails[0].transform.position = transform.TransformPoint(previewBallPosition[0][0]);
+            }            
+            PreviewCleanup();
+
+            previewCurrentIteration = 0;
             isPreviewSimRunning = true;
-            // 1 meter = 20m/s
-            float previewInitialCueVelocity = Mathf.Min(cueDistance * 20,CUE_VELOCITY_CLAMP);
-
-            previewBallVelocity[0][0] = cueArmedShotDirection * previewInitialCueVelocity;
-
+            
             // Angular velocity: L=r(normalized)×p
             Vector3 r = (raySphereOutput - previewBallPosition[0][0]) * BALL_1OR;
-            Vector3 p = cueLocalForwardDirection * previewInitialCueVelocity;
+            Vector3 p;
+            if (isDesktopLocalTurn)
+            {
+                Vector3 ncursor = deskTopCursor;
+                ncursor.y = 0.0f;
+                Vector3 delta = ncursor - previewBallPosition[0][0];
+                shootAmt = desktopShootReference - Vector3.Dot(desktopShootVector, ncursor);
+                shootAmt = Mathf.Clamp(shootAmt, 0.0f, 0.5f);
+                float vel = Mathf.Pow(shootAmt * 2.0f, 1.4f) * 9.0f;
+                p = desktopShootVector.normalized * vel;
+            }
+            else
+            {
+                Vector3 copyOfLocalSpacePositionOfCueTip = localSpacePositionOfCueTip;
+                float sweepTimeBall = Vector3.Dot(previewBallPosition[0][0] - localSpacePositionOfCueTipLastFrame, cueLocalForwardDirection);
+                if (sweepTimeBall > 0.0f && sweepTimeBall < (localSpacePositionOfCueTipLastFrame - copyOfLocalSpacePositionOfCueTip).magnitude)
+                {
+                    copyOfLocalSpacePositionOfCueTip = localSpacePositionOfCueTipLastFrame + (cueLocalForwardDirection * sweepTimeBall);
+                }                
+                Vector3 horizontalForce = copyOfLocalSpacePositionOfCueTip - localSpacePositionOfCueTipLastFrame;
+                horizontalForce.y = 0.0f;
+                float vel = forceMultiplier * (horizontalForce.magnitude / Time.deltaTime);
+                p = cueLocalForwardDirection * vel;
+                previewBallVelocity[0][0] = cueArmedShotDirection * Mathf.Min(vel, CUE_VELOCITY_CLAMP);
+
+            }
+
+            previewBallVelocity[0][0] = p;
             previewAngularVelocities[0][0] = Vector3.Cross(r, p) * -50.0f;
         }
         
         private void RunPreviewSim()
         {
             int loops = 0;
-            while (isPreviewSimRunning && loops < PREVIEW_MAX_ITERATIONS_FRAME)
+            while (isPreviewSimRunning && loops < previewMAXIterationsFrame)
             {
                 loops++;
-                previewTotalIterations++;
+                previewCurrentIteration++;
                 //return previous state
-                previewBallPosition[previewTotalIterations] =
-                    (Vector3[])previewBallPosition[previewTotalIterations - 1].Clone();
-                previewBallVelocity[previewTotalIterations] =
-                    (Vector3[])previewBallVelocity[previewTotalIterations - 1].Clone();
-                previewPocketedState[previewTotalIterations] =
-                    (bool[])previewPocketedState[previewTotalIterations - 1].Clone();
-                previewAngularVelocities[previewTotalIterations] =
-                    (Vector3[])previewAngularVelocities[previewTotalIterations - 1].Clone();
-                
+                previewBallPosition[previewCurrentIteration] =
+                    (Vector3[])previewBallPosition[previewCurrentIteration - 1].Clone();
+                previewBallVelocity[previewCurrentIteration] =
+                    (Vector3[])previewBallVelocity[previewCurrentIteration - 1].Clone();
+                previewPocketedState[previewCurrentIteration] =
+                    (bool[])previewPocketedState[previewCurrentIteration - 1].Clone();
+                previewAngularVelocities[previewCurrentIteration] =
+                    (Vector3[])previewAngularVelocities[previewCurrentIteration - 1].Clone();
                 PreviewAdvancePhysicsStep();
-                //TODO: end if balls are not moving!
-                //TODO: Simulate ball moving with trails
-                //TODO: Simulate cue movement to achive velocity
+                
                 //End if sim runs too long
-                if (PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT < previewTotalIterations)
+                if (PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT - 2 < previewCurrentIteration)
                 {
                     isPreviewSimRunning = false;
+                    if (logger)
+                    {
+                        logger._Log(name, "RunPreviewSimFinished");
+                    }
+
+                    for (int i = 0; i < NUMBER_OF_SIMULATED_BALLS; i++)
+                    {
+                        if (previewPocketedState[previewCurrentIteration][i])
+                        {
+                            previewTrails[i].material.color = i == 0 ? tableRed : tableLightBlue;
+                        }
+                    }
                     break;
                 }
             }
@@ -4147,35 +4246,17 @@ namespace VRCBilliards
         
         private void PreviewAdvancePhysicsStep()
         {
-            ballsMoving = false; //TODO: Isolate
-
-
-            // Cue angular velocity
-            {
-                if (!PreviewIsCollisionWithCueBallInevitable())
-                {
-                    // Apply movement
-                    previewBallPosition[previewTotalIterations][0] += previewBallVelocity[previewTotalIterations][0] * FIXED_TIME_STEP;
-                }
-                PreviewAdvanceSimulationForBall(0);
-            }
-
             // Run main simulation / inter-ball collision
-            for (int i = 1; i < NUMBER_OF_SIMULATED_BALLS; i++)
+            for (int i = 0; i < NUMBER_OF_SIMULATED_BALLS; i++)
             {
-                if (!previewPocketedState[previewTotalIterations][i]) // If the ball in question is not sunk
+                if (!previewPocketedState[previewCurrentIteration][i]) // If the ball in question is not sunk
                 {
-                    previewBallPosition[previewTotalIterations][i] += previewBallVelocity[previewTotalIterations][i] * FIXED_TIME_STEP;
-
+                    previewBallPosition[previewCurrentIteration][i] += previewBallVelocity[previewCurrentIteration][i] * FIXED_TIME_STEP;
                     PreviewAdvanceSimulationForBall(i);
+                    Vector3 pos = transform.TransformPoint(previewBallPosition[previewCurrentIteration][i]);
+                    previewTrails[i].AddPosition(pos);
+                    previewTrails[i].transform.position = pos;
                 }
-            }
-
-            // Check if simulation has settled
-            if (!ballsMoving && isPreviewSimRunning)
-            {
-                isPreviewSimRunning = false;
-                return;
             }
 
             if (isFourBall)
@@ -4192,12 +4273,12 @@ namespace VRCBilliards
             // Run edge collision
             for (int index = 0; index < NUMBER_OF_SIMULATED_BALLS; index++)
             {
-                if (!previewPocketedState[previewTotalIterations][index])
+                if (!previewPocketedState[previewCurrentIteration][index])
                 {
                     float zy, zx, zk, zw, d, k, i, j, l, r;
                     Vector3 A, N;
 
-                    A = previewBallPosition[previewTotalIterations][index];
+                    A = previewBallPosition[previewCurrentIteration][index];
 
                     // REGIONS
                     /*
@@ -4254,8 +4335,8 @@ namespace VRCBilliards
                             i = ((A.x * d) + A.z - k) / (2.0f * d);
                             j = (i * d) + k;
 
-                            previewBallPosition[previewTotalIterations][index].x = i;
-                            previewBallPosition[previewTotalIterations][index].z = j;
+                            previewBallPosition[previewCurrentIteration][index].x = i;
+                            previewBallPosition[previewCurrentIteration][index].z = j;
 
                             // Reflect velocity
                             PreviewApplyBounceCushion(index, N);
@@ -4265,13 +4346,13 @@ namespace VRCBilliards
                     {
                         if (A.x * zx > TABLE_WIDTH)
                         {
-                            previewBallPosition[previewTotalIterations][index].x = TABLE_WIDTH * zx;
+                            previewBallPosition[previewCurrentIteration][index].x = TABLE_WIDTH * zx;
                             PreviewApplyBounceCushion(index, Vector3.left * zx);
                         }
 
                         if (A.z * zy > TABLE_HEIGHT)
                         {
-                            previewBallPosition[previewTotalIterations][index].z = TABLE_HEIGHT * zy;
+                            previewBallPosition[previewCurrentIteration][index].z = TABLE_HEIGHT * zy;
                             PreviewApplyBounceCushion(index, Vector3.back * zy);
                         }
                     }
@@ -4281,10 +4362,10 @@ namespace VRCBilliards
             // Run triggers
             for (int i = 0; i < NUMBER_OF_SIMULATED_BALLS; i++)
             {
-                if (!previewPocketedState[previewTotalIterations][i])
+                if (!previewPocketedState[previewCurrentIteration][i])
                 {
                     float zz, zx;
-                    Vector3 A = previewBallPosition[previewTotalIterations][i];
+                    Vector3 A = previewBallPosition[previewCurrentIteration][i];
 
                     // Setup major regions
                     zx = Mathf.Sign(A.x);
@@ -4302,30 +4383,15 @@ namespace VRCBilliards
                         int count_extent = isNineBall ? 10 : NUMBER_OF_SIMULATED_BALLS;
                         for (int j = 1; j < count_extent; j++)
                         {
-                            total += previewPocketedState[previewTotalIterations][i] ? 1 : 0;
+                            total += previewPocketedState[previewCurrentIteration][i] ? 1 : 0;
                         }
 
                         // set this for later
-                        previewBallPosition[previewTotalIterations][i].x = -0.9847f + (total * BALL_DIAMETER);
-                        previewBallPosition[previewTotalIterations][i].z = 0.768f;
+                        previewBallPosition[previewCurrentIteration][i].x = -0.9847f + (total * BALL_DIAMETER);
+                        previewBallPosition[previewCurrentIteration][i].z = 0.768f;
 
                         // This is where we actually save the pocketed/non-pocketed state of balls.
-                        previewPocketedState[previewTotalIterations][i] = true;
-
-                        //mainSrc.PlayOneShot(sinkSfx, 1.0f);
-            
-                        //int offset = newIsTeam2Turn ^ isPlayer2Blue ? 7 : 0; //offset for stripes
-
-                        // VFX ( make ball move )
-                        //Rigidbody body = ballTransforms[i].GetComponent<Rigidbody>();
-                        //body.isKinematic = false;
-
-                        //body.velocity = baseObject.transform.rotation * new Vector3(
-                        //    Mathf.Clamp(currentBallVelocities[i].x, (pocketVelocityClamp * -1), pocketVelocityClamp),
-                        //    0.0f,
-                        //    Mathf.Clamp(currentBallVelocities[i].z, (pocketVelocityClamp * -1), pocketVelocityClamp)
-                        //);
-                        // Debug.Log("Ball sunk velocity, " + body.velocity);
+                        previewPocketedState[previewCurrentIteration][i] = true;
                     }
                 }
             }
@@ -4334,8 +4400,8 @@ namespace VRCBilliards
         private void PreviewAdvanceSimulationForBall(int ballID)
         {
             // Since v1.5.0
-            Vector3 V = previewBallVelocity[previewTotalIterations][ballID];
-            Vector3 W = previewAngularVelocities[previewTotalIterations][ballID];
+            Vector3 V = previewBallVelocity[previewCurrentIteration][ballID];
+            Vector3 W = previewAngularVelocities[previewCurrentIteration][ballID];
 
             // Equations derived from: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.89.4627&rep=rep1&type=pdf
             //
@@ -4394,10 +4460,6 @@ namespace VRCBilliards
                     W = vectorZero;
                     V = vectorZero;
                 }
-                else
-                {
-                    ballsMoving = true;
-                }
             }
             else // Slipping
             {
@@ -4408,121 +4470,43 @@ namespace VRCBilliards
                 // (baked):
                 W += -2.04305208f * Vector3.Cross(Vector3.up, nv);
                 V += -F_SLIDE * 9.8f * FIXED_TIME_STEP * nv;
-
-                ballsMoving = true;
             }
 
-            previewBallVelocity[previewTotalIterations][ballID] = W;
-            previewBallVelocity[previewTotalIterations][ballID] = V;
+            previewAngularVelocities[previewCurrentIteration][ballID] = W;
+            previewBallVelocity[previewCurrentIteration][ballID] = V;
 
             // FSP [22/03/21]: Use the base object's rotation as a factor in the axis. This stops the balls spinning incorrectly.
-            ballTransforms[ballID].Rotate((baseObject.transform.rotation * W).normalized,
-                W.magnitude * FIXED_TIME_STEP * -Mathf.Rad2Deg, Space.World);
+            //ballTransforms[ballID].Rotate((baseObject.transform.rotation * W).normalized,
+            //    W.magnitude * FIXED_TIME_STEP * -Mathf.Rad2Deg, Space.World);
 
             // ball/ball collisions
             for (int i = ballID + 1; i < NUMBER_OF_SIMULATED_BALLS; i++)
             {
                 // If the ball has been pocketed it cannot be collided with.
-                if (previewPocketedState[previewTotalIterations][i])
+                if (previewPocketedState[previewCurrentIteration][i])
                 {
                     continue;
                 }
 
-                Vector3 delta = previewBallPosition[previewTotalIterations][i] -
-                                previewBallPosition[previewTotalIterations][ballID];
+                Vector3 delta = previewBallPosition[previewCurrentIteration][i] -
+                                previewBallPosition[previewCurrentIteration][ballID];
                 float dist = delta.magnitude;
 
                 if (dist < BALL_DIAMETER)
                 {
                     Vector3 normal = delta / dist;
 
-                    Vector3 velocityDelta = previewBallVelocity[previewTotalIterations][ballID] -
-                                            previewBallVelocity[previewTotalIterations][i];
+                    Vector3 velocityDelta = previewBallVelocity[previewCurrentIteration][ballID] -
+                                            previewBallVelocity[previewCurrentIteration][i];
 
                     float dot = Vector3.Dot(velocityDelta, normal);
 
                     if (dot > 0.0f)
                     {
                         Vector3 reflection = normal * dot;
-                        previewBallVelocity[previewTotalIterations][ballID] -= reflection;
-                        previewBallVelocity[previewTotalIterations][i] += reflection;
-
-                        // Prevent sound spam if it happens
-                        if (previewBallVelocity[previewTotalIterations][ballID].sqrMagnitude > 0 &&
-                            previewBallVelocity[previewTotalIterations][i].sqrMagnitude > 0)
-                        {
-                            int clip = UnityEngine.Random.Range(0, hitsSfx.Length - 1);
-                            float vol = Mathf.Clamp01(previewBallVelocity[previewTotalIterations][ballID].magnitude *
-                                                      reflection.magnitude);
-                            //TODO: Simulate movement with fake balls
-                            //ballPoolTransforms[ballID].position = ballTransforms[ballID].position;
-                            ballPool[ballID].PlayOneShot(hitsSfx[clip], vol);
-                        }
-
-                        /*// First hit detected
-                        if (ballID == 0)
-                        {
-                            if (isFourBall)
-                            {
-                                if (isKorean) // KR 사구 ( Sagu )
-                                {
-                                    if (i == 9)
-                                    {
-                                        if (!isMadeFoul)
-                                        {
-                                            isMadeFoul = true;
-                                            scores[Convert.ToInt32(newIsTeam2Turn)]--;
-
-                                            if (scores[Convert.ToInt32(newIsTeam2Turn)] < 0)
-                                            {
-                                                scores[Convert.ToInt32(newIsTeam2Turn)] = 0;
-                                            }
-
-                                            SpawnMinusOne(ballTransforms[i]);
-                                        }
-                                    }
-                                    else if (isFirstHit == 0)
-                                    {
-                                       isFirstHit = i;
-                                    }
-                                    else if (i != isFirstHit)
-                                    {
-                                        if (isSecondHit == 0)
-                                        {
-                                            isSecondHit = i;
-                                            OnLocalCaromPoint(ballTransforms[i]);
-                                        }
-                                    }
-                                }
-                                else // JP 四つ玉 ( Yotsudama )
-                                {
-                                    if (isFirstHit == 0)
-                                    {
-                                        isFirstHit = i;
-                                    }
-                                    else if (isSecondHit == 0)
-                                    {
-                                        if (i != isFirstHit)
-                                        {
-                                            isSecondHit = i;
-                                            OnLocalCaromPoint(ballTransforms[i]);
-                                        }
-                                    }
-                                    else if (isThirdHit == 0)
-                                    {
-                                        if (i != isFirstHit && i != isSecondHit)
-                                        {
-                                            isThirdHit = i;
-                                            OnLocalCaromPoint(ballTransforms[i]);
-                                        }
-                                    }
-                                }
-                            }
-                            else if (isFirstHit == 0)
-                            {
-                                isFirstHit = i;
-                            }
-                        }*/
+                        previewBallVelocity[previewCurrentIteration][ballID] -= reflection;
+                        previewBallVelocity[previewCurrentIteration][i] += reflection;
+                        
                     }
                 }
             }
@@ -4531,8 +4515,8 @@ namespace VRCBilliards
         private bool PreviewIsCollisionWithCueBallInevitable()
         {
             // Get what will be the next position
-            Vector3 originalDelta = previewBallVelocity[previewTotalIterations][0] * FIXED_TIME_STEP;
-            Vector3 norm = previewBallVelocity[previewTotalIterations][0].normalized;
+            Vector3 originalDelta = previewBallVelocity[previewCurrentIteration][0] * FIXED_TIME_STEP;
+            Vector3 norm = previewBallVelocity[previewCurrentIteration][0].normalized;
 
             Vector3 h;
             float lf, s, nmag;
@@ -4546,12 +4530,12 @@ namespace VRCBilliards
             // Loop balls look for collisions
             for (int i = 1; i < NUMBER_OF_SIMULATED_BALLS; i++)
             {
-                if (!ballPocketedState[i])
+                if (!previewPocketedState[previewCurrentIteration][i])
                 {
                     continue;
                 }
 
-                h = previewBallPosition[previewTotalIterations][i] - previewBallPosition[previewTotalIterations][0];
+                h = previewBallPosition[previewCurrentIteration][i] - previewBallPosition[previewCurrentIteration][0];
                 lf = Vector3.Dot(norm, h);
                 s = BALL_DSQRPE - Vector3.Dot(h, h) + (lf * lf);
 
@@ -4575,44 +4559,13 @@ namespace VRCBilliards
                 // Assign new position if got appropriate magnitude
                 if (nmag * nmag < originalDelta.sqrMagnitude)
                 {
-                    previewBallPosition[previewTotalIterations][0] += norm * nmag;
+                    previewBallPosition[previewCurrentIteration][0] += norm * nmag;
                     return true;
                 }
             }
 
             return false;
         }
-        private bool PreviewIsCueContacting()
-        {
-            // 8 ball, practice, portal
-            if (gameMode != 1)
-            {
-                // Check all
-                for (int i = 1; i < NUMBER_OF_SIMULATED_BALLS; i++)
-                {
-                    if ((previewBallPosition[previewTotalIterations][0] -
-                         previewBallPosition[previewTotalIterations][i]).sqrMagnitude < BALL_DSQR)
-                    {
-                        return true;
-                    }
-                }
-            }
-            else // 9 ball
-            {
-                // Only check to 9 ball
-                for (int i = 1; i <= 9; i++)
-                {
-                    if ((previewBallPosition[previewTotalIterations][0] -
-                         previewBallPosition[previewTotalIterations][i]).sqrMagnitude < BALL_DSQR)
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-        
         private void PreviewApplyBounceCushion(int id, Vector3 N)
         {
             // Mathematical expressions derived from: https://billiards.colostate.edu/physics_articles/Mathavan_IMechE_2010.pdf
@@ -4646,7 +4599,7 @@ namespace VRCBilliards
             // Reject bounce if velocity is going the same way as normal
             // this state means we tunneled, but it happens only on the corner
             // vertexes
-            Vector3 source_v = previewBallVelocity[previewTotalIterations][id];
+            Vector3 source_v = previewBallVelocity[previewCurrentIteration][id];
             if (Vector3.Dot(source_v, N) > 0.0f)
             {
                 return;
@@ -4656,7 +4609,7 @@ namespace VRCBilliards
             Quaternion rq = Quaternion.AngleAxis(Mathf.Atan2(-N.z, -N.x) * Mathf.Rad2Deg, Vector3.up);
             Quaternion rb = Quaternion.Inverse(rq);
             Vector3 V = rq * source_v;
-            Vector3 W = rq * previewAngularVelocities[previewTotalIterations][id];
+            Vector3 W = rq * previewAngularVelocities[previewCurrentIteration][id];
 
             Vector3 V1;
             Vector3 W1;
@@ -4691,13 +4644,13 @@ namespace VRCBilliards
             W1.y = k * COS_A;
 
             // Unrotate result
-            previewBallVelocity[previewTotalIterations][id] += rb * V1;
-            previewAngularVelocities[previewTotalIterations][id] += rb * W1;
+            previewBallVelocity[previewCurrentIteration][id] += rb * V1;
+            previewAngularVelocities[previewCurrentIteration][id] += rb * W1;
         }
         private void PreviewBounceBallOffCushionIfApplicable(int id)
         {
             float zz, zx;
-            Vector3 A = previewBallPosition[previewTotalIterations][id];
+            Vector3 A = previewBallPosition[previewCurrentIteration][id];
 
             // Setup major regions
             zx = Mathf.Sign(A.x);
@@ -4705,15 +4658,129 @@ namespace VRCBilliards
 
             if (A.x * zx > TABLE_WIDTH)
             {
-                previewBallPosition[previewTotalIterations][id].x = TABLE_WIDTH * zx;
+                previewBallPosition[previewCurrentIteration][id].x = TABLE_WIDTH * zx;
                 PreviewApplyBounceCushion(id, Vector3.left * zx);
             }
 
             if (A.z * zz > TABLE_HEIGHT)
             {
-                previewBallPosition[previewTotalIterations][id].z = TABLE_HEIGHT * zz;
+                previewBallPosition[previewCurrentIteration][id].z = TABLE_HEIGHT * zz;
                 PreviewApplyBounceCushion(id, Vector3.back * zz);
             }
+        }
+
+        private void PreviewCleanup()
+        {
+            if (logger)
+            {
+                logger._Log(name, "PreviewCleanup");
+            }
+            isPreviewSimRunning = false;
+            foreach (TrailRenderer trail in previewTrails)
+            {
+                trail.material.color = tableWhite;
+                trail.Clear();
+            }
+        }
+        public void _EnablePreviewSim()
+        {
+            if (logger)
+            {
+                logger._Log(name, "EnablePreviewSim");
+            }
+            Networking.SetOwner(localPlayer, gameObject);
+            isPreviewSimEnabled = true;
+            RefreshNetworkData(false);        }
+
+        public void _DisablePreviewSim()
+        {
+            if (logger)
+            {
+                logger._Log(name, "DisablePreviewSim");
+            }
+            Networking.SetOwner(localPlayer, gameObject);
+            isPreviewSimEnabled = false;
+            PreviewCleanup();
+            RefreshNetworkData(false);
+        }
+        #endregion
+
+        public void _ReplayPhysics()
+        {
+            if (!gameIsSimulating && !isGameInMenus && currentTurn > 1)
+            {
+                if (logger)
+                {
+                    logger._Log(name, "ReplayPhysics");
+                }
+                gameIsSimulating = true;
+                currentBallPositions = previousBallPositions[currentTurn - 1];
+                currentBallVelocities[0] = initialCueBallVelocity;
+                currentAngularVelocities[0] = initialCueBallAngularVelocity;
+                ballPocketedState = (bool[])oldBallPocketedState.Clone();
+            }
+        }
+        
+        #region turnUndo
+        private void StoreCurrentTurn()
+        {
+            currentTurn++;
+            latestTurn = currentTurn;
+            //for physics replay, store initial state that matters
+            previousBallPositions[currentTurn] = (Vector3[])currentBallPositions.Clone();
+            initialCueBallVelocity = currentBallVelocities[0];
+            initialCueBallAngularVelocity = currentAngularVelocities[0];
+            
+            //For turn undo
+            previousIsOpen[currentTurn] = isOpen;
+            previousPlayerTeam2[currentTurn] = playerIsTeam2;
+            previousIsPlayer2Blue[currentTurn] = isPlayer2Blue;
+            previousIsTeam2Turn[currentTurn] = newIsTeam2Turn;
+        }
+
+        public void _UndoTurn()
+        {
+            if (!gameIsSimulating && !isGameInMenus && currentTurn > 1)
+            {
+                if (logger)
+                {
+                    logger._Log(name, "UndoTurn");
+                }
+                currentTurn--;
+                isOpen = previousIsOpen[currentTurn];
+                playerIsTeam2 = previousPlayerTeam2[currentTurn];
+                isPlayer2Blue = previousIsPlayer2Blue[currentTurn];
+                newIsTeam2Turn = previousIsTeam2Turn[currentTurn];
+                currentBallPositions = previousBallPositions[currentTurn];
+                ballPocketedState = (bool[])oldBallPocketedState.Clone();
+                RefreshNetworkData(false);
+            }
+        }
+
+        public void _RedoTurn()
+        {
+            if (!gameIsSimulating && !isGameInMenus && currentTurn > 0 && currentTurn < latestTurn)
+            {
+                if (logger)
+                {
+                    logger._Log(name,"RedoTurn");
+                }
+                currentTurn++;
+                isOpen = previousIsOpen[currentTurn];
+                playerIsTeam2 = previousPlayerTeam2[currentTurn];
+                isPlayer2Blue = previousIsPlayer2Blue[currentTurn];
+                newIsTeam2Turn = previousIsTeam2Turn[currentTurn];
+                currentBallPositions = previousBallPositions[currentTurn];
+                ballPocketedState = (bool[])oldBallPocketedState.Clone();
+                RefreshNetworkData(false);
+            }
+        }
+
+        public void _SwitchPreShotMode()
+        {
+            isPreviewSimEnabled = !isPreviewSimEnabled;
+            RefreshNetworkData(false);
+
         }
         #endregion
     }
