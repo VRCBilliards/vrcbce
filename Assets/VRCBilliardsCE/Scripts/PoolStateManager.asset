@@ -7404,7 +7404,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: isPlayer2Blue
+      Data: isPlayer2Solids
     - Name: $v
       Entry: 7
       Data: 421|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -7425,10 +7425,10 @@ MonoBehaviour:
       Data: SystemBoolean
     - Name: symbolOriginalName
       Entry: 1
-      Data: isPlayer2Blue
+      Data: isPlayer2Solids
     - Name: symbolUniqueName
       Entry: 1
-      Data: isPlayer2Blue
+      Data: isPlayer2Solids
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
@@ -10308,7 +10308,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: previousIsPlayer2Blue
+      Data: previousIsPlayer2Solids
     - Name: $v
       Entry: 7
       Data: 585|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -10329,10 +10329,10 @@ MonoBehaviour:
       Data: SystemBooleanArray
     - Name: symbolOriginalName
       Entry: 1
-      Data: previousIsPlayer2Blue
+      Data: previousIsPlayer2Solids
     - Name: symbolUniqueName
       Entry: 1
-      Data: previousIsPlayer2Blue
+      Data: previousIsPlayer2Solids
     - Name: symbolDefaultValue
       Entry: 6
       Data: 

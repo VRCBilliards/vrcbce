@@ -357,7 +357,7 @@ namespace VRCBilliards
         /// <summary>
         /// 19:4 (0x10)		What colour the players have chosen
         /// </summary>
-        [UdonSynced] private bool isPlayer2Blue;
+        [UdonSynced] private bool isPlayer2Solids;
 
         /// <summary>
         /// 19:5 (0x20)	The game isn't running
@@ -478,7 +478,7 @@ namespace VRCBilliards
         private bool[][] previousBallPocketedState = new bool[MAX_TURNS][];
         private bool[] previousIsOpen = new bool[MAX_TURNS];
         private bool[] previousIsTeam2Turn = new bool[MAX_TURNS];
-        private bool[] previousIsPlayer2Blue = new bool[MAX_TURNS];
+        private bool[] previousIsPlayer2Solids = new bool[MAX_TURNS];
         private bool[] previousPlayerTeam2 = new bool[MAX_TURNS];
 
         
@@ -1435,7 +1435,7 @@ namespace VRCBilliards
             poolCues[0].tableIsActive = true;
             poolCues[1].tableIsActive = true;
 
-            isPlayer2Blue = false;
+            isPlayer2Solids = false;
             isTeam2Winner = false;
 
             // Cue ball
@@ -1939,7 +1939,7 @@ namespace VRCBilliards
 
                         mainSrc.PlayOneShot(sinkSfx, 1.0f);
             
-                        int offset = newIsTeam2Turn ^ isPlayer2Blue ? 7 : 0; //offset for stripes
+                        int offset = newIsTeam2Turn ^ isPlayer2Solids ? 7 : 0; //offset for stripes
                         if (isOpen)
                         {
                             if (i > 1 && i < 16)
@@ -1986,7 +1986,7 @@ namespace VRCBilliards
 
             // Owner state checks
             
-            int offset = newIsTeam2Turn ^ isPlayer2Blue ? 7 : 0; //offset for stripes
+            int offset = newIsTeam2Turn ^ isPlayer2Solids ? 7 : 0; //offset for stripes
 
             // Common informations
             bool isSetComplete = true;
@@ -2174,7 +2174,7 @@ namespace VRCBilliards
 
                     if (sunkBlues != sunkOranges)
                     {
-                        isPlayer2Blue = (sunkBlues > sunkOranges) ? newIsTeam2Turn : !newIsTeam2Turn;
+                        isPlayer2Solids = (sunkBlues > sunkOranges) ? newIsTeam2Turn : !newIsTeam2Turn;
 
                         isOpen = false;
                         ApplyTableColour(newIsTeam2Turn);
@@ -2510,7 +2510,7 @@ namespace VRCBilliards
             {
                 if (isTeam2Turn)
                 {
-                    if (isPlayer2Blue)
+                    if (isPlayer2Solids)
                     {
                         tableSrcColour = tableBlue;
                         cueRenderObjs[0].material.SetColor(uniformCueColour, tableOrange * 0.33f);
@@ -2525,7 +2525,7 @@ namespace VRCBilliards
                 }
                 else
                 {
-                    if (isPlayer2Blue)
+                    if (isPlayer2Solids)
                     {
                         tableSrcColour = tableOrange;
                         cueRenderObjs[0].material.SetColor(uniformCueColour, tableOrange);
@@ -3885,7 +3885,7 @@ namespace VRCBilliards
                 {
                     if (ballPocketedState[j])
                     {
-                        counters[isPlayer2Blue ? 0 : 1]++;
+                        counters[isPlayer2Solids ? 0 : 1]++;
                     }
                 }
 
@@ -3893,7 +3893,7 @@ namespace VRCBilliards
                 {
                     if (ballPocketedState[j])
                     {
-                        counters[isPlayer2Blue ? 1 : 0]++;
+                        counters[isPlayer2Solids ? 1 : 0]++;
                     }
                 }
 
@@ -4740,7 +4740,7 @@ namespace VRCBilliards
             //For turn undo
             previousIsOpen[currentTurn] = isOpen;
             previousPlayerTeam2[currentTurn] = playerIsTeam2;
-            previousIsPlayer2Blue[currentTurn] = isPlayer2Blue;
+            previousIsPlayer2Solids[currentTurn] = isPlayer2Solids;
             previousIsTeam2Turn[currentTurn] = newIsTeam2Turn;
             previousBallPocketedState[currentTurn] = (bool[])ballPocketedState.Clone();
 
@@ -4759,7 +4759,7 @@ namespace VRCBilliards
                 currentTurn--;
                 isOpen = previousIsOpen[currentTurn];
                 playerIsTeam2 = previousPlayerTeam2[currentTurn];
-                isPlayer2Blue = previousIsPlayer2Blue[currentTurn];
+                isPlayer2Solids = previousIsPlayer2Solids[currentTurn];
                 newIsTeam2Turn = previousIsTeam2Turn[currentTurn];
                 currentBallPositions = previousBallPositions[currentTurn];
                 ballPocketedState = (bool[])previousBallPocketedState[currentTurn].Clone();
@@ -4780,7 +4780,7 @@ namespace VRCBilliards
                 currentTurn++;
                 isOpen = previousIsOpen[currentTurn];
                 playerIsTeam2 = previousPlayerTeam2[currentTurn];
-                isPlayer2Blue = previousIsPlayer2Blue[currentTurn];
+                isPlayer2Solids = previousIsPlayer2Solids[currentTurn];
                 newIsTeam2Turn = previousIsTeam2Turn[currentTurn];
                 currentBallPositions = previousBallPositions[currentTurn];
                 ballPocketedState = (bool[])previousBallPocketedState[currentTurn].Clone();
