@@ -473,7 +473,7 @@ namespace VRCBilliards
         /// </summary>
         [UdonSynced] [HideInInspector] public int currentTurn = 0;
         [UdonSynced] [HideInInspector] public int latestTurn = 0; //for redo feature
-        private const int MAX_TURNS = 10000;
+        private const int MAX_TURNS = 1000;
         private Vector3[][] previousBallPositions = new Vector3[MAX_TURNS][];
         private bool[][] previousBallPocketedState = new bool[MAX_TURNS][];
         private bool[] previousIsOpen = new bool[MAX_TURNS];
@@ -1500,19 +1500,13 @@ namespace VRCBilliards
         {
             ballPocketedState = new bool[NUMBER_OF_SIMULATED_BALLS];
             
-            // Slowly dies inside
-            ballPocketedState[1] = true;
-            ballPocketedState[4] = true;
-            ballPocketedState[5] = true;
-            ballPocketedState[6] = true;
-            ballPocketedState[7] = true;
-            ballPocketedState[8] = true;
-            ballPocketedState[10] = true;
-            ballPocketedState[11] = true;
-            ballPocketedState[12] = true;
-            ballPocketedState[13] = true;
-            ballPocketedState[14] = true;
-            ballPocketedState[15] = true;
+            for (int i = 0; i < NUMBER_OF_SIMULATED_BALLS; i++)
+            {
+                if (i != 0 && i != 2 && i != 3 && i != 9)
+                {
+                    ballPocketedState[i] = true;
+                }
+            }
 
             currentBallPositions[0] = new Vector3(-SPOT_CAROM_X, 0.0f, 0.0f);
             currentBallPositions[9] = new Vector3(SPOT_CAROM_X, 0.0f, 0.0f);
@@ -2392,21 +2386,15 @@ namespace VRCBilliards
 
             if (isFourBall)
             {
-                //ballPocketedState = new bool[NUMBER_OF_SIMULATED_BALLS] {true,true,true,true,true,true,false,true,true,true,true,true,false,false,true,false};
                 ballPocketedState = new bool[NUMBER_OF_SIMULATED_BALLS];
-                // Slowly dies inside
-                ballPocketedState[1] = true;
-                ballPocketedState[4] = true;
-                ballPocketedState[5] = true;
-                ballPocketedState[6] = true;
-                ballPocketedState[7] = true;
-                ballPocketedState[8] = true;
-                ballPocketedState[10] = true;
-                ballPocketedState[11] = true;
-                ballPocketedState[12] = true;
-                ballPocketedState[13] = true;
-                ballPocketedState[14] = true;
-                ballPocketedState[15] = true;
+
+                for (int i = 0; i < NUMBER_OF_SIMULATED_BALLS; i++)
+                {
+                    if (i != 0 && i != 2 && i != 3 && i != 9)
+                    {
+                        ballPocketedState[i] = true;
+                    }
+                }
 
             }
 
