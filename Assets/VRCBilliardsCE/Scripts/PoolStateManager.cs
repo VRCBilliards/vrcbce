@@ -203,8 +203,8 @@ namespace VRCBilliards
         public Color fabricBlue = new Color(0.1f, 0.6f, 1.0f, 1.0f);
         public Color fabricGreen = new Color(0.15f, 0.75f, 0.3f, 1.0f);
 
-        [Header("Ball Colors (9 Ball)")] [ColorUsage(true, true)]
-        public Color[] ballColors = new Color[NUMBER_OF_SIMULATED_BALLS];
+        [ColorUsage(true, true)]
+        private Color[] ballColors = new Color[NUMBER_OF_SIMULATED_BALLS];
         
         [Header("Cues")] public PoolCue[] poolCues;
 
@@ -216,30 +216,30 @@ namespace VRCBilliards
         [Header("Table Objects")]
         [Tooltip(
             "The balls that are used by the table.\nThe order of the balls is as follows: cue, black, all blue in ascending order, then all orange in ascending order.\nIf the order of the balls is incorrect, gameplay will not proceed correctly.")]
-        public Transform[] ballTransforms;
+        public Transform[] ballTransforms = new Transform[NUMBER_OF_SIMULATED_BALLS];
 
-        private Rigidbody[] ballRigidbodies;
+        private Rigidbody[] ballRigidbodies = new Rigidbody[NUMBER_OF_SIMULATED_BALLS];
 
         [Tooltip("The shadow object for each ball")]
-        public PositionConstraint[] ballShadowPosConstraints;
+        public PositionConstraint[] ballShadowPosConstraints = new PositionConstraint[NUMBER_OF_SIMULATED_BALLS];
 
-        private Transform[] ballShadowPosConstraintTransforms;
-        public GameObject cueTip;
+        private Transform[] ballShadowPosConstraintTransforms = new Transform[NUMBER_OF_SIMULATED_BALLS];
+        private GameObject cueTip;
         private Transform cueTipTransform;
         public ShotGuideController guideline;
         public GameObject devhit;
-        public GameObject[] playerTotems;
-        public GameObject[] cueTips;
-        public GameObject gameTable;
+        private GameObject[] playerTotems = new GameObject[2];
+        private GameObject[] cueTips = new GameObject[2];
+        //public GameObject gameTable;
         public GameObject marker;
         private Material markerMaterial;
         public GameObject marker9ball;
         //public GameObject tableCollisionParent;
         public GameObject pocketBlockers;
-        public MeshRenderer[] cueRenderObjs;
+        private MeshRenderer[] cueRenderObjs = new MeshRenderer[2];
         private Material[] cueMaterials = new Material[2];
 
-        [Header("Materials")] public MeshRenderer[] ballRenderers;
+        [Header("Materials")] private MeshRenderer[] ballRenderers = new MeshRenderer[NUMBER_OF_SIMULATED_BALLS];
 
         public MeshRenderer tableRenderer;
         private Material[] tableMaterials;
@@ -247,7 +247,7 @@ namespace VRCBilliards
         public Texture[] sets;
 
 
-        public Material[] cueGrips;
+        private Material[] cueGripMaterials = new Material[2];
         //public Material markerMaterial;
 
         [Header("Audio")] public GameObject audioSourcePoolContainer;
@@ -265,7 +265,7 @@ namespace VRCBilliards
         [Header("Reflection Probes")] public ReflectionProbe tableReflection;
 
         [Header("Meshes")] public Mesh[] cueballMeshes;
-        public Mesh nineBall;
+        private Mesh nineBall;
 
         private GameObject baseObject;
         private PoolMenu poolMenu;
@@ -301,7 +301,7 @@ namespace VRCBilliards
         public GameObject desktopBase;
 
         //public GameObject desktopQuad;
-        public GameObject[] desktopCueParents;
+        private GameObject[] desktopCueParents = new GameObject[2];
         public GameObject desktopOverlayPower;
 
         [Header("UI Stuff")]
@@ -550,7 +550,7 @@ namespace VRCBilliards
         [UdonSynced] private int player3ID;
         [UdonSynced] private int player4ID;
 
-        public FairlySadPanda.UsefulThings.Logger logger;
+        public FairlySadPanda.UsefulThings.Logger logger; 
 
         [UdonSynced] private bool gameWasReset;
 
@@ -647,6 +647,11 @@ namespace VRCBilliards
 
         public void Start()
         {
+            //Find logger if missing
+            if (logger == null)
+            {
+                logger = transform.parent.GetComponentInChildren<FairlySadPanda.UsefulThings.Logger>();
+            }
             if (transform.parent && transform.parent.parent)
             {
                 baseObject = transform.parent.parent.gameObject;
@@ -694,6 +699,60 @@ namespace VRCBilliards
             {
                 isPlayerInVR = localPlayer.IsUserInVR();
             }
+            
+            
+            // Try to set up shadows
+            Transform shadowsParent = transform.Find("Shadows");
+            if (shadowsParent == null)
+            {
+                shadows = shadowsParent.gameObject;
+            }
+            shadows.SetActive(fakeBallShadows);
+            // Find 4 ball particles
+            if (plusOneParticleSystem == null) plusOneParticleSystem = transform.Find("Plus").GetComponent<ParticleSystem>();
+            if (minusOneParticleSystem == null) minusOneParticleSystem = transform.Find("Minus").GetComponent<ParticleSystem>();
+            // Find Markers
+            if (marker == null) marker = transform.Find("marker").gameObject;
+            if (devhit == null) devhit = transform.Find("dev-hit").gameObject;
+            if (marker9ball == null) marker9ball = transform.Find("9ball_target").gameObject;
+            //Find Balls
+            if (ballTransforms[0] == null) ballTransforms[0] = transform.Find("Cue Ball");
+            if (ballShadowPosConstraints[0] == null) ballShadowPosConstraints[0] = shadowsParent.Find("Cue Ball Shadow").GetComponent<PositionConstraint>();
+            if (ballTransforms[1] == null) ballTransforms[1] = transform.Find("Black Ball");
+            if (ballShadowPosConstraints[1] == null) ballShadowPosConstraints[1] = shadowsParent.Find("Black Ball Shadow").GetComponent<PositionConstraint>();
+            
+            for (int i = 2; i < NUMBER_OF_SIMULATED_BALLS-1; i++)
+            {
+                if (i == 9) i = 10;
+                if (ballTransforms[i] == null)
+                {
+                    string targetBall = "ball"+(i-1).ToString("00");
+                    ballTransforms[i] = transform.Find(targetBall);
+                }
+
+                if (ballShadowPosConstraints[i] == null)
+                {
+                    ballShadowPosConstraints[i] = shadowsParent.Find("Ball " + (i-1) + " Shadow").GetComponent<PositionConstraint>();
+                }
+            }
+            nineBall = ballTransforms[9].gameObject.GetComponent<MeshFilter>().mesh;
+            for (int i = 0; i < NUMBER_OF_SIMULATED_BALLS; i++)
+            {
+                ballRenderers[i] = ballTransforms[i].GetComponent<MeshRenderer>();
+                ballRigidbodies[i] = ballTransforms[i].GetComponent<Rigidbody>();
+                ballShadowPosConstraintTransforms[i] = ballShadowPosConstraints[i].transform;
+            }
+            
+            // Setup cues
+            for (int i = 0; i < 2; i++)
+            {
+                cueTips[i] = poolCues[i].cueTip;
+                cueRenderObjs[i] = poolCues[i].GetComponent<MeshRenderer>();
+                playerTotems[i] = poolCues[i].gameObject;
+                desktopCueParents[i] = poolCues[i].cueParent.gameObject;
+                cueGripMaterials[i] = poolCues[i].GetComponent<Renderer>().material;
+
+            }
 
             // Disable the reflection probe on Quest.
 #if UNITY_ANDROID
@@ -701,18 +760,6 @@ namespace VRCBilliards
 #endif
 
             tableMaterials = tableRenderer.materials;
-
-            ballRigidbodies = new Rigidbody[ballTransforms.Length];
-            for (int i = 0; i < ballRigidbodies.Length; i++)
-            {
-                ballRigidbodies[i] = ballTransforms[i].GetComponent<Rigidbody>();
-            }
-
-            ballShadowPosConstraintTransforms = new Transform[ballShadowPosConstraints.Length];
-            for (int i = 0; i < ballShadowPosConstraints.Length; i++)
-            {
-                ballShadowPosConstraintTransforms[i] = ballShadowPosConstraints[i].transform;
-            }
 
             mainSrc = GetComponent<AudioSource>();
 
@@ -740,7 +787,8 @@ namespace VRCBilliards
 
             cueMaterials[0].SetColor(uniformCueColour, tableBlack);
             cueMaterials[1].SetColor(uniformCueColour, tableBlack);
-
+            
+            cueTip = cueTips[1];
             cueTipTransform = cueTip.transform;
 
             if (tableReflection)
@@ -770,11 +818,6 @@ namespace VRCBilliards
             if (marker9ball)
             {
                 marker9ball.SetActive(false);
-            }
-
-            if (shadows)
-            {
-                shadows.SetActive(fakeBallShadows);
             }
 
             ballShadowOffset = ballTransforms[0].position.y - ballShadowPosConstraintTransforms[0].position.y;
@@ -830,9 +873,26 @@ namespace VRCBilliards
             timerOutputFormat = poolMenu.timerOutputFormat;
             timerCountdown = poolMenu.timerCountdown;
 
+            // Set colors
+            ballColors[0] = Color.white;
+            ballColors[1] = Color.black;
+            ballColors[2] = Color.yellow;
+            ballColors[3] = Color.blue;
+            ballColors[4] = Color.red;
+            ballColors[5] = Color.magenta;
+            ballColors[6] = new Color(1, 0.6f, 0,1);
+            ballColors[7] = Color.green;
+            ballColors[8] = new Color(0.59f, 0.29f, 0, 1);
+            ballColors[9] = Color.yellow;
+            ballColors[10] = Color.blue;
+            ballColors[11] = Color.red;
+            ballColors[12] = Color.magenta;
+            ballColors[13] = new Color(1, 0.6f, 0,1);
+            ballColors[14] = Color.green;
+            ballColors[15] = new Color(0.59f, 0.29f, 0, 1);
+
+            FindTrails();
             startHasConcluded = true;
-
-
         }
 
         public void Update()
@@ -2547,8 +2607,8 @@ namespace VRCBilliards
                 cueRenderObjs[Convert.ToInt32(!newIsTeam2Turn)].materials[0].SetColor(uniformCueColour, tableBlack);
             }
 
-            cueGrips[Convert.ToInt32(newIsTeam2Turn)].SetColor(uniformMarkerColour, gripColourActive);
-            cueGrips[Convert.ToInt32(!newIsTeam2Turn)].SetColor(uniformMarkerColour, gripColourInactive);
+            cueGripMaterials[Convert.ToInt32(newIsTeam2Turn)].SetColor(uniformMarkerColour, gripColourActive);
+            cueGripMaterials[Convert.ToInt32(!newIsTeam2Turn)].SetColor(uniformMarkerColour, gripColourInactive);
         }
 
 
@@ -4111,31 +4171,40 @@ namespace VRCBilliards
         
         //Run the sim before the shot for ball prediction
         #region preShotSim
-        [Header("Preview Simulation")]
-        [UdonSynced()] public bool isPreviewSimEnabled = true;
-        private const float PREVIEW_MIN_POWER_DISTANCE = 0.005f;
+        [UdonSynced()] [HideInInspector] public bool isPreviewSimEnabled = true;
         private bool isPreviewSimRunning = false;
-
         private float previewPreviousCueDistance = 0;
+        private bool previewOnlyCueBall = false;
         //Number of times to run the sim per frame
-        [Tooltip("Affects Performance")]
-        [Range(1,20)]
-        public int previewMAXIterationsFrame = 15;
         private const int PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT = 500;
         private int previewCurrentIteration = 0;
-        private bool[][] previewPocketedState;
-        private Vector3[][] previewBallVelocity;
-        private Vector3[][] previewBallPosition;
-        private Vector3[][] previewAngularVelocities;
+        private bool[][] previewPocketedState = new bool[PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT][];
+        private Vector3[][] previewBallVelocity = new Vector3[PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT][];
+        private Vector3[][] previewBallPosition = new Vector3[PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT][];
+        private Vector3[][] previewAngularVelocities = new Vector3[PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT][];
 
-        public TrailRenderer[] previewTrails;
+        private TrailRenderer[] previewTrails;
+
+        /// <summary>
+        /// Finds the trail renderer for the given ball. Done this way because prefabs are annoying to update;
+        /// </summary>
+        private void FindTrails()
+        {
+            Transform trailParent = transform.Find("Trails");
+            previewTrails = new TrailRenderer[NUMBER_OF_SIMULATED_BALLS];
+            for (int i = 0; i < NUMBER_OF_SIMULATED_BALLS; i++)
+            {
+                string targetBall = "ball"+i.ToString("00");
+                previewTrails[i] = trailParent.Find(targetBall).GetComponent<TrailRenderer>();
+            }
+        }
         private void StartPreviewSim(float cueDistance)
         {
             if (!isPreviewSimEnabled)
             {
                 return;
             }
-            else if (Mathf.Abs(cueDistance - previewPreviousCueDistance) <= PREVIEW_MIN_POWER_DISTANCE)
+            else if (Mathf.Abs(cueDistance - previewPreviousCueDistance) <= 0.005f)
             {
                 return;
             }
@@ -4144,23 +4213,25 @@ namespace VRCBilliards
                 logger._Log(name,"StartPreviewSim");
             }
             previewPreviousCueDistance = cueDistance;
-            //Init Jagged arrays
-            previewPocketedState = new bool[PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT][];
-            previewBallVelocity = new Vector3[PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT][];
-            previewBallPosition = new Vector3[PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT][];
-            previewAngularVelocities = new Vector3[PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT][];
             // Copy current state
             previewPocketedState[0] = (bool[]) ballPocketedState.Clone();
             previewBallPosition[0] = (Vector3[]) currentBallPositions.Clone();
             previewBallVelocity[0] = new Vector3[NUMBER_OF_SIMULATED_BALLS];
             previewAngularVelocities[0] = new Vector3[NUMBER_OF_SIMULATED_BALLS];
-
-            for (int i = 0; i < NUMBER_OF_SIMULATED_BALLS; i++) //TODO: remove cue lock
+            
+            if (previewOnlyCueBall)
             {
-                previewTrails[0].transform.position = transform.TransformPoint(previewBallPosition[0][0]);
-            }            
-            PreviewCleanup();
-
+                previewTrails[0].transform.localPosition = previewBallPosition[0][0];
+            }
+            else
+            {
+                for (int i = 0; i < NUMBER_OF_SIMULATED_BALLS; i++)
+                {
+                    previewTrails[i].transform.localPosition = previewBallPosition[0][i];
+                    previewTrails[i].material.color = ballColors[i];// todo: 4 ball colors
+                    previewTrails[i].Clear();
+                }
+            }
             previewCurrentIteration = 0;
             isPreviewSimRunning = true;
             
@@ -4200,7 +4271,7 @@ namespace VRCBilliards
         private void RunPreviewSim()
         {
             int loops = 0;
-            while (isPreviewSimRunning && loops < previewMAXIterationsFrame)
+            while (isPreviewSimRunning && loops < 10)
             {
                 loops++;
                 previewCurrentIteration++;
@@ -4247,6 +4318,10 @@ namespace VRCBilliards
                 {
                     previewBallPosition[previewCurrentIteration][i] += previewBallVelocity[previewCurrentIteration][i] * FIXED_TIME_STEP;
                     PreviewAdvanceSimulationForBall(i);
+                    if (previewOnlyCueBall && i > 0)
+                    {
+                        continue;
+                    }
                     Vector3 pos = transform.TransformPoint(previewBallPosition[previewCurrentIteration][i]);
                     previewTrails[i].AddPosition(pos);
                     previewTrails[i].transform.position = pos;
