@@ -40,7 +40,7 @@ namespace VRCBilliards
         /// <summary>
         /// Default time step in seconds per iteration
         /// </summary>
-        public const float DEFAULT_TIME_STEP = 0.0125f;
+        private const float DEFAULT_TIME_STEP = 0.0125f;
         
         /// <summary>
         /// horizontal span of table
