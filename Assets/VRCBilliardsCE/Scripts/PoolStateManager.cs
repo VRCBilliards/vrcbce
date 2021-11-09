@@ -161,9 +161,9 @@ namespace VRCBilliards
         [Header("Options")]
 
         [Tooltip("Use fake shadows? Fake shadows are high-performance, but they may clash with your world's lighting.")]
-        private bool fakeBallShadows = true;
+        public bool fakeBallShadows = true;
         [Tooltip("Does the table model for this table have rails that guide the ball when the ball sinks?")]
-        private bool tableModelHasRails;
+        public bool tableModelHasRails;
 
         [Header("------")]
 
@@ -176,7 +176,7 @@ namespace VRCBilliards
         [Header("Shader Information")]
         public string uniformMarkerColour = "_Color";
         public string uniformCueColour = "_EmissionColor";
-        private string uniformTableColour = "_EmissionColor";
+        public string uniformTableColour = "_EmissionColor";
 
         [Tooltip("Change the length of the intro ball-drop animation. If you set this to zero, the animation will not play at all.")]
         [Range(0f, 5f)]
@@ -186,7 +186,7 @@ namespace VRCBilliards
         public bool scaleHitForceWithScaleBeyond1;
 
         [Tooltip("This value scales the clamp applied to the velocity of pocketted balls. Raising this will make pockets look less artificial at the cost of increasing the chance high-velocity balls will fly out of the table.")]
-        private float pocketVelocityClamp = 1.0f;
+        public float pocketVelocityClamp = 1.0f;
 
         [Header("Table Colours")]
         [ColorUsage(true, true)] public Color tableBlue = new Color(0.0f, 0.5f, 1.5f, 1.0f);
@@ -236,17 +236,15 @@ namespace VRCBilliards
         private Material markerMaterial;
         public GameObject marker9ball;
         //public GameObject tableCollisionParent;
-        private GameObject pocketBlockers;
+        public GameObject pocketBlockers;
         private MeshRenderer[] cueRenderObjs = new MeshRenderer[2];
 
-        [Header("Materials")] private MeshRenderer[] ballRenderers = new MeshRenderer[NUMBER_OF_SIMULATED_BALLS];
-
-        private MeshRenderer tableRenderer;
+        [Header("Materials")]
+        public MeshRenderer tableRenderer;
         private Material[] tableMaterials;
-
+        private MeshRenderer[] ballRenderers = new MeshRenderer[NUMBER_OF_SIMULATED_BALLS];
         public Texture[] sets;
-
-
+        
         private Material[] cueGripMaterials = new Material[2];
         //public Material markerMaterial;
 
@@ -264,7 +262,8 @@ namespace VRCBilliards
 
         [Header("Reflection Probes")] public ReflectionProbe tableReflection;
 
-        [Header("Meshes")] public Mesh fourBallCueMesh;
+        [Header("Meshes")] 
+        public Mesh fourBallCueMesh;
         private Mesh originalNineBallMesh;
         private Mesh originalCueBallMesh;
         private GameObject baseObject;
@@ -272,7 +271,6 @@ namespace VRCBilliards
         
         private PoolMenu poolMenu;
         private PoolPracticeMenu poolPracticeMenu;
-        private PoolTable poolTable;
         /// <summary>
         /// True whilst balls are rolling
         /// </summary>
@@ -708,11 +706,11 @@ namespace VRCBilliards
             if (marker == null) marker = transform.Find("marker").gameObject;
             if (devhit == null) devhit = transform.Find("dev-hit").gameObject;
             if (marker9ball == null) marker9ball = transform.Find("9ball_target").gameObject;
-            SetupTable();
+
             SetupBalls();
             SetupShadows();
             SetupCues();
-            
+            tableMaterials = tableRenderer.materials;
             // Disable the reflection probe on Quest.
 #if UNITY_ANDROID
             tableReflection = null;
@@ -893,6 +891,7 @@ namespace VRCBilliards
                 ballRigidbodies[i] = ballTransforms[i].GetComponent<Rigidbody>();
             }
         }
+
         private void UsColors()
         {
             // Set colors
@@ -902,113 +901,25 @@ namespace VRCBilliards
             ballColors[3] = Color.blue;
             ballColors[4] = Color.red;
             ballColors[5] = Color.magenta;
-            ballColors[6] = new Color(1, 0.6f, 0,1);
+            ballColors[6] = new Color(1, 0.6f, 0, 1);
             ballColors[7] = Color.green;
             ballColors[8] = new Color(0.59f, 0.29f, 0, 1);
             ballColors[9] = Color.yellow;
             ballColors[10] = Color.blue;
             ballColors[11] = Color.red;
             ballColors[12] = Color.magenta;
-            ballColors[13] = new Color(1, 0.6f, 0,1);
+            ballColors[13] = new Color(1, 0.6f, 0, 1);
             ballColors[14] = Color.green;
             ballColors[15] = new Color(0.59f, 0.29f, 0, 1);
         }
 
-        private void SetupTable()
+        private void FourBallColors()
         {
-            if (poolTable == null)
-            {
-                poolTable = transform.parent.GetComponentInChildren<PoolTable>();
-            }
-            pocketBlockers = poolTable.fourBallBlockers;
-            if (poolTable.sunkBallPosition != null)
-            {
-                sunkBallsPositionRoot = poolTable.sunkBallPosition;
-            }
-            if (poolTable.reflectionProbePositionOverride != null)
-            {
-                tableReflection.transform.position = poolTable.reflectionProbePositionOverride.position;
-            }
-            
-            if (poolTable.mainMenuTarget != null)
-            {
-                Transform resetLockButton = poolMenu.lockMenu.transform.parent;
-                poolMenu.lockMenu.transform.parent = poolMenu.mainMenu.transform;
-                poolMenu.mainMenu.transform.position = poolTable.mainMenuTarget.position;
-                poolMenu.mainMenu.transform.rotation = poolTable.mainMenuTarget.rotation;
-                poolMenu.mainMenu.transform.localScale = poolTable.mainMenuTarget.localScale; 
-                poolMenu.lockMenu.transform.parent = resetLockButton;            
-            }
+            ballColors[0] = Color.white;
+            ballColors[9] = Color.yellow;
+            ballColors[2] = Color.red;
+            ballColors[3] = Color.red;
 
-            if (poolTable.scoreBoardTarget != null && poolMenu.scores[0] != null)
-            {
-                poolMenu.scores[0].transform.position = poolTable.scoreBoardTarget.position;
-                poolMenu.scores[0].transform.rotation = poolTable.scoreBoardTarget.rotation;
-                poolMenu.scores[0].transform.localScale = poolTable.scoreBoardTarget.localScale;
-            }
-            //Move InfoCard & Scoreboard2
-            if (poolTable.scoreBoardTarget2 != null && poolMenu.scores[1] != null)
-            {
-                Transform resetParent = poolMenu.resetGameButton.transform.parent;
-                Transform hideUiButton = poolMenu.GetComponentInChildren<InteractToggle>().transform;
-                Transform resetHideButton = hideUiButton.parent;
-                hideUiButton.parent = poolMenu.mainMenu.transform;
-                poolMenu.scores[1].transform.position = poolTable.scoreBoardTarget2.position;
-                poolMenu.scores[1].transform.rotation = poolTable.scoreBoardTarget2.rotation;
-                poolMenu.scores[1].transform.localScale = poolTable.scoreBoardTarget2.localScale;
-                poolMenu.tableInfoScreen.transform.position = poolTable.scoreBoardTarget2.position;
-                poolMenu.tableInfoScreen.transform.rotation = poolTable.scoreBoardTarget2.rotation;
-                poolMenu.tableInfoScreen.transform.localScale = poolTable.scoreBoardTarget2.localScale;
-                
-                hideUiButton.parent = resetHideButton;
-                poolMenu.resetGameButton.transform.parent = resetParent;
-            }
-            for (int i = 0; i < 2; i++)
-            {
-                if (poolTable.cueStickTargets[i] != null && poolCues[i] != null)
-                {
-                    poolCues[i].transform.position = poolTable.cueStickTargets[i].position;
-                    poolCues[i].transform.rotation = poolTable.cueStickTargets[i].rotation;
-                    poolCues[i].transform.localScale = poolTable.cueStickTargets[i].localScale;
-                }
-            }
-            
-            
-            fakeBallShadows = poolTable.useFakeShadows;
-            tableModelHasRails = poolTable.tabelHasRails;
-            pocketVelocityClamp = poolTable.pocketVelocityClamp;
-            uniformTableColour = poolTable.uniformTableColor;
-            
-            if (poolTable.introSfx != null)
-            {
-                introSfx = poolTable.introSfx;
-            }
-            if (poolTable.sinkSfx != null)
-            {
-                sinkSfx = poolTable.sinkSfx;
-            }
-            if (poolTable.hitsSfx != null && poolTable.hitsSfx.Length > 0)
-            {
-                hitsSfx = poolTable.hitsSfx;
-            }
-            if (poolTable.newTurnSfx != null)
-            {
-                newTurnSfx = poolTable.newTurnSfx;
-            }
-            if (poolTable.sinkSfx != null)
-            {
-                sinkSfx = poolTable.sinkSfx;
-            }
-            if (poolTable.spinStopSfx != null)
-            {
-                spinStopSfx = poolTable.spinStopSfx;
-            }
-            if (poolTable.hitBallSfx != null)
-            {
-                hitBallSfx = poolTable.hitBallSfx;
-            }
-            tableRenderer = poolTable.poolTableMesh;
-            tableMaterials = tableRenderer.materials;
         }
         public void Update()
         {
@@ -1667,6 +1578,7 @@ namespace VRCBilliards
                     currentAngularVelocities[k] = vectorZero;
                 }
             }
+            UsColors();
         }
 
         private void Initialize4Ball()
@@ -1695,12 +1607,12 @@ namespace VRCBilliards
             currentAngularVelocities[9] = vectorZero;
             currentAngularVelocities[2] = vectorZero;
             currentAngularVelocities[3] = vectorZero;
+            FourBallColors();
         }
 
         private void Initialize8Ball()
         {
             ballPocketedState = new bool[NUMBER_OF_SIMULATED_BALLS]; // No balls are pocketed.
-
             for (int i = 0, k = 0; i < 5; i++)
             {
                 for (int j = 0; j <= i; j++)
@@ -1716,6 +1628,7 @@ namespace VRCBilliards
                     currentAngularVelocities[k] = vectorZero;
                 }
             }
+            UsColors();//TODO Check if using custom colors
         }
 
         public void _Select8Ball()
