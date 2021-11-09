@@ -29,7 +29,7 @@ namespace VRCBilliards
         /*
          * Constants
          */
-
+        
         /// <summary>
         /// Maximum steps/frame (8). Note: for Android this was originally designed to be replaced with a value of 0.075.
         /// </summary>
@@ -38,10 +38,10 @@ namespace VRCBilliards
         // Physics calculation constants (measurements are in meters)
 
         /// <summary>
-        /// time step in seconds per iteration
+        /// Default time step in seconds per iteration
         /// </summary>
-        private const float FIXED_TIME_STEP = 0.0125f / 2f;
-
+        public const float DEFAULT_TIME_STEP = 0.0125f;
+        
         /// <summary>
         /// horizontal span of table
         /// </summary>
@@ -164,7 +164,10 @@ namespace VRCBilliards
         public bool fakeBallShadows = true;
         [Tooltip("Does the table model for this table have rails that guide the ball when the ball sinks?")]
         public bool tableModelHasRails;
-
+        
+        [Tooltip("Runs the simulation twice per frame at the slight cost of performance")]
+        public bool isMoreAccurate = false;
+        
         [Header("------")]
 
         [Header("Important Objects")]
@@ -481,7 +484,11 @@ namespace VRCBilliards
         private bool[] previousIsPlayer2Solids = new bool[MAX_TURNS];
         private bool[] previousPlayerTeam2 = new bool[MAX_TURNS];
 
-        
+        /// <summary>
+        /// time step in seconds per iteration
+        /// </summary>
+        private float FIXED_TIME_STEP = 0.0125f;
+
         /// <summary>
         /// Runtime target colour
         /// </summary>
@@ -817,6 +824,15 @@ namespace VRCBilliards
             UsColors();
             FindTrails();
             startHasConcluded = true;
+            
+            if (isMoreAccurate)
+            {
+                FIXED_TIME_STEP = DEFAULT_TIME_STEP / 2;
+            }
+            else
+            {
+                FIXED_TIME_STEP = DEFAULT_TIME_STEP;
+            }
         }
 
         private void SetupCues()
@@ -949,14 +965,12 @@ namespace VRCBilliards
                 {
                     minTimeSinceLastSimRun = MAX_DELTA;
                 }
-
-                while (minTimeSinceLastSimRun >= FIXED_TIME_STEP * 2)
+                int isAccurate = isMoreAccurate ? 2 : 1;
+                while (minTimeSinceLastSimRun >= FIXED_TIME_STEP * isAccurate)
                 {
                     AdvancePhysicsStep();
-#if UNITY_ANDROID //Only run the sim twice on pc to preserve framerate. Simulation would be at half speed
-                    AdvancePhysicsStep();
-#endif
-                    minTimeSinceLastSimRun -= FIXED_TIME_STEP * 2;
+                    if (isMoreAccurate) AdvancePhysicsStep();
+                    minTimeSinceLastSimRun -= FIXED_TIME_STEP * isAccurate;
                 }
             }
             else if (isGameInMenus)
