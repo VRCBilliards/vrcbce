@@ -447,6 +447,11 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3492924437292106801, guid: ee9f4e835544408469fb94985a04b320,
+        type: 3}
+      propertyPath: _syncMethod
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 4175727234589736631, guid: ee9f4e835544408469fb94985a04b320,
         type: 3}
       propertyPath: m_AnchoredPosition.x

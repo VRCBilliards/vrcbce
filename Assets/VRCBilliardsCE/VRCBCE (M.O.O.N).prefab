@@ -362,6 +362,11 @@ PrefabInstance:
       propertyPath: m_LocalRotation.z
       value: -0
       objectReference: {fileID: 0}
+    - target: {fileID: 3492924437292106801, guid: ee9f4e835544408469fb94985a04b320,
+        type: 3}
+      propertyPath: _syncMethod
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 3492924437292106802, guid: ee9f4e835544408469fb94985a04b320,
         type: 3}
       propertyPath: m_LocalScale.y
@@ -517,6 +522,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: VRCBCE (Base)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3805221875248830652, guid: d33826510185c7141b6eeba4cfeb451e,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8658868485224426084, guid: d33826510185c7141b6eeba4cfeb451e,
         type: 3}

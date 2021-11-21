@@ -5,6 +5,7 @@ namespace FairlySadPanda
 {
     namespace UsefulThings
     {
+        [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
         public class Logger : UdonSharpBehaviour
         {
             public TMPro.TextMeshProUGUI text;

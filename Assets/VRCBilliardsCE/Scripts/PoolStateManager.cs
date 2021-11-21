@@ -13,6 +13,7 @@ namespace VRCBilliards
     /// Main Behaviour for VRCBilliards: Community Edition. This is a giant class. Here be dragons.
     /// </summary>
     [RequireComponent(typeof(AudioSource))]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
     public class PoolStateManager : UdonSharpBehaviour
     {
         /*

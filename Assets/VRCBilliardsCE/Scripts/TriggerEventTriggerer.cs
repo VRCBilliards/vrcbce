@@ -4,6 +4,7 @@ using VRC.Udon;
 
 namespace VRCBilliards
 {
+    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class TriggerEventTriggerer : UdonSharpBehaviour
     {
         public UdonBehaviour behaviour;

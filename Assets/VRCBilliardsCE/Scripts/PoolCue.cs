@@ -5,6 +5,7 @@ using VRC.SDKBase;
 
 namespace VRCBilliards
 {
+    [UdonBehaviourSyncMode(BehaviourSyncMode.Continuous)]
     public class PoolCue : UdonSharpBehaviour
     {
         public PoolOtherHand otherHand;

@@ -7,6 +7,7 @@ using VRC.Udon;
 namespace VRCBilliards
 {
     [RequireComponent(typeof(LineRenderer))]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class ShotGuideController : UdonSharpBehaviour
     {
         public LayerMask tableLayers;

@@ -1,10 +1,10 @@
-
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 
 namespace VRCBilliards
 {
+    [UdonBehaviourSyncMode(BehaviourSyncMode.Continuous)]
     public class PoolOtherHand : UdonSharpBehaviour
     {
         public GameObject objPrimary;

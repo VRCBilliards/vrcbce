@@ -1,5 +1,4 @@
-﻿
-using TMPro;
+﻿using TMPro;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
@@ -9,6 +8,7 @@ namespace VRCBilliards
     /// <summary>
     /// Proprietary animation manager for M.O.O.N's UI
     /// </summary>
+    [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
     public class UIAnimationManager : UdonSharpBehaviour
     {
         public PoolMenu poolMenu;

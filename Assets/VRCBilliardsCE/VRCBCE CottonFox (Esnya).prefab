@@ -547,6 +547,11 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: -0.22
       objectReference: {fileID: 0}
+    - target: {fileID: 3805221873291636402, guid: e0ea4875f333c744d89ce89444260060,
+        type: 3}
+      propertyPath: _syncMethod
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 3805221873291636403, guid: e0ea4875f333c744d89ce89444260060,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
@@ -1547,6 +1552,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3805221874749882772, guid: e0ea4875f333c744d89ce89444260060,
         type: 3}
+      propertyPath: _syncMethod
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3805221874749882772, guid: e0ea4875f333c744d89ce89444260060,
+        type: 3}
       propertyPath: serializedProgramAsset
       value: 
       objectReference: {fileID: 0}
@@ -1671,6 +1681,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalPosition.z
       value: -2.32
+      objectReference: {fileID: 0}
+    - target: {fileID: 3805221875338555914, guid: e0ea4875f333c744d89ce89444260060,
+        type: 3}
+      propertyPath: _syncMethod
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 3805221875352447111, guid: e0ea4875f333c744d89ce89444260060,
         type: 3}
@@ -2223,8 +2238,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 640439740775931973, guid: eac7cdc0b42cf524c9094fd52419a2ce,
         type: 3}
+      propertyPath: _syncMethod
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 640439740775931973, guid: eac7cdc0b42cf524c9094fd52419a2ce,
+        type: 3}
       propertyPath: serializedProgramAsset
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 640439740808950808, guid: eac7cdc0b42cf524c9094fd52419a2ce,
+        type: 3}
+      propertyPath: _syncMethod
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 640439740808950808, guid: eac7cdc0b42cf524c9094fd52419a2ce,
         type: 3}
@@ -2238,13 +2263,28 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 640439741532886172, guid: eac7cdc0b42cf524c9094fd52419a2ce,
         type: 3}
+      propertyPath: _syncMethod
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 640439741532886172, guid: eac7cdc0b42cf524c9094fd52419a2ce,
+        type: 3}
       propertyPath: serializedProgramAsset
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 640439742058021379, guid: eac7cdc0b42cf524c9094fd52419a2ce,
         type: 3}
+      propertyPath: _syncMethod
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 640439742058021379, guid: eac7cdc0b42cf524c9094fd52419a2ce,
+        type: 3}
       propertyPath: serializedProgramAsset
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 640439742077708075, guid: eac7cdc0b42cf524c9094fd52419a2ce,
+        type: 3}
+      propertyPath: _syncMethod
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 640439742077708075, guid: eac7cdc0b42cf524c9094fd52419a2ce,
         type: 3}
@@ -2260,6 +2300,11 @@ PrefabInstance:
         type: 3}
       propertyPath: serializedProgramAsset
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 640439742584322521, guid: eac7cdc0b42cf524c9094fd52419a2ce,
+        type: 3}
+      propertyPath: _syncMethod
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 640439742584322521, guid: eac7cdc0b42cf524c9094fd52419a2ce,
         type: 3}
@@ -2363,6 +2408,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2274518542578971268, guid: eac7cdc0b42cf524c9094fd52419a2ce,
         type: 3}
+      propertyPath: _syncMethod
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2274518542578971268, guid: eac7cdc0b42cf524c9094fd52419a2ce,
+        type: 3}
       propertyPath: serializedProgramAsset
       value: 
       objectReference: {fileID: 0}
@@ -2383,13 +2433,28 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2274518542718319689, guid: eac7cdc0b42cf524c9094fd52419a2ce,
         type: 3}
+      propertyPath: _syncMethod
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2274518542718319689, guid: eac7cdc0b42cf524c9094fd52419a2ce,
+        type: 3}
       propertyPath: serializedProgramAsset
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 2274518542932089123, guid: eac7cdc0b42cf524c9094fd52419a2ce,
         type: 3}
+      propertyPath: _syncMethod
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2274518542932089123, guid: eac7cdc0b42cf524c9094fd52419a2ce,
+        type: 3}
       propertyPath: serializedProgramAsset
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 2274518543127096607, guid: eac7cdc0b42cf524c9094fd52419a2ce,
+        type: 3}
+      propertyPath: _syncMethod
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 2274518543127096607, guid: eac7cdc0b42cf524c9094fd52419a2ce,
         type: 3}
@@ -2466,6 +2531,16 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -12.5
       objectReference: {fileID: 0}
+    - target: {fileID: 6605319018976404323, guid: eac7cdc0b42cf524c9094fd52419a2ce,
+        type: 3}
+      propertyPath: _syncMethod
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8106554554236945686, guid: eac7cdc0b42cf524c9094fd52419a2ce,
+        type: 3}
+      propertyPath: _syncMethod
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 8106554554236945686, guid: eac7cdc0b42cf524c9094fd52419a2ce,
         type: 3}
       propertyPath: serializedProgramAsset
@@ -2473,8 +2548,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8466249863445125162, guid: eac7cdc0b42cf524c9094fd52419a2ce,
         type: 3}
+      propertyPath: _syncMethod
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8466249863445125162, guid: eac7cdc0b42cf524c9094fd52419a2ce,
+        type: 3}
       propertyPath: serializedProgramAsset
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 8697789118958193758, guid: eac7cdc0b42cf524c9094fd52419a2ce,
+        type: 3}
+      propertyPath: _syncMethod
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 8697789118958193758, guid: eac7cdc0b42cf524c9094fd52419a2ce,
         type: 3}

@@ -4,6 +4,7 @@ using UnityEngine;
 namespace VRCBilliards
 {
     [RequireComponent(typeof(Camera))]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class CameraSizeScroller : UdonSharpBehaviour
     {
         [Range(0, 10f)]
