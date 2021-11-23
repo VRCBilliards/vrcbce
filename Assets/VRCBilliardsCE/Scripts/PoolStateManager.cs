@@ -4252,7 +4252,6 @@ namespace VRCBilliards
 
         #endregion
         
-        //Run the sim before the shot for ball prediction
         #region preShotSim
 
         /// <summary>
@@ -4378,12 +4377,14 @@ namespace VRCBilliards
             {
                 if (!previewPocketedState[previewCurrentIteration][i]) // If the ball in question is not sunk
                 {
+                    // Update position
                     previewBallPosition[previewCurrentIteration][i] += previewBallVelocity[previewCurrentIteration][i] * FIXED_TIME_STEP;
                     PreviewAdvanceSimulationForBall(i);
                     if (previewOnlyCueBall && i > 0)
                     {
                         continue;
                     }
+                    // Update Trails
                     Vector3 pos = transform.TransformPoint(previewBallPosition[previewCurrentIteration][i]);
                     previewTrails[i].AddPosition(pos);
                     previewTrails[i].transform.position = pos;
