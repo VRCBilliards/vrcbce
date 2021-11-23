@@ -131,6 +131,11 @@ namespace VRCBilliards
 
         private const float CUE_VELOCITY_CLAMP = 20.0f;
         /// <summary>
+        /// Number of itterations to run the preview sim.
+        /// </summary>
+        private const int PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT = 500;
+        
+        /// <summary>
         /// Vectors cannot be const.
         /// </summary>
         // ReSharper disable once InconsistentNaming
@@ -293,7 +298,43 @@ namespace VRCBilliards
         /// Player is hitting
         /// </summary>
         private bool isArmed;
-
+        
+        /// <summary>
+        /// Is the Pre Shot Sim Enabled?
+        /// </summary>
+        [UdonSynced] private bool isPreviewSimEnabled = false;
+        
+        /// <summary>
+        /// Is the preview sim running?
+        /// </summary>
+        private bool isPreviewSimRunning = false;
+        
+        /// <summary>
+        /// How far is the cuetip from the cue ball last frame?
+        /// </summary>
+        private float previewPreviousCueDistance = 0;
+        
+        /// <summary>
+        /// Should trail lines be shown for the cue ball or all balls?
+        /// </summary>
+        private bool previewOnlyCueBall = false;
+        
+        /// <summary>
+        /// The number of itterations run the preview sim.
+        /// </summary>
+        private int previewCurrentIteration = 0;
+        
+        // Previous States
+        private bool[][] previewPocketedState = new bool[PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT][];
+        private Vector3[][] previewBallVelocity = new Vector3[PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT][];
+        private Vector3[][] previewBallPosition = new Vector3[PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT][];
+        private Vector3[][] previewAngularVelocities = new Vector3[PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT][];
+        
+        /// <summary>
+        /// Trail Renderers for Preview Sim
+        /// </summary>
+        private TrailRenderer[] previewTrails = new TrailRenderer[16];
+        
         private int localPlayerID = -1;
 
         [UdonSynced] private bool guideLineEnabled = true;
@@ -4213,19 +4254,6 @@ namespace VRCBilliards
         
         //Run the sim before the shot for ball prediction
         #region preShotSim
-        [UdonSynced()] [HideInInspector] public bool isPreviewSimEnabled = false;
-        private bool isPreviewSimRunning = false;
-        private float previewPreviousCueDistance = 0;
-        private bool previewOnlyCueBall = false;
-        //Number of times to run the sim per frame
-        private const int PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT = 500;
-        private int previewCurrentIteration = 0;
-        private bool[][] previewPocketedState = new bool[PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT][];
-        private Vector3[][] previewBallVelocity = new Vector3[PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT][];
-        private Vector3[][] previewBallPosition = new Vector3[PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT][];
-        private Vector3[][] previewAngularVelocities = new Vector3[PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT][];
-
-        private TrailRenderer[] previewTrails = new TrailRenderer[16];
 
         /// <summary>
         /// Finds the trail renderer for the given ball. Done this way because prefabs are annoying to update;
@@ -4239,6 +4267,10 @@ namespace VRCBilliards
                 previewTrails[i] = trailParent.Find(targetBall).GetComponent<TrailRenderer>();
             }
         }
+        /// <summary>
+        /// Resets and Sets up the preview sim for the current shot.
+        /// </summary>
+        /// <param name="cueDistance"></param>
         private void StartPreviewSim(float cueDistance)
         {
             if (!isPreviewSimEnabled)
@@ -4303,7 +4335,9 @@ namespace VRCBilliards
             logger._Log(name, "Asumed Velocity: " + vel.ToString());
             previewAngularVelocities[0][0] = Vector3.Cross(r, p) * -50.0f;
         }
-        
+        /// <summary>
+        /// Runs the preview sim for the current shot.
+        /// </summary>
         private void RunPreviewSim()
         {
             int loops = 0;
@@ -4765,7 +4799,9 @@ namespace VRCBilliards
                 PreviewApplyBounceCushion(id, Vector3.back * zz);
             }
         }
-
+        /// <summary>
+        /// Cleans up the preview trails
+        /// </summary>
         private void PreviewCleanup()
         {
             if (logger)
@@ -4802,7 +4838,7 @@ namespace VRCBilliards
         }
         #endregion
         /// <summary>
-        /// Rerun s the simulation for the current turn.
+        /// Reruns the simulation for the current turn. Result should be the same.
         /// </summary>
         public void _ReplayPhysics()
         {
