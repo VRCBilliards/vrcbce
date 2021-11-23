@@ -19,7 +19,7 @@ namespace VRCBilliards
         [Header("Preview Sim")] public Animator previewAnimator;
         [Header("Replay Shot")] public Button replayShotButton;
 
-        private void start()
+        private void Start()
         {
             if (manager == null)
                 manager = transform.parent.parent.GetComponentInChildren<PoolStateManager>();
