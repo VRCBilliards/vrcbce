@@ -129,7 +129,7 @@ namespace VRCBilliards
         /// </summary>
         private const float RACK_HEIGHT = -0.0702f;
 
-        private const float CUE_VELOCITY_CLAMP = 20f;
+        private const float CUE_VELOCITY_CLAMP = 20.0f;
         /// <summary>
         /// Vectors cannot be const.
         /// </summary>
@@ -840,10 +840,10 @@ namespace VRCBilliards
             for (int i = 0; i < 2; i++)
             {
                 cueTips[i] = poolCues[i].cueTip;
-                cueRenderObjs[i] = poolCues[i].GetComponent<MeshRenderer>();
+                cueRenderObjs[i] = poolCues[i].cueParent.GetComponentInChildren<MeshRenderer>();
                 poolCueGameObjects[i] = poolCues[i].gameObject;
                 desktopCueParents[i] = poolCues[i].cueParent.gameObject;
-                cueGripMaterials[i] = poolCues[i].GetComponent<Renderer>().material;
+                cueGripMaterials[i] = poolCues[i].GetComponent<Renderer>().sharedMaterial;
                 cueRenderObjs[i].material.SetColor(uniformCueColour, tableBlack);
             }
             activeCueTip = cueTips[1];
@@ -1018,11 +1018,12 @@ namespace VRCBilliards
                         markerMaterial.SetColor(uniformMarkerColour, markerOK);
                     }
                 }
-
+                Vector3 cueballPosition = currentBallPositions[0];
+                
                 if (isArmed)
                 {
-                    float cueDistance = (copyOfLocalSpacePositionOfCueTip - currentBallPositions[0]).sqrMagnitude;
-                    float sweepTimeBall = Vector3.Dot(currentBallPositions[0] - localSpacePositionOfCueTipLastFrame,
+                    float cueDistance = (copyOfLocalSpacePositionOfCueTip - cueballPosition).sqrMagnitude;
+                    float sweepTimeBall = Vector3.Dot(cueballPosition - localSpacePositionOfCueTipLastFrame,
                         cueLocalForwardDirection);
 
                     // Check for potential skips due to low frame rate
@@ -1038,7 +1039,6 @@ namespace VRCBilliards
                     {
                         Vector3 horizontalForce =
                             copyOfLocalSpacePositionOfCueTip - localSpacePositionOfCueTipLastFrame;
-                        horizontalForce.y = 0.0f;
 
                         // Compute velocity delta
                         float vel = forceMultiplier * (horizontalForce.magnitude / Time.deltaTime);
@@ -1047,7 +1047,7 @@ namespace VRCBilliards
                         currentBallVelocities[0] = cueArmedShotDirection * Mathf.Min(vel, CUE_VELOCITY_CLAMP);
 
                         // Angular velocity: L=r(normalized)×p
-                        Vector3 r = (raySphereOutput - currentBallPositions[0]) * BALL_1OR;
+                        Vector3 r = (raySphereOutput - cueballPosition) * BALL_1OR;
                         Vector3 p = cueLocalForwardDirection * vel;
                         currentAngularVelocities[0] = Vector3.Cross(r, p) * -50.0f;
                         StoreCurrentTurn();
@@ -1056,7 +1056,6 @@ namespace VRCBilliards
                     else
                     {
                         StartPreviewSim(cueDistance);
-                        
                     }
                 }
                 else
@@ -1065,7 +1064,7 @@ namespace VRCBilliards
 
                     // Get where the cue will strike the ball
                     if (IsIntersectingWithSphere(copyOfLocalSpacePositionOfCueTip, cueLocalForwardDirection,
-                        currentBallPositions[0]))
+                        cueballPosition))
                     {
                         if (guideLineEnabled && guideline)
                         {
@@ -1084,7 +1083,7 @@ namespace VRCBilliards
                         if (!isInDesktopTopDownView)
                         {
                             // Compute deflection in VR mode
-                            Vector3 scuffdir = currentBallPositions[0] - raySphereOutput;
+                            Vector3 scuffdir = cueballPosition - raySphereOutput;
                             scuffdir.y = 0.0f;
                             cueArmedShotDirection += scuffdir.normalized * 0.17f;
                         }
@@ -3914,7 +3913,10 @@ namespace VRCBilliards
             {
                 logger._Log(name, "disabling marker because the ball hase been hit");
             }
-
+            if (logger)
+            {
+                logger._Log(name, "Cue Velocity: " + currentBallVelocities[0] + "  Cue Angular Velocity: " + currentAngularVelocities[0]);
+            }
             isRepositioningCueBall = false;
 
             if (marker)
@@ -4190,14 +4192,14 @@ namespace VRCBilliards
                 return;
             }
 
-            var isSinglePlayer = PlayerCount == 1;
-            var isWinner = playerIsTeam2 && isTeam2Winner || !playerIsTeam2 && !isTeam2Winner;
+            bool isSinglePlayer = PlayerCount == 1;
+            bool isWinner = playerIsTeam2 && isTeam2Winner || !playerIsTeam2 && !isTeam2Winner;
             if (!isSinglePlayer && !isWinner)
             {
                 return;
             }
 
-            var total = isSinglePlayer ? singlePlayPrize : prize * raiseCount;
+            float total = isSinglePlayer ? singlePlayPrize : prize * raiseCount;
             if (logger)
             {
                 logger._Log(name, $"Give rewards {total}");
@@ -4211,7 +4213,7 @@ namespace VRCBilliards
         
         //Run the sim before the shot for ball prediction
         #region preShotSim
-        [UdonSynced()] [HideInInspector] public bool isPreviewSimEnabled = true;
+        [UdonSynced()] [HideInInspector] public bool isPreviewSimEnabled = false;
         private bool isPreviewSimRunning = false;
         private float previewPreviousCueDistance = 0;
         private bool previewOnlyCueBall = false;
@@ -4223,7 +4225,7 @@ namespace VRCBilliards
         private Vector3[][] previewBallPosition = new Vector3[PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT][];
         private Vector3[][] previewAngularVelocities = new Vector3[PREVIEW_MAX_ITERATIONS_TOTAL_LIMIT][];
 
-        private TrailRenderer[] previewTrails;
+        private TrailRenderer[] previewTrails = new TrailRenderer[16];
 
         /// <summary>
         /// Finds the trail renderer for the given ball. Done this way because prefabs are annoying to update;
@@ -4231,7 +4233,6 @@ namespace VRCBilliards
         private void FindTrails()
         {
             Transform trailParent = transform.Find("Trails");
-            previewTrails = new TrailRenderer[NUMBER_OF_SIMULATED_BALLS];
             for (int i = 0; i < NUMBER_OF_SIMULATED_BALLS; i++)
             {
                 string targetBall = "ball"+i.ToString("00");
@@ -4244,7 +4245,8 @@ namespace VRCBilliards
             {
                 return;
             }
-            else if (Mathf.Abs(cueDistance - previewPreviousCueDistance) <= 0.005f)
+            // Only Start the sim if the cue has moved.
+            else if (Mathf.Abs(cueDistance - previewPreviousCueDistance) <= 0.01f)
             {
                 return;
             }
@@ -4262,6 +4264,7 @@ namespace VRCBilliards
             if (previewOnlyCueBall)
             {
                 previewTrails[0].transform.localPosition = previewBallPosition[0][0];
+                previewTrails[0].Clear();
             }
             else
             {
@@ -4278,40 +4281,33 @@ namespace VRCBilliards
             // Angular velocity: L=r(normalized)×p
             Vector3 r = (raySphereOutput - previewBallPosition[0][0]) * BALL_1OR;
             Vector3 p;
-            if (isDesktopLocalTurn)
+            float vel;
+            if (isPlayerInVR) // Pain peko
+            {
+                vel = forceMultiplier *
+                            (raySphereOutput * Mathf.Lerp(0f, CUE_VELOCITY_CLAMP, Mathf.InverseLerp(0f, 0.3f, cueDistance))).magnitude;
+                p = cueLocalForwardDirection * vel;
+                previewBallVelocity[0][0] = cueArmedShotDirection * Mathf.Min(vel, CUE_VELOCITY_CLAMP);
+            }
+            else
             {
                 Vector3 ncursor = deskTopCursor;
                 ncursor.y = 0.0f;
                 Vector3 delta = ncursor - previewBallPosition[0][0];
                 shootAmt = desktopShootReference - Vector3.Dot(desktopShootVector, ncursor);
                 shootAmt = Mathf.Clamp(shootAmt, 0.0f, 0.5f);
-                float vel = Mathf.Pow(shootAmt * 2.0f, 1.4f) * 9.0f;
+                vel = Mathf.Pow(shootAmt * 2.0f, 1.4f) * 9.0f;
                 p = desktopShootVector.normalized * vel;
+                previewBallVelocity[0][0] = p;
             }
-            else
-            {
-                Vector3 copyOfLocalSpacePositionOfCueTip = localSpacePositionOfCueTip;
-                float sweepTimeBall = Vector3.Dot(previewBallPosition[0][0] - localSpacePositionOfCueTipLastFrame, cueLocalForwardDirection);
-                if (sweepTimeBall > 0.0f && sweepTimeBall < (localSpacePositionOfCueTipLastFrame - copyOfLocalSpacePositionOfCueTip).magnitude)
-                {
-                    copyOfLocalSpacePositionOfCueTip = localSpacePositionOfCueTipLastFrame + (cueLocalForwardDirection * sweepTimeBall);
-                }                
-                Vector3 horizontalForce = copyOfLocalSpacePositionOfCueTip - localSpacePositionOfCueTipLastFrame;
-                horizontalForce.y = 0.0f;
-                float vel = forceMultiplier * (horizontalForce.magnitude / Time.deltaTime);
-                p = cueLocalForwardDirection * vel;
-                previewBallVelocity[0][0] = cueArmedShotDirection * Mathf.Min(vel, CUE_VELOCITY_CLAMP);
-
-            }
-
-            previewBallVelocity[0][0] = p;
+            logger._Log(name, "Asumed Velocity: " + vel.ToString());
             previewAngularVelocities[0][0] = Vector3.Cross(r, p) * -50.0f;
         }
         
         private void RunPreviewSim()
         {
             int loops = 0;
-            while (isPreviewSimRunning && loops < 10)
+            while (isPreviewSimRunning && loops < 5)
             {
                 loops++;
                 previewCurrentIteration++;
@@ -4895,7 +4891,7 @@ namespace VRCBilliards
             }
         }
         /// <summary>
-        /// Toggle the turn undo/redo status.
+        /// Toggle the turn preSim status
         /// </summary>
         public void _SwitchPreShotMode()
         {
