@@ -4868,6 +4868,14 @@ namespace VRCBilliards
                 {
                     logger._Log(name, "ReplayPhysics");
                 }
+                if (previousBallPositions[currentTurn-1] == null)
+                {
+                    if (logger)
+                    {
+                        logger._Error(name, "Unable to replay physics, no previous data stored");
+                    }
+                    return;
+                }
                 isArmed = false;
                 isReplaying = true;
                 gameIsSimulating = true;
@@ -4939,7 +4947,7 @@ namespace VRCBilliards
                 {
                     if (logger)
                     {
-                        logger._Log(name, "UndoTurn: State is not available for turn " + currentTurn);
+                        logger._Error(name, "UndoTurn: State is not available for turn " + currentTurn);
                     }
                     return;
                 }
@@ -4968,7 +4976,7 @@ namespace VRCBilliards
                 {
                     if (logger)
                     {
-                        logger._Log(name, "RedoTurn: State is not available for turn " + currentTurn);
+                        logger._Error(name, "RedoTurn: State is not available for turn " + currentTurn);
                     }
                     return;
                 }
