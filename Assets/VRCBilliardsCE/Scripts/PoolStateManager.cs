@@ -4330,7 +4330,7 @@ namespace VRCBilliards
             Vector3 r = (raySphereOutput - previewBallPosition[0][0]) * BALL_1OR; // Wah
             Vector3 p;
             float vel;
-            if (isPlayerInVR) // Pain peko
+            if (isPlayerInVR)
             {
                 vel = forceMultiplier *
                             (raySphereOutput * Mathf.Lerp(0f, CUE_VELOCITY_CLAMP, Mathf.InverseLerp(0f, 0.3f, cueDistance))).magnitude;
@@ -4932,7 +4932,7 @@ namespace VRCBilliards
         /// </summary>
         public void _UndoTurn()
         {
-            if (!gameIsSimulating && !isGameInMenus && currentTurn > -1 && isGameModePractice)
+            if (!gameIsSimulating && !isGameInMenus && currentTurn > -1 && isGameModePractice && isPlayerAllowedToPlay)
             {
                 if (logger)
                 {
@@ -4957,6 +4957,7 @@ namespace VRCBilliards
                 newIsTeam2Turn = previousIsTeam2Turn[currentTurn];
                 currentBallPositions = previousBallPositions[currentTurn];
                 ballPocketedState = previousBallPocketedState[currentTurn];
+                Networking.SetOwner(localPlayer,gameObject);
                 RefreshNetworkData(false);
             }
         }
@@ -4965,7 +4966,7 @@ namespace VRCBilliards
         /// </summary>
         public void _RedoTurn()
         {
-            if (!gameIsSimulating && !isGameInMenus && currentTurn < latestTurn && isGameModePractice)
+            if (!gameIsSimulating && !isGameInMenus && currentTurn < latestTurn && isGameModePractice && isPlayerAllowedToPlay)
             {
                 if (logger)
                 {
@@ -4986,6 +4987,7 @@ namespace VRCBilliards
                 newIsTeam2Turn = previousIsTeam2Turn[currentTurn];
                 currentBallPositions = previousBallPositions[currentTurn];
                 ballPocketedState = (bool[])previousBallPocketedState[currentTurn].Clone();
+                Networking.SetOwner(localPlayer,gameObject);
                 RefreshNetworkData(false);
             }
         }
@@ -4994,15 +4996,22 @@ namespace VRCBilliards
         /// </summary>
         public void _SwitchPreShotMode()
         {
-            isPreviewSimEnabled = !isPreviewSimEnabled;
-            RefreshNetworkData(false);
-
+            if (isPlayerAllowedToPlay)
+            {
+                isPreviewSimEnabled = !isPreviewSimEnabled;
+                Networking.SetOwner(localPlayer,gameObject);
+                RefreshNetworkData(false);
+            }
         }
 
         public void _SwitchPreShotCueMode()
         {
-            previewOnlyCueBall = !previewOnlyCueBall;
-            RefreshNetworkData(false);
+            if (isPlayerAllowedToPlay)
+            {
+                previewOnlyCueBall = !previewOnlyCueBall;
+                Networking.SetOwner(localPlayer,gameObject);
+                RefreshNetworkData(false);
+            }
         }
         #endregion
     }
