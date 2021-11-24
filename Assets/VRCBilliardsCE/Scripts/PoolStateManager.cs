@@ -317,7 +317,7 @@ namespace VRCBilliards
         /// <summary>
         /// Should trail lines be shown for the cue ball or all balls?
         /// </summary>
-        private bool previewOnlyCueBall = false;
+        [UdonSynced]private bool previewOnlyCueBall = false;
         
         /// <summary>
         /// The number of itterations run the preview sim.
@@ -1091,7 +1091,7 @@ namespace VRCBilliards
                         Vector3 r = (raySphereOutput - cueballPosition) * BALL_1OR;
                         Vector3 p = cueLocalForwardDirection * vel;
                         currentAngularVelocities[0] = Vector3.Cross(r, p) * -50.0f;
-                        StoreCurrentTurn();
+                        _StoreShot();
                         HitBallWithCue();
                     }
                     else
@@ -1606,6 +1606,7 @@ namespace VRCBilliards
             {
                 poolPracticeMenu._EnablePracticeMenu();
             }
+            poolPracticeMenu._UpdateMenu(currentTurn,latestTurn,isGameModePractice,isPreviewSimEnabled,previewOnlyCueBall);
         }
 
         private void Initialize9Ball()
@@ -1853,8 +1854,8 @@ namespace VRCBilliards
         {
             isGameInMenus = true;
             isReplaying = false;
-            currentTurn = 0;
-            latestTurn = 0;
+            currentTurn = -1;
+            latestTurn = -1;
             poolPracticeMenu._DisablePracticeMenu();
             poolCues[0].tableIsActive = false;
             poolCues[1].tableIsActive = false;
@@ -2120,7 +2121,7 @@ namespace VRCBilliards
         private void HandleEndOfTurn()
         {
             isSimulatedByUs = false;
-
+            _StoreEndTurn();
             // We are updating the game state so make sure we are network owner
             Networking.SetOwner(Networking.LocalPlayer, gameObject);
 
@@ -2458,7 +2459,7 @@ namespace VRCBilliards
                 player3ID,
                 player4ID,
                 guideLineEnabled);
-            poolPracticeMenu._UpdateMenu(currentTurn,latestTurn,isGameModePractice,isPreviewSimEnabled);
+            poolPracticeMenu._UpdateMenu(currentTurn,latestTurn,isGameModePractice,isPreviewSimEnabled,previewOnlyCueBall);
             if (isGameInMenus)
             {
                 if (lastTimerType != timerType)
@@ -2842,7 +2843,7 @@ namespace VRCBilliards
                 player3ID,
                 player4ID,
                 guideLineEnabled);
-            poolPracticeMenu._UpdateMenu(currentTurn,latestTurn,isGameModePractice,isPreviewSimEnabled);
+            poolPracticeMenu._UpdateMenu(currentTurn,latestTurn,isGameModePractice,isPreviewSimEnabled, previewOnlyCueBall);
 
             poolMenu._EnableMainMenu();
             poolPracticeMenu._DisablePracticeMenu();
@@ -3197,6 +3198,8 @@ namespace VRCBilliards
                 {
                     mainAudioSource.PlayOneShot(introSfx, 1.0f);
                     SendCustomEventDelayedSeconds(nameof(_ReEnableShadowConstraints), introAnimationLength);
+                    SendCustomEventDelayedSeconds(nameof(_StoreEndTurn), introAnimationLength);
+
                 }
             }
 
@@ -3882,7 +3885,7 @@ namespace VRCBilliards
                             currentAngularVelocities[0] = Vector3.Cross(r_1, p) * -25.0f;
                             cue.transform.localPosition = new Vector3(2000.0f, 2000.0f, 2000.0f);
                             isDesktopLocalTurn = false;
-                            StoreCurrentTurn();
+                            _StoreShot();
                             HitBallWithCue();
                         }
 
@@ -4310,7 +4313,7 @@ namespace VRCBilliards
             isPreviewSimRunning = true;
             
             // Angular velocity: L=r(normalized)×p
-            Vector3 r = (raySphereOutput - previewBallPosition[0][0]) * BALL_1OR;
+            Vector3 r = (raySphereOutput - previewBallPosition[0][0]) * BALL_1OR; // Wah
             Vector3 p;
             float vel;
             if (isPlayerInVR) // Pain peko
@@ -4319,6 +4322,7 @@ namespace VRCBilliards
                             (raySphereOutput * Mathf.Lerp(0f, CUE_VELOCITY_CLAMP, Mathf.InverseLerp(0f, 0.3f, cueDistance))).magnitude;
                 p = cueLocalForwardDirection * vel;
                 previewBallVelocity[0][0] = cueArmedShotDirection * Mathf.Min(vel, CUE_VELOCITY_CLAMP);
+                previewAngularVelocities[0][0] = Vector3.Cross(r, p) * -50.0f;
             }
             else
             {
@@ -4330,9 +4334,10 @@ namespace VRCBilliards
                 vel = Mathf.Pow(shootAmt * 2.0f, 1.4f) * 9.0f;
                 p = desktopShootVector.normalized * vel;
                 previewBallVelocity[0][0] = p;
+                previewAngularVelocities[0][0] = Vector3.Cross(r, p) * -25.0f;
+
             }
-            logger._Log(name, "Asumed Velocity: " + vel.ToString());
-            previewAngularVelocities[0][0] = Vector3.Cross(r, p) * -50.0f;
+            logger._Log(name, "Asumed Velocity: " + p.ToString()+ " Asumed Angular Velocity: " + previewAngularVelocities[0][0].ToString());
         }
         /// <summary>
         /// Runs the preview sim for the current shot.
@@ -4843,17 +4848,19 @@ namespace VRCBilliards
         /// </summary>
         public void _ReplayPhysics()
         {
-            if (!gameIsSimulating && currentTurn > 0)
+            if (!gameIsSimulating && currentTurn >= 0)
             {
                 if (logger)
                 {
                     logger._Log(name, "ReplayPhysics");
                 }
+                isArmed = false;
                 isReplaying = true;
                 gameIsSimulating = true;
                 currentAngularVelocities = new Vector3[NUMBER_OF_SIMULATED_BALLS];
                 currentBallVelocities = new Vector3[NUMBER_OF_SIMULATED_BALLS];
-                currentBallPositions = (Vector3[])previousBallPositions[currentTurn].Clone();
+                // Restore to state from the end of last turn.
+                currentBallPositions = (Vector3[])previousBallPositions[currentTurn-1].Clone();
                 currentBallVelocities[0] = initialCueBallVelocity[currentTurn];
                 currentAngularVelocities[0] = initialCueBallAngularVelocity[currentTurn];
                 ballPocketedState = (bool[])previousBallPocketedState[currentTurn].Clone();
@@ -4864,45 +4871,70 @@ namespace VRCBilliards
         /// <summary>
         /// Store the state of the game at the start of the current turn.
         /// </summary>
-        private void StoreCurrentTurn()
+        public void _StoreShot()
         {
+            if (!isGameModePractice || isReplaying) return;
+            else if (logger)
+            {
+                logger._Log(name, "StoreShot");
+            }
+            currentTurn++;
+            latestTurn = currentTurn;
+            //for physics replay, store initial state that matters
+            initialCueBallVelocity[currentTurn] = currentBallVelocities[0];
+            initialCueBallAngularVelocity[currentTurn] = currentAngularVelocities[0];
+        }
+
+        public void _StoreEndTurn()
+        {
+            if (!isGameModePractice) return;
             if (isReplaying)
             {
                 isReplaying = false;
                 return;
             }
-            currentTurn++;
-            latestTurn = currentTurn;
-            //for physics replay, store initial state that matters
-            previousBallPositions[currentTurn] = (Vector3[])currentBallPositions.Clone();
-            initialCueBallVelocity[currentTurn] = currentBallVelocities[0];
-            initialCueBallAngularVelocity[currentTurn] = currentAngularVelocities[0];
+            else if (logger)
+            {
+                logger._Log(name, "StoreEndTurn");
+            }
             //For turn undo
             previousIsOpen[currentTurn] = isOpen;
             previousPlayerTeam2[currentTurn] = playerIsTeam2;
             previousIsPlayer2Solids[currentTurn] = isPlayer2Solids;
             previousIsTeam2Turn[currentTurn] = newIsTeam2Turn;
             previousBallPocketedState[currentTurn] = (bool[])ballPocketedState.Clone();
-
+            previousBallPositions[currentTurn] = (Vector3[])currentBallPositions.Clone();
         }
         /// <summary>
         /// Undo the last turn.
         /// </summary>
         public void _UndoTurn()
         {
-            if (!gameIsSimulating && !isGameInMenus && currentTurn > 1)
+            if (!gameIsSimulating && !isGameInMenus && currentTurn > -1 && isGameModePractice)
             {
                 if (logger)
                 {
                     logger._Log(name, "UndoTurn");
                 }
-                currentTurn--;
+                if (currentTurn > 0) // allow undoing the first turn
+                {
+                    currentTurn--;
+                }
+                // Return since state is not available.
+                if (previousIsOpen[currentTurn] == null)
+                {
+                    if (logger)
+                    {
+                        logger._Log(name, "UndoTurn: State is not available for turn " + currentTurn);
+                    }
+                    return;
+                }
                 isOpen = previousIsOpen[currentTurn];
                 playerIsTeam2 = previousPlayerTeam2[currentTurn];
                 isPlayer2Solids = previousIsPlayer2Solids[currentTurn];
                 newIsTeam2Turn = previousIsTeam2Turn[currentTurn];
                 currentBallPositions = previousBallPositions[currentTurn];
-                ballPocketedState = (bool[])previousBallPocketedState[currentTurn].Clone();
+                ballPocketedState = previousBallPocketedState[currentTurn];
                 RefreshNetworkData(false);
             }
         }
@@ -4911,7 +4943,7 @@ namespace VRCBilliards
         /// </summary>
         public void _RedoTurn()
         {
-            if (!gameIsSimulating && !isGameInMenus && currentTurn > 0 && currentTurn < latestTurn)
+            if (!gameIsSimulating && !isGameInMenus && currentTurn < latestTurn && isGameModePractice)
             {
                 if (logger)
                 {
@@ -4935,6 +4967,12 @@ namespace VRCBilliards
             isPreviewSimEnabled = !isPreviewSimEnabled;
             RefreshNetworkData(false);
 
+        }
+
+        public void _SwitchPreShotCueMode()
+        {
+            previewOnlyCueBall = !previewOnlyCueBall;
+            RefreshNetworkData(false);
         }
         #endregion
     }
