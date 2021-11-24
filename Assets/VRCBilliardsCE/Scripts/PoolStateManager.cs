@@ -949,6 +949,19 @@ namespace VRCBilliards
             }
         }
 
+        private void TeamColors()
+        {
+            ballColors[0] = Color.white;
+            ballColors[1] = Color.black;
+            for (int i = 2; i < 9; i++)
+            {
+                ballColors[i] = tableBlue;
+            }
+            for (int i = 9; i < NUMBER_OF_SIMULATED_BALLS; i++)
+            {
+                ballColors[i] = tableOrange;
+            }
+        }
         private void UsColors()
         {
             // Set colors
@@ -1683,7 +1696,8 @@ namespace VRCBilliards
                     currentAngularVelocities[k] = vectorZero;
                 }
             }
-            UsColors();//TODO Check if using custom colors
+            TeamColors();
+            //UsColors();//TODO Check if using us colors
         }
 
         public void _Select8Ball()
@@ -4950,6 +4964,14 @@ namespace VRCBilliards
                     logger._Log(name,"RedoTurn");
                 }
                 currentTurn++;
+                if (previousIsOpen[currentTurn] == null)
+                {
+                    if (logger)
+                    {
+                        logger._Log(name, "RedoTurn: State is not available for turn " + currentTurn);
+                    }
+                    return;
+                }
                 isOpen = previousIsOpen[currentTurn];
                 playerIsTeam2 = previousPlayerTeam2[currentTurn];
                 isPlayer2Solids = previousIsPlayer2Solids[currentTurn];
