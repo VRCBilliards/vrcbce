@@ -15,32 +15,40 @@ namespace VRCBilliards
     {
         [Header("Interface with the core code")]
         public PoolStateManager PoolTable;
-        public bool team1Blue = true;
+        public bool solidsBlue = true;
         private bool isPanelEnabled = false;
         
         [Header("Shader property name and the display material that will be colored")]
-        public string ColorName = "_MainTex";
-        public Renderer displayOutput;
+        public string ColorMaterialName = "_Color";
+        private Renderer displayOutput;
         
         [Header("HSV values from the Slider and the synced float variables")]
-        public Slider sliderHue;
-        public Slider sliderSaturation;
-        public Slider sliderBrightness;
+        private Slider[] slidersAll; //0 Hue, 1 Saturation, 2 Brightness
         [UdonSynced()] public float floatHue = 0;
         [UdonSynced()] public float floatSaturation = 0.75f;
         [UdonSynced()] public float floatBrightness = 1;
         
         [Header("The Colored Buttons that are already set up fro the player")]
-        public PrefabColor[] colorButtons;
+        private PrefabColor[] colorButtons;
         [Header("The sound that plays when the buttons are pressed")]
-        public AudioSource audioSource;
+        private AudioSource audioSource;
 
         private void Start()
         {
+            slidersAll = GetComponentsInChildren<Slider>();
+            displayOutput = GetComponentInChildren<Renderer>();
+            colorButtons = GetComponentsInChildren<PrefabColor>();
+            audioSource = GetComponentInChildren<AudioSource>();
+            if (slidersAll.Length != 3)
+            {
+                Debug.Log("sliders did not equal 3");
+            }
             Color Temp = new Color(floatHue, floatSaturation, floatBrightness, 1);
-            displayOutput.material.SetColor(ColorName, Temp);
+            displayOutput.material.SetColor(ColorMaterialName, Temp);
             SetColor();
         }
+        
+        
 
 
         public void _SetHue()
@@ -49,7 +57,7 @@ namespace VRCBilliards
             if (isPanelEnabled)
             {
                 Networking.SetOwner(Networking.LocalPlayer, gameObject);
-                floatHue = sliderHue.value;
+                floatHue = slidersAll[0].value;
                 RequestSerialization();
                 SetColor();
             }
@@ -60,7 +68,7 @@ namespace VRCBilliards
             if (isPanelEnabled)
             {
                 Networking.SetOwner(Networking.LocalPlayer, gameObject);
-                floatSaturation = sliderSaturation.value;
+                floatSaturation = slidersAll[1].value;
                 RequestSerialization();
                 SetColor();
             }
@@ -71,7 +79,7 @@ namespace VRCBilliards
             if (isPanelEnabled)
             {
                 Networking.SetOwner(Networking.LocalPlayer, gameObject);
-                floatBrightness = sliderBrightness.value;
+                floatBrightness = slidersAll[3].value;
                 RequestSerialization();
                 SetColor();
             }
@@ -80,8 +88,8 @@ namespace VRCBilliards
         private void SetColor()
         {
             Color Temp = Color.HSVToRGB(floatHue, floatSaturation, floatBrightness, true);
-            displayOutput.material.SetColor(ColorName, Temp);
-            if (team1Blue)
+            displayOutput.material.SetColor(ColorMaterialName, Temp);
+            if (solidsBlue)
             {
                 PoolTable.tableBlue = Temp;
             }
