@@ -10,17 +10,19 @@ namespace VRCBilliards
 {
     public class PrefabColor : UdonSharpBehaviour
     {
-        public colorpicker PlayerPanel;
+        private colorpicker PlayerPanel;
         public Color PrefabedColor = new Color(1.00f, 1.00f, 1.00f, 1.00f);
 
         public string materialName = "_Color";
 
         //public Renderer ButtonColor;
-        public Image Button;
+        private Image Button;
 
         private void Start()
         {
             //ButtonColor.material.SetColor(materialName, PrefabedColor);
+            PlayerPanel = GetComponentInParent<colorpicker>();
+            Button = GetComponent<Image>();
             _ButtonColors(false);
         }
 
