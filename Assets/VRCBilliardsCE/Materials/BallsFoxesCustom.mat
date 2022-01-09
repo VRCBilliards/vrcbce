@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: balls foxes color
+  m_Name: BallsFoxesCustom
   m_Shader: {fileID: 4800000, guid: 84a5b3d13c1d177498638e0dcd9c4a19, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
@@ -105,7 +105,7 @@ Material:
     - _Turnoff: 0
     - _UVSec: 0
     - _ZWrite: 1
-    - __dirty: 1
+    - __dirty: 0
     m_Colors:
     - _BallColour: {r: 1, g: 0, b: 0, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
