@@ -80,7 +80,7 @@ namespace VRCBilliards
             if (isPanelEnabled)
             {
                 Networking.SetOwner(Networking.LocalPlayer, gameObject);
-                floatBrightness = slidersAll[3].value;
+                floatBrightness = slidersAll[2].value;
                 RequestSerialization();
                 SetColor();
             }
