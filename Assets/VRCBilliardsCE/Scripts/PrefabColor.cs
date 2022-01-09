@@ -8,6 +8,7 @@ using VRC.Udon;
 
 namespace VRCBilliards
 {
+    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class PrefabColor : UdonSharpBehaviour
     {
         private colorpicker PlayerPanel;

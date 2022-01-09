@@ -11,6 +11,7 @@ using VRCBilliards;
 
 namespace VRCBilliards
 {
+    [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
     public class colorpicker : UdonSharpBehaviour
     {
         [Header("Interface with the core code")]
