@@ -116,6 +116,8 @@ The original creator of this prefab was harry_t. harry_t did (unsuccessfully) at
 
 🦊 Juice - CottonFox Table
 
+🦈 akalink - Classic Table, UI, Color Change shaders
+
 🚗 Varneon - Optimization
 
 🧙‍♂️ Xiexe - Original Forker, Early refactor work
