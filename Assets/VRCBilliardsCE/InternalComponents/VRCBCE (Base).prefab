@@ -2398,17 +2398,32 @@ PrefabInstance:
     - target: {fileID: 2658905674319268445, guid: dd923d329abcb594cb064a63764cb957,
         type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2658905674319268445, guid: dd923d329abcb594cb064a63764cb957,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7494819633635195013, guid: dd923d329abcb594cb064a63764cb957,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: -90
       objectReference: {fileID: 0}
     - target: {fileID: 7494819634187984084, guid: dd923d329abcb594cb064a63764cb957,
         type: 3}
       propertyPath: m_Name
       value: Logger
+      objectReference: {fileID: 0}
+    - target: {fileID: 7494819634187984084, guid: dd923d329abcb594cb064a63764cb957,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7494819634187984084, guid: dd923d329abcb594cb064a63764cb957,
+        type: 3}
+      propertyPath: m_TagString
+      value: EditorOnly
       objectReference: {fileID: 0}
     - target: {fileID: 7494819634187984094, guid: dd923d329abcb594cb064a63764cb957,
         type: 3}
