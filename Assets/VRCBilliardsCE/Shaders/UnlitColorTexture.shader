@@ -1,4 +1,4 @@
-﻿Shader "akalink/Unlit Color+Texture"
+﻿Shader "VRCBCE/Unlit Color+Texture"
 {
     Properties
     {
