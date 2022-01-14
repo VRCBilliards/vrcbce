@@ -72,15 +72,15 @@ namespace VRCBilliards
 
             if (isGamemodeMenuSwitched)
             {
-                modeButtonText.text = "Switch to Traditional Menu";
-                modeLeft.text = "Korean";
-                modeRight.text = "Japanese";
+                modeButtonText.text = "Cambiar al menu tradicional";
+                modeLeft.text = "Coreano";
+                modeRight.text = "Japones";
             }
             else
             {
-                modeButtonText.text = "Switch to 4 Ball Menu";
-                modeLeft.text = "9 Ball";
-                modeRight.text = "8 Ball";
+                modeButtonText.text = "Cambiar al menu de 4 bolas";
+                modeLeft.text = "9 Bolas";
+                modeRight.text = "8 Bolas";
             }
 
             if (isGuide)
@@ -107,13 +107,13 @@ namespace VRCBilliards
                 {
                     //For 4 Ball Japanese
                     poolMenu._Select4BallJapanese();
-                    if (logger) logger._Log(name, "Switched to 4Ball JPN");
+                    if (logger) logger._Log(name, "Cambiar a 4Bolas Jap");
                 }
                 else
                 {
                     //For 8Ball
                     poolMenu._Select8Ball();
-                    if (logger) logger._Log(name, "Switched to 8Ball");
+                    if (logger) logger._Log(name, "Cambiar a 8Bolas");
                 }
             }
             else
@@ -121,13 +121,13 @@ namespace VRCBilliards
                 if (isGamemodeMenuSwitched)
                 {
                     poolMenu._Select4BallKorean();
-                    if (logger) logger._Log(name, "Switched to 4Ball KOR");
+                    if (logger) logger._Log(name, "Cambiar a 4Bolas Cor");
                 }
                 else
                 {
                     //For 9Ball
                     poolMenu._Select9Ball();
-                    if (logger) logger._Log(name, "Switched to 9Ball");
+                    if (logger) logger._Log(name, "Cambiar a 9Bolas");
                 }
             }
         }

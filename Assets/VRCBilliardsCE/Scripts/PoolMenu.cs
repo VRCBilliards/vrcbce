@@ -646,22 +646,22 @@ namespace VRCBilliards
             {
                 if (isTeam2)
                 {
-                    winnerText.text = $"{player2Scores[0].text} and {player4Scores[0].text} win!";
+                    winnerText.text = $"{player2Scores[0].text} y {player4Scores[0].text} gano!";
                 }
                 else
                 {
-                    winnerText.text = $"{player1Scores[0].text} and {player3Scores[0].text} win!";
+                    winnerText.text = $"{player1Scores[0].text} y {player3Scores[0].text} gano!";
                 }
             }
             else
             {
                 if (isTeam2)
                 {
-                    winnerText.text = $"{player2Scores[0].text} wins!";
+                    winnerText.text = $"{player2Scores[0].text} gano!";
                 }
                 else
                 {
-                    winnerText.text = $"{player1Scores[0].text} wins!";
+                    winnerText.text = $"{player1Scores[0].text} gano!";
                 }
             }
         }
