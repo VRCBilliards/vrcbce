@@ -33,10 +33,10 @@ namespace VRCBilliards
         public TextMeshProUGUI gameModeTxt;
         public Image[] gameModeButtons = { };
         //akalink added, allows you to override the name given when their respecive button is clicked.
-        public string uSA8BallString = "American 8-Ball";
-        public string uSA9BallString = "American 9-Ball";
-        public string jP4BallString = "Japanese 4-Ball";
-        public string kN4BallString = "Korean 4-Ball";
+        public string uSA8BallString = "8-Bolas Americano";
+        public string uSA9BallString = "9-Bolas Americano";
+        public string jP4BallString = "4-Bolas Japones";
+        public string kN4BallString = "4-Bolas Coreano";
         //end
 
 
@@ -47,25 +47,25 @@ namespace VRCBilliards
         public TextMeshProUGUI guidelineStatus;
         public Image[] guideLineButtons = { };
         //akalink added
-        public string guidelineEnabledString = "Guideline On";
-        public string guidelineDisabledString = "Guideline Off";
+        public string guidelineEnabledString = "Guias activadas";
+        public string guidelineDisabledString = "Guias desactivadas";
         //end
 
         [Header("Timer")]
         public TextMeshProUGUI timer;
-        public string noTimerText = "No Limit";
-        public string timerValueText = "{}s Limit";
+        public string noTimerText = "Sin limite";
+        public string timerValueText = "{}s Limite";
         public Image timerButton, noTimerButton;
         public TextMeshProUGUI visibleTimerDuringGame;
         public Image timerCountdown;
-        public string timerOutputFormat = "{} seconds remaining";
+        public string timerOutputFormat = "{} segundos restantes";
 
         [Header("Teams")]
         public TextMeshProUGUI teamsTxt;
         public Image[] teamsButtons = { };
         //akalink added
-        public string oneVOneString = "Teams: NO";
-        public string twoVTwoString = "Teams: YES";
+        public string oneVOneString = "Equipos: NO";
+        public string twoVTwoString = "Equipos: Si";
         //end
 
         [Header("Players")]
@@ -74,7 +74,7 @@ namespace VRCBilliards
         public GameObject player3Button;
         public GameObject player4Button;
         public GameObject leaveButton;
-        public string defaultEmptyPlayerSlotText = "<color=grey>Player {}</color>";
+        public string defaultEmptyPlayerSlotText = "<color=grey>Jugador {}</color>";
         public TextMeshProUGUI player1MenuText;
         public TextMeshProUGUI player2MenuText;
         public TextMeshProUGUI player3MenuText;
@@ -104,11 +104,11 @@ namespace VRCBilliards
 
         public TextMeshProUGUI winnerText;
         //akalink added
-        public string gameResetText = "The game was ended!";
+        public string gameResetText = "¡El juego ha terminado!";
         //
 
         [Header("UdonChips Integration")]
-        public string defaultEmptyplayerSlotTextWithUdonChips = "{}uc to play";
+        public string defaultEmptyplayerSlotTextWithUdonChips = "{}uc para jugar";
 
         private bool isTeams;
         private bool isSignedUpToPlay;
