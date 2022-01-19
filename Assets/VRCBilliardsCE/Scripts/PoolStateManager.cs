@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.Rendering;
+using UnityEngine.Serialization;
 using VRC.SDKBase;
 using VRC.Udon;
 
@@ -30,17 +31,7 @@ namespace VRCBilliards
          * Constants
          */
 
-        /// <summary>
-        /// Maximum steps/frame (8). Note: for Android this was originally designed to be replaced with a value of 0.075.
-        /// </summary>
-        private const float MAX_DELTA = 0.1f;
-
         // Physics calculation constants (measurements are in meters)
-
-        /// <summary>
-        /// time step in seconds per iteration
-        /// </summary>
-        private const float FIXED_TIME_STEP = 0.0125f;
 
         /// <summary>
         /// horizontal span of table
@@ -125,11 +116,6 @@ namespace VRCBilliards
         private const float SPOT_CAROM_X = 0.8001f;
 
         /// <summary>
-        /// Rack position on Y axis
-        /// </summary>
-        private const float RACK_HEIGHT = -0.0702f;
-
-        /// <summary>
         /// Vectors cannot be const.
         /// </summary>
         // ReSharper disable once InconsistentNaming
@@ -176,10 +162,11 @@ namespace VRCBilliards
         public string uniformTableColour = "_EmissionColor";
         public string uniformMarkerColour = "_Color";
         public string uniformCueColour = "_EmissionColor";
+        
         //akalink added, various property names of the custom shader.
         public string uniformBallColour = "_BallColour";
         public string uniformBallFloat = "_CustomColor";
-        public string BallMaskToggle = "_Turnoff";
+        [FormerlySerializedAs("BallMaskToggle")] public string ballMaskToggle = "_Turnoff";
        
         //end
 
@@ -187,12 +174,9 @@ namespace VRCBilliards
         [Range(0f, 5f)]
         public float introAnimationLength = 2.0f;
 
-        [Tooltip("If enabled, worldspace table scales beyond 1 in x or z will increase the force of hits to compensate, making it easier for regular-sized avatars to play.")]
+        [Tooltip("If enabled, world-space table scales beyond 1 in x or z will increase the force of hits to compensate, making it easier for regular-sized avatars to play.")]
         public bool scaleHitForceWithScaleBeyond1;
-
-        [Tooltip("This value scales the clamp applied to the velocity of pocketted balls. Raising this will make pockets look less artificial at the cost of increasing the chance high-velocity balls will fly out of the table.")]
-        public float pocketVelocityClamp = 1.0f;
-
+        
         [Header("Table Colours")]
         [ColorUsage(true, true)] public Color tableBlue = new Color(0.0f, 0.5f, 1.5f, 1.0f);
         [ColorUsage(true, true)] public Color tableOrange = new Color(1.5f, 0.5f, 0.0f, 1.0f);
@@ -201,22 +185,24 @@ namespace VRCBilliards
         [ColorUsage(true, true)] public Color tableBlack = new Color(0.01f, 0.01f, 0.01f, 1.0f);
         [ColorUsage(true, true)] public Color tableYellow = new Color(2.0f, 1.0f, 0.0f, 1.0f);
         [ColorUsage(true, true)] public Color tableLightBlue = new Color(0.45f, 0.9f, 1.5f, 1.0f);
-        public Color markerOK = new Color(0.0f, 1.0f, 0.0f, 1.0f);
-        public Color markerNotOK = new Color(1.0f, 0.0f, 0.0f, 1.0f);
+        [FormerlySerializedAs("markerOK")] public Color markerOk = new Color(0.0f, 1.0f, 0.0f, 1.0f);
+        [FormerlySerializedAs("markerNotOK")] public Color markerNotOk = new Color(1.0f, 0.0f, 0.0f, 1.0f);
         public Color gripColourActive = new Color(0.0f, 0.5f, 1.1f, 1.0f);
         public Color gripColourInactive = new Color(0.34f, 0.34f, 0.34f, 1.0f);
         public Color fabricGray = new Color(0.3f, 0.3f, 0.3f, 1.0f);
         public Color fabricBlue = new Color(0.1f, 0.6f, 1.0f, 1.0f);
         public Color fabricGreen = new Color(0.15f, 0.75f, 0.3f, 1.0f);
+        
         //akalink added, the behaviors of the color panels, as well as the shader toggle.
-        [Header("Colour Options")]  
-        public bool BallCustomColours = false; //bypasses ball colour options for UI that doesn't use it. Add the behaviours and shader when in use
-        public colorpicker BlueTeamSliders;
-        public colorpicker OrangeTeamSliders;
+        [FormerlySerializedAs("BallCustomColours")] [Header("Colour Options")]  
+        public bool ballCustomColours; //bypasses ball colour options for UI that doesn't use it. Add the behaviours and shader when in use
+        [FormerlySerializedAs("BlueTeamSliders")] public colorpicker blueTeamSliders;
+        [FormerlySerializedAs("OrangeTeamSliders")] public colorpicker orangeTeamSliders;
         [Range(-1, 0)] private float ShaderToggleFloat = 0; //disables the colourization on the shader for 4 & 9 ball.
         //end
 
-        [Header("Cues")] public PoolCue[] poolCues;
+        [Header("Cues")]
+        public PoolCue[] poolCues;
 
         /// <summary>
         /// The balls that are used by the table.
@@ -240,11 +226,9 @@ namespace VRCBilliards
         public GameObject devhit;
         public GameObject[] playerTotems;
         public GameObject[] cueTips;
-        public GameObject gameTable;
         public GameObject marker;
         private Material markerMaterial;
-        public GameObject marker9ball;
-        //public GameObject tableCollisionParent;
+        [FormerlySerializedAs("marker9ball")] public GameObject marker9Ball;
         public GameObject pocketBlockers;
         public MeshRenderer[] cueRenderObjs;
         private Material[] cueMaterials = new Material[2];
@@ -255,10 +239,8 @@ namespace VRCBilliards
         private Material[] tableMaterials;
 
         public Texture[] sets;
-
-
+        
         public Material[] cueGrips;
-        //public Material markerMaterial;
 
         [Header("Audio")] public GameObject audioSourcePoolContainer;
         public AudioSource cueTipSrc;
@@ -267,9 +249,7 @@ namespace VRCBilliards
         public AudioClip[] hitsSfx;
         public AudioClip newTurnSfx;
         public AudioClip pointMadeSfx;
-        public AudioClip buttonSfx;
         public AudioClip spinSfx;
-        public AudioClip spinStopSfx;
         public AudioClip hitBallSfx;
 
         [Header("Reflection Probes")] public ReflectionProbe tableReflection;
@@ -281,7 +261,7 @@ namespace VRCBilliards
         private PoolMenu poolMenu;
 
         /// <summary>
-        /// True whilst balls are rolling
+        /// Set to true when the cue hits the cue ball. Set to false once the sim hits equilibrium.
         /// </summary>
         [UdonSynced] private bool gameIsSimulating;
 
@@ -306,20 +286,15 @@ namespace VRCBilliards
 
         [Header("Desktop Stuff")] public GameObject desktopCursorObject;
         public GameObject desktopHitPosition;
-
         public GameObject desktopBase;
-
-        //public GameObject desktopQuad;
         public GameObject[] desktopCueParents;
         public GameObject desktopOverlayPower;
 
         [Header("UI Stuff")]
-        //public Text[] lobbyNames;
         /*
          * Private variables
          */
         private AudioSource[] ballPool;
-
         private Transform[] ballPoolTransforms;
         private AudioSource mainSrc;
         private UdonBehaviour udonChips;
@@ -612,9 +587,7 @@ namespace VRCBilliards
         private bool hasPaidToSignUp;
 
         #endregion
-
-        private bool startHasConcluded;
-
+        
         public void Start()
         {
             if (transform.parent && transform.parent.parent)
@@ -737,9 +710,9 @@ namespace VRCBilliards
                 marker.SetActive(false);
             }
 
-            if (marker9ball)
+            if (marker9Ball)
             {
-                marker9ball.SetActive(false);
+                marker9Ball.SetActive(false);
             }
 
             if (shadows)
@@ -799,12 +772,9 @@ namespace VRCBilliards
             timerText = poolMenu.visibleTimerDuringGame;
             timerOutputFormat = poolMenu.timerOutputFormat;
             timerCountdown = poolMenu.timerCountdown;
-
-            startHasConcluded = true;
-
-
         }
 
+        #region UpdateLoop
         public void Update()
         {
             if (isInDesktopTopDownView)
@@ -824,28 +794,16 @@ namespace VRCBilliards
                 }
             }
 
-            // Run sim only if things are moving
-            if (gameIsSimulating)
-            {
-                accumulation += Time.deltaTime;
-
-                if (accumulation > MAX_DELTA)
-                {
-                    accumulation = MAX_DELTA;
-                }
-
-                while (accumulation >= FIXED_TIME_STEP)
-                {
-                    AdvancePhysicsStep();
-                    accumulation -= FIXED_TIME_STEP;
-                }
-            }
-            else if (isGameInMenus)
+            if (isGameInMenus)
             {
                 return;
             }
-
-            // Everything below this line only runs when the game is active.
+            
+            // Run simulation only if things are moving
+            if (gameIsSimulating)
+            {
+                AdvancePhysicsStep();
+            }
 
             // Update rendering objects positions
             uint ballBit = 0x1u;
@@ -880,11 +838,11 @@ namespace VRCBilliards
 
                     if (IsCueContacting())
                     {
-                        markerMaterial.SetColor(uniformMarkerColour, markerNotOK);
+                        markerMaterial.SetColor(uniformMarkerColour, markerNotOk);
                     }
                     else
                     {
-                        markerMaterial.SetColor(uniformMarkerColour, markerOK);
+                        markerMaterial.SetColor(uniformMarkerColour, markerOk);
                     }
                 }
 
@@ -903,7 +861,7 @@ namespace VRCBilliards
                                                            (cueLocalForwardDirection * sweepTimeBall);
                     }
 
-                    // Hit condition is when cuetip is gone inside ball
+                    // Hit condition is when cuetip has gone inside ball
                     if ((copyOfLocalSpacePositionOfCueTip - cueballPosition).sqrMagnitude < BALL_RADIUS_SQUARED)
                     {
                         Vector3 horizontalForce =
@@ -914,7 +872,7 @@ namespace VRCBilliards
                         float vel = forceMultiplier * (horizontalForce.magnitude / Time.deltaTime);
 
                         // Clamp velocity input to 20 m/s ( moderate break speed )
-                        currentBallVelocities[0] = cueArmedShotDirection * Mathf.Min(vel, 20.0f);
+                        currentBallVelocities[0] = cueArmedShotDirection * Mathf.Min(vel, 20.0f * forceMultiplier);
 
                         // Angular velocity: L=r(normalized)×p
                         Vector3 r = (raySphereOutput - cueballPosition) * BALL_1OR;
@@ -922,6 +880,12 @@ namespace VRCBilliards
                         currentAngularVelocities[0] = Vector3.Cross(r, p) * -50.0f;
 
                         HitBallWithCue();
+
+                        // Make sure the guideline is off once the ball is hit.
+                        if (guideline)
+                        {
+                            guideline.gameObject.SetActive(false);
+                        }
                     }
                 }
                 else
@@ -987,9 +951,7 @@ namespace VRCBilliards
             {
                 tableCurrentColour = Color.Lerp(tableCurrentColour, tableSrcColour, Time.deltaTime * 3.0f);
             }
-
-            //float timePercentage;
-
+            
             if (isTimerRunning)
             {
                 remainingTime -= Time.deltaTime;
@@ -1102,29 +1064,1142 @@ namespace VRCBilliards
                 }
             }
         }
-
-        private void FixedUpdate()
+        
+        private void AdvancePhysicsStep()
         {
-            if (isGameInMenus)
+            ballsMoving = false;
+
+            uint ballBit = 0x1u;
+
+            // Cue angular velocity
+            if ((ballPocketedState & 0x1U) == 0) // If cueball is not sunk
             {
+                if (!IsCollisionWithCueBallInevitable())
+                {
+                    // Apply movement
+                    currentBallPositions[0] += currentBallVelocities[0] * Time.deltaTime;
+                }
+
+                AdvanceSimulationForBall(0);
+            }
+
+            // Run main simulation / inter-ball collision
+            for (int i = 1; i < NUMBER_OF_SIMULATED_BALLS; i++)
+            {
+                ballBit <<= 1;
+
+                if ((ballBit & ballPocketedState) == 0U) // If the ball in question is not sunk
+                {
+                    currentBallPositions[i] += currentBallVelocities[i] * Time.deltaTime;
+
+                    AdvanceSimulationForBall(i);
+                }
+            }
+
+            // Check if simulation has settled
+            if (!ballsMoving && gameIsSimulating)
+            {
+                gameIsSimulating = false;
+
+                // Make sure we only run this from the client who initiated the move
+                if (isSimulatedByUs)
+                {
+                    HandleEndOfTurn();
+                }
+
+                // Check if there was a network update on hold
+                if (isUpdateLocked)
+                {
+                    isUpdateLocked = false;
+
+                    ReadNetworkData();
+                }
+
                 return;
             }
 
-            Vector3 referencePosition = transform.position;
-
-            foreach (Rigidbody poolBall in ballRigidbodies)
+            if (isFourBall)
             {
-                if (poolBall.isKinematic || !((referencePosition.y - poolBall.position.y) < 0))
+                BounceBallOffCushionIfApplicable(0);
+                BounceBallOffCushionIfApplicable(2);
+                BounceBallOffCushionIfApplicable(3);
+                BounceBallOffCushionIfApplicable(9);
+
+                return;
+            }
+
+            ballBit = 0x1U;
+
+            // Run edge collision
+            for (int index = 0; index < NUMBER_OF_SIMULATED_BALLS; index++)
+            {
+                if ((ballBit & ballPocketedState) == 0U)
+                {
+                    float zy, zx, zk, zw, d, k, i, j, l, r;
+                    Vector3 A, N;
+
+                    A = currentBallPositions[index];
+
+                    // REGIONS
+                    /*
+                        *  QUADS:							SUBSECTION:				SUBSECTION:
+                        *    zx, zy:							zz:						zw:
+                        *
+                        *  o----o----o  +:  1			\_________/				\_________/
+                        *  | -+ | ++ |  -: -1		     |	    /		              /  /
+                        *  |----+----|					  -  |  +   |		      -     /   |
+                        *  | -- | +- |						  |	   |		          /  +  |
+                        *  o----o----o						  |      |             /       |
+                        *
+                        */
+
+                    // Setup major regions
+                    zx = Mathf.Sign(A.x);
+                    zy = Mathf.Sign(A.z);
+
+                    // within pocket regions
+                    if ((A.z * zy > (TABLE_HEIGHT - POCKET_RADIUS)) &&
+                        (A.x * zx > (TABLE_WIDTH - POCKET_RADIUS) || A.x * zx < POCKET_RADIUS))
+                    {
+                        // Subregions
+                        zw = A.z * zy > (A.x * zx) - TABLE_WIDTH + TABLE_HEIGHT ? 1.0f : -1.0f;
+
+                        // Normalization / line coefficients change depending on sub-region
+                        if (A.x * zx > TABLE_WIDTH * 0.5f)
+                        {
+                            zk = 1.0f;
+                            r = ONE_OVER_ROOT_TWO;
+                        }
+                        else
+                        {
+                            zk = -2.0f;
+                            r = ONE_OVER_ROOT_FIVE;
+                        }
+
+                        // Collider line EQ
+                        d = zx * zy * zk; // Coefficient
+                        k = (-(TABLE_WIDTH * Mathf.Max(zk, 0.0f)) + (POCKET_RADIUS * zw * Mathf.Abs(zk)) +
+                             TABLE_HEIGHT) * zy; // Konstant
+
+                        // Check if colliding
+                        l = zw * zy;
+                        if (A.z * l > ((A.x * d) + k) * l)
+                        {
+                            // Get line normal
+                            N.x = zx * zk;
+                            N.z = -zy;
+                            N.y = 0.0f;
+                            N *= zw * r;
+
+                            // New position
+                            i = ((A.x * d) + A.z - k) / (2.0f * d);
+                            j = (i * d) + k;
+
+                            currentBallPositions[index].x = i;
+                            currentBallPositions[index].z = j;
+
+                            // Reflect velocity
+                            ApplyBounceCushion(index, N);
+                        }
+                    }
+                    else // edges
+                    {
+                        if (A.x * zx > TABLE_WIDTH)
+                        {
+                            currentBallPositions[index].x = TABLE_WIDTH * zx;
+                            ApplyBounceCushion(index, Vector3.left * zx);
+                        }
+
+                        if (A.z * zy > TABLE_HEIGHT)
+                        {
+                            currentBallPositions[index].z = TABLE_HEIGHT * zy;
+                            ApplyBounceCushion(index, Vector3.back * zy);
+                        }
+                    }
+                }
+
+                ballBit <<= 1;
+            }
+
+            ballBit = 0x1U;
+
+            // Run triggers
+            for (int i = 0; i < NUMBER_OF_SIMULATED_BALLS; i++)
+            {
+                if ((ballBit & ballPocketedState) == 0U)
+                {
+                    float zz, zx;
+                    Vector3 A = currentBallPositions[i];
+
+                    // Setup major regions
+                    zx = Mathf.Sign(A.x);
+                    zz = Mathf.Sign(A.z);
+
+                    // Its in a pocket
+                    if (
+                        A.z * zz > TABLE_HEIGHT + POCKET_DEPTH ||
+                        A.z * zz > (A.x * -zx) + TABLE_WIDTH + TABLE_HEIGHT + POCKET_DEPTH
+                    )
+                    {
+                        uint total = 0U;
+
+                        // Get total for X positioning
+                        int count_extent = isNineBall ? 10 : NUMBER_OF_SIMULATED_BALLS;
+                        for (int j = 1; j < count_extent; j++)
+                        {
+                            total += (ballPocketedState >> j) & 0x1U;
+                        }
+
+                        // set this for later
+                        currentBallPositions[i].x = -0.9847f + (total * BALL_DIAMETER);
+                        currentBallPositions[i].z = 0.768f;
+
+                        // This is where we actually save the pocketed/non-pocketed state of balls.
+                        ballPocketedState ^= 1U << i;
+
+                        uint bmask = 0x1FCU <<
+                                     ((int)(Convert.ToUInt32(newIsTeam2Turn) ^ Convert.ToUInt32(isPlayer2Blue)) * 7);
+                        mainSrc.PlayOneShot(sinkSfx, 1.0f);
+
+                        // If good pocket
+                        if (((0x1U << i) & (bmask | (isOpen ? 0xFFFCU : 0x0000U) |
+                                            ((bmask & ballPocketedState) == bmask ? 0x2U : 0x0U))) > 0)
+                        {
+                            // Make a bright flash
+                            tableCurrentColour *= 1.9f;
+                        }
+                        else
+                        {
+                            tableCurrentColour = pointerColourErr;
+                        }
+
+                        // VFX ( make ball move )
+                        Rigidbody body = ballTransforms[i].GetComponent<Rigidbody>();
+                        body.isKinematic = false;
+
+                        body.velocity = baseObject.transform.rotation * new Vector3(currentBallVelocities[i].x, 0.0f,
+                            currentBallVelocities[i].z);
+                    }
+                }
+
+                ballBit <<= 1;
+            }
+        }
+
+        private void HitBallWithCue()
+        {
+            if (logger)
+            {
+                logger._Log(name, "disabling marker because the ball has been hit");
+            }
+
+            isRepositioningCueBall = false;
+
+            if (marker)
+            {
+                marker.SetActive(false);
+            }
+
+            if (devhit)
+            {
+                devhit.SetActive(false);
+            }
+
+            if (guideline)
+            {
+                guideline.gameObject.SetActive(false);
+            }
+
+            // Remove locks
+            _EndHit();
+            isPlayerAllowedToPlay = false;
+            isFoul = false; // In case did not drop foul marker
+
+            // Commit changes
+            gameIsSimulating = true;
+            oldPocketed = ballPocketedState;
+
+            // Make sure we are the network owner
+            Networking.SetOwner(localPlayer, gameObject);
+            RefreshNetworkData(newIsTeam2Turn);
+
+            isSimulatedByUs = true;
+
+            float vol = Mathf.Clamp(currentBallVelocities[0].magnitude * 0.1f, 0f, 0.6f);
+            cueTipSrc.transform.position = cueTipTransform.position;
+            cueTipSrc.PlayOneShot(hitBallSfx, vol);
+        }
+
+        /// <summary>
+        /// Is cue touching another ball?
+        /// </summary>
+        private bool IsCueContacting()
+        {
+            // 8 ball, practice, portal
+            if (gameMode != 1u)
+            {
+                // Check all
+                for (int i = 1; i < NUMBER_OF_SIMULATED_BALLS; i++)
+                {
+                    if ((currentBallPositions[0] - currentBallPositions[i]).sqrMagnitude < BALL_DSQR)
+                    {
+                        return true;
+                    }
+                }
+            }
+            else // 9 ball
+            {
+                // Only check to 9 ball
+                for (int i = 1; i <= 9; i++)
+                {
+                    if ((currentBallPositions[0] - currentBallPositions[i]).sqrMagnitude < BALL_DSQR)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+        
+        // TODO: This is a single-use function we can refactor. Note that its use is to equate a bool,
+        //       so it's more acceptable to hold on to.
+        private bool IsIntersectingWithSphere(Vector3 start, Vector3 dir, Vector3 sphere)
+        {
+            Vector3 nrm = dir.normalized;
+            Vector3 h = sphere - start;
+            float lf = Vector3.Dot(nrm, h);
+            float s = BALL_RADIUS_SQUARED - Vector3.Dot(h, h) + (lf * lf);
+
+            if (s < 0.0f)
+            {
+                return false;
+            }
+
+            s = Mathf.Sqrt(s);
+
+            if (lf < s)
+            {
+                if (lf + s >= 0)
+                {
+                    s = -s;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            raySphereOutput = start + (nrm * (lf - s));
+            return true;
+        }
+        
+        // TODO: This is a single-use function we can refactor. Note that its use is to equate a bool,
+        //       so it's more acceptable to hold on to.
+        // ( Since v0.2.0a ) Check if we can predict a collision before move update happens to improve accuracy
+        private bool IsCollisionWithCueBallInevitable()
+        {
+            // Get what will be the next position
+            Vector3 originalDelta = currentBallVelocities[0] * Time.deltaTime;
+            Vector3 norm = currentBallVelocities[0].normalized;
+
+            Vector3 h;
+            float lf, s, nmag;
+
+            // Closest found values
+            float minlf = 9999999.0f;
+            int minid = 0;
+            float mins = 0;
+
+            uint ball_bit = 0x1U;
+
+            // Loop balls look for collisions
+            for (int i = 1; i < NUMBER_OF_SIMULATED_BALLS; i++)
+            {
+                ball_bit <<= 1;
+
+                if ((ball_bit & ballPocketedState) != 0U)
                 {
                     continue;
                 }
 
-                Vector3 differenceNormalized = poolBall.position - referencePosition;
-                differenceNormalized = Vector3.Normalize(differenceNormalized) * repulsionForce;
+                h = currentBallPositions[i] - currentBallPositions[0];
+                lf = Vector3.Dot(norm, h);
+                s = BALL_DSQRPE - Vector3.Dot(h, h) + (lf * lf);
 
-                poolBall.AddForce(differenceNormalized);
+                if (s < 0.0f)
+                {
+                    continue;
+                }
+
+                if (lf < minlf)
+                {
+                    minlf = lf;
+                    minid = i;
+                    mins = s;
+                }
+            }
+
+            if (minid > 0)
+            {
+                nmag = minlf - Mathf.Sqrt(mins);
+
+                // Assign new position if got appropriate magnitude
+                if (nmag * nmag < originalDelta.sqrMagnitude)
+                {
+                    currentBallPositions[0] += norm * nmag;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+                /// <summary>
+        /// Advance simulation 1 step for ball id
+        /// </summary>
+        /// <param name="ballID"></param>
+        private void AdvanceSimulationForBall(int ballID)
+        {
+            // Since v1.5.0
+            Vector3 V = currentBallVelocities[ballID];
+            Vector3 W = currentAngularVelocities[ballID];
+
+            // Equations derived from: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.89.4627&rep=rep1&type=pdf
+            //
+            // R: Contact location with ball and floor aka: (0,-r,0)
+            // µₛ: Slipping friction coefficient
+            // µᵣ: Rolling friction coefficient
+            // i: Up vector aka: (0,1,0)
+            // g: Planet Earth's gravitation acceleration ( 9.80665 )
+            //
+            // Relative contact velocity (marlow):
+            //   c = v + R✕ω
+            //
+            // Ball is classified as 'rolling' or 'slipping'. Rolling is when the relative velocity is none and the ball is
+            // said to be in pure rolling motion
+            //
+            // When ball is classified as rolling:
+            //   Δv = -µᵣ∙g∙Δt∙(v/|v|)
+            //
+            // Angular momentum can therefore be derived as:
+            //   ωₓ = -vᵤ/R
+            //   ωᵧ =  0
+            //   ωᵤ =  vₓ/R
+            //
+            // In the slipping state:
+            //   Δω = ((-5∙µₛ∙g)/(2/R))∙Δt∙i✕(c/|c|)
+            //   Δv = -µₛ∙g∙Δt(c/|c|)
+
+            // Relative contact velocity of ball and table
+            Vector3 cv = V + Vector3.Cross(CONTACT_POINT, W);
+
+            // Rolling is achieved when cv's length is approaching 0
+            // The epsilon is quite high here because of the fairly large timestep we are working with
+            if (cv.magnitude <= 0.1f)
+            {
+                //V += -F_ROLL * GRAVITY * FIXED_TIME_STEP * V.normalized;
+                // (baked):
+                V += -0.00122583125f * V.normalized;
+
+                // Calculate rolling angular velocity
+                W.x = -V.z * BALL_1OR;
+
+                if (0.3f > Mathf.Abs(W.y))
+                {
+                    W.y = 0.0f;
+                }
+                else
+                {
+                    W.y -= Mathf.Sign(W.y) * 0.3f;
+                }
+
+                W.z = V.x * BALL_1OR;
+
+                // Stopping scenario
+                if (V.magnitude < 0.01f && W.magnitude < 0.2f)
+                {
+                    W = vectorZero;
+                    V = vectorZero;
+                }
+                else
+                {
+                    ballsMoving = true;
+                }
+            }
+            else // Slipping
+            {
+                Vector3 nv = cv.normalized;
+
+                // Angular slipping friction
+                //W += ((-5.0f * F_SLIDE * 9.8f)/(2.0f * 0.03f)) * FIXED_TIME_STEP * Vector3.Cross( Vector3.up, nv );
+                // (baked):
+                W += -2.04305208f * Vector3.Cross(Vector3.up, nv);
+                V += -F_SLIDE * 9.8f * Time.deltaTime * nv;
+
+                ballsMoving = true;
+            }
+
+            currentAngularVelocities[ballID] = W;
+            currentBallVelocities[ballID] = V;
+
+            // FSP [22/03/21]: Use the base object's rotation as a factor in the axis. This stops the balls spinning incorrectly.
+            ballTransforms[ballID].Rotate((baseObject.transform.rotation * W).normalized,
+                W.magnitude * Time.deltaTime * -Mathf.Rad2Deg, Space.World);
+
+            uint ball_bit = 0x1U << ballID;
+
+            // ball/ball collisions
+            for (int i = ballID + 1; i < NUMBER_OF_SIMULATED_BALLS; i++)
+            {
+                ball_bit <<= 1;
+
+                // If the ball has been pocketed it cannot be collided with.
+                if ((ball_bit & ballPocketedState) != 0U)
+                {
+                    continue;
+                }
+
+                Vector3 delta = currentBallPositions[i] - currentBallPositions[ballID];
+                float dist = delta.magnitude;
+
+                if (dist < BALL_DIAMETER)
+                {
+                    Vector3 normal = delta / dist;
+
+                    Vector3 velocityDelta = currentBallVelocities[ballID] - currentBallVelocities[i];
+
+                    float dot = Vector3.Dot(velocityDelta, normal);
+
+                    if (dot > 0.0f)
+                    {
+                        Vector3 reflection = normal * dot;
+                        currentBallVelocities[ballID] -= reflection;
+                        currentBallVelocities[i] += reflection;
+
+                        // Prevent sound spam if it happens
+                        if (currentBallVelocities[ballID].sqrMagnitude > 0 && currentBallVelocities[i].sqrMagnitude > 0)
+                        {
+                            int clip = UnityEngine.Random.Range(0, hitsSfx.Length - 1);
+                            float vol = Mathf.Clamp01(currentBallVelocities[ballID].magnitude * reflection.magnitude);
+                            ballPoolTransforms[ballID].position = ballTransforms[ballID].position;
+                            ballPool[ballID].PlayOneShot(hitsSfx[clip], vol);
+                        }
+
+                        // First hit detected
+                        if (ballID == 0)
+                        {
+                            if (isFourBall)
+                            {
+                                if (isKorean) // KR 사구 ( Sagu )
+                                {
+                                    if (i == 9)
+                                    {
+                                        if (!isMadeFoul)
+                                        {
+                                            isMadeFoul = true;
+                                            scores[Convert.ToUInt32(newIsTeam2Turn)]--;
+
+                                            if (scores[Convert.ToUInt32(newIsTeam2Turn)] < 0)
+                                            {
+                                                scores[Convert.ToUInt32(newIsTeam2Turn)] = 0;
+                                            }
+
+                                            SpawnMinusOne(ballTransforms[i]);
+                                        }
+                                    }
+                                    else if (isFirstHit == 0)
+                                    {
+                                        isFirstHit = i;
+                                    }
+                                    else if (i != isFirstHit)
+                                    {
+                                        if (isSecondHit == 0)
+                                        {
+                                            isSecondHit = i;
+                                            OnLocalCaromPoint(ballTransforms[i]);
+                                        }
+                                    }
+                                }
+                                else // JP 四つ玉 ( Yotsudama )
+                                {
+                                    if (isFirstHit == 0)
+                                    {
+                                        isFirstHit = i;
+                                    }
+                                    else if (isSecondHit == 0)
+                                    {
+                                        if (i != isFirstHit)
+                                        {
+                                            isSecondHit = i;
+                                            OnLocalCaromPoint(ballTransforms[i]);
+                                        }
+                                    }
+                                    else if (isThirdHit == 0)
+                                    {
+                                        if (i != isFirstHit && i != isSecondHit)
+                                        {
+                                            isThirdHit = i;
+                                            OnLocalCaromPoint(ballTransforms[i]);
+                                        }
+                                    }
+                                }
+                            }
+                            else if (isFirstHit == 0)
+                            {
+                                isFirstHit = i;
+                            }
+                        }
+                    }
+                }
             }
         }
+                
+        private void HandleEndOfTurn()
+        {
+            isSimulatedByUs = false;
+
+            // We are updating the game state so make sure we are network owner
+            Networking.SetOwner(Networking.LocalPlayer, gameObject);
+
+            // Owner state checks
+
+            /*
+            FSP note: For clarity, I've moved Harry's bitmasking here to use binary notation (0b) rather than hex (0x).
+
+            Some notes on what's going on below:
+            &= is bitwise AND. 0b0101 &= 0b0100 is 0b0100
+            |= is bitwise OR. 0b0101 |= 0b0100 is 0b0101
+            << is a bitshift leftwards.
+            */
+
+            uint bmask = 0b1111111111111100;
+            uint emask = 0b0000000000000000;
+
+            // Quash down the mask if table has closed
+            if (!isOpen)
+            {
+                bmask &= 0x1FCu << ((int)(Convert.ToUInt32(isPlayer2Blue) ^ Convert.ToUInt32(newIsTeam2Turn)) * 7);
+                emask = 0x1FCu << ((int)(Convert.ToUInt32(isPlayer2Blue) ^ Convert.ToUInt32(!newIsTeam2Turn)) * 7);
+            }
+
+            // Common informations
+            bool isSetComplete = (ballPocketedState & bmask) == bmask;
+
+            bool isScratch = (ballPocketedState & 0x1U) == 0x1U;
+
+            // Append black to mask if set is done
+            if (isSetComplete)
+            {
+                bmask |= 0x2U;
+            }
+
+            // These are the resultant states we can set for each mode
+            // then the rest is taken care of
+            bool
+                isObjectiveSink,
+                isOpponentSink,
+                winCondition,
+                foulCondition,
+                deferLossCondition
+                ;
+
+            if (is8Ball) // Standard 8 ball
+            {
+                isObjectiveSink = (ballPocketedState & bmask) > (oldPocketed & bmask);
+                isOpponentSink = (ballPocketedState & emask) > (oldPocketed & emask);
+                // Calculate if objective was not hit first
+                bool isWrongHit = ((0x1U << isFirstHit) & bmask) == 0;
+                bool is8Sink = (ballPocketedState & 0x2U) == 0x2U;
+                winCondition = isSetComplete && is8Sink;
+                foulCondition = isScratch || isWrongHit;
+                deferLossCondition = is8Sink;
+            }
+            else if (isNineBall) // 9 ball
+            {
+                // Rules are from: https://www.youtube.com/watch?v=U0SbHOXCtFw
+
+                // Rule #1: Cueball must strike the lowest number ball, first
+                bool isWrongHit = GetLowestNumberedBall(oldPocketed) != isFirstHit;
+
+                // Rule #2: Pocketing cueball, is a foul
+
+                // Win condition: Pocket 9 ball ( at anytime )
+                winCondition = (ballPocketedState & 0x200u) == 0x200u;
+
+                // this video is hard to follow so im just gonna guess this is right
+                isObjectiveSink = (ballPocketedState & 0x3FEu) > (oldPocketed & 0x3FEu);
+
+                isOpponentSink = false;
+                deferLossCondition = false;
+
+                foulCondition = isWrongHit || isScratch;
+
+                // TODO: Implement rail contact requirement
+            }
+            else if (isFourBall) // 4 ball
+            {
+                isObjectiveSink = isMadePoint;
+                isOpponentSink = isMadeFoul;
+                foulCondition = false;
+                deferLossCondition = false;
+
+                winCondition = scores[Convert.ToInt32(newIsTeam2Turn)] >= 10;
+            }
+            else // Unkown mode
+            {
+                isObjectiveSink = true;
+                isOpponentSink = false;
+                winCondition = false;
+                foulCondition = false;
+                deferLossCondition = false;
+
+                if ((ballPocketedState & 0x1u) == 0x1u)
+                {
+                    isFoul = true;
+                    OnRemoteTurnChange();
+                }
+            }
+
+            if (winCondition)
+            {
+                if (foulCondition)
+                {
+                    // Loss
+                    OnTurnOverGameWon(!newIsTeam2Turn);
+                }
+                else
+                {
+                    // Win
+                    OnTurnOverGameWon(newIsTeam2Turn);
+                }
+            }
+            else if (deferLossCondition)
+            {
+                // Loss
+                OnTurnOverGameWon(!newIsTeam2Turn);
+            }
+            else if (foulCondition)
+            {
+                // Foul
+                OnTurnOverFoul();
+            }
+            else if (isObjectiveSink && !isOpponentSink)
+            {
+                // Continue
+                // Close table if it was open ( 8 ball specific )
+                if (is8Ball && isOpen)
+                {
+                    uint sunkOranges = 0;
+                    uint sunkBlues = 0;
+                    uint pmask = ballPocketedState >> 2;
+
+                    for (int i = 0; i < 7; i++)
+                    {
+                        if ((pmask & 0x1u) == 0x1u)
+                        {
+                            sunkBlues++;
+                        }
+
+                        pmask >>= 1;
+                    }
+
+                    for (int i = 0; i < 7; i++)
+                    {
+                        if ((pmask & 0x1u) == 0x1u)
+                        {
+                            sunkOranges++;
+                        }
+
+                        pmask >>= 1;
+                    }
+
+                    if (sunkBlues != sunkOranges)
+                    {
+                        isPlayer2Blue = (sunkBlues > sunkOranges) ? newIsTeam2Turn : !newIsTeam2Turn;
+
+                        isOpen = false;
+                        ApplyTableColour(newIsTeam2Turn);
+                    }
+                }
+
+                // Keep playing
+                isPlayerAllowedToPlay = true;
+
+                RefreshNetworkData(newIsTeam2Turn);
+            }
+            else
+            {
+                // Pass
+                isPlayerAllowedToPlay = true;
+
+                if (isFourBall)
+                {
+                    Vector3 temp = currentBallPositions[0];
+                    currentBallPositions[0] = currentBallPositions[9];
+                    currentBallPositions[9] = temp;
+                }
+
+                RefreshNetworkData(!newIsTeam2Turn);
+            }
+        }
+
+        /// <summary>
+        /// Decode networking string
+        /// </summary>
+        private void ReadNetworkData()
+        {
+            if (logger)
+            {
+                logger._Log(name, "ReadNetworkData");
+            }
+
+            if (marker)
+            {
+                marker.SetActive(false);
+            }
+
+            // Events ==========================================================================================================
+
+            if (gameID > oldGameID && !isGameInMenus)
+            {
+                OnRemoteNewGame();
+
+                if (((localPlayerID >= 0) && (playerIsTeam2 == newIsTeam2Turn)) || isGameModePractice)
+                {
+                    if (logger)
+                    {
+                        logger._Log(name, "enabling marker because it is the start of the game and we are breaking");
+                    }
+
+                    isRepositioningCueBall = true;
+                    repoMaxX = -SPOT_POSITION_X;
+                    ballRigidbodies[0].isKinematic = true;
+
+                    if (marker)
+                    {
+                        markerTransform.localPosition = currentBallPositions[0];
+                        if (!isFourBall)
+                        {
+                            marker.SetActive(true);
+                        }
+
+                        ((VRC_Pickup)marker.gameObject.GetComponent(typeof(VRC_Pickup))).pickupable = true;
+                    }
+                }
+                else
+                {
+                    markerTransform.localPosition = currentBallPositions[0];
+
+                    if (!isFourBall)
+                    {
+                        marker.SetActive(true);
+                    }
+
+                    ((VRC_Pickup)marker.gameObject.GetComponent(typeof(VRC_Pickup))).pickupable = false;
+                }
+            }
+
+            if (newIsTeam2Turn != oldIsTeam2Turn)
+            {
+                OnRemoteTurnChange();
+            }
+
+            oldIsTeam2Turn = newIsTeam2Turn;
+
+            if (oldOpen && !isOpen)
+            {
+                ApplyTableColour(newIsTeam2Turn);
+            }
+
+            if (!oldIsGameInMenus && isGameInMenus)
+            {
+                OnRemoteGameOver();
+            }
+
+            CopyGameStateToOldState();
+
+            if (isTableLocked)
+            {
+                poolMenu._EnableUnlockTableButton();
+                ResetScores();
+            }
+            else if (!isGameInMenus)
+            {
+                poolMenu._EnableResetButton();
+                UpdateScores();
+            }
+            else
+            {
+                poolMenu._EnableMainMenu();
+                ResetScores();
+            }
+
+            poolMenu._UpdateMainMenuView(
+                isTeams,
+                newIsTeam2Turn,
+                (int)gameMode,
+                //colorBalls,
+                isKorean,
+                (int)timerType,
+                player1ID,
+                player2ID,
+                player3ID,
+                player4ID,
+                guideLineEnabled
+            );
+
+            if (isGameInMenus)
+            {
+                if (lastTimerType != timerType)
+                {
+                    mainSrc.PlayOneShot(spinSfx);
+                    lastTimerType = timerType;
+                }
+
+                int numberOfPlayers = 0;
+
+                if (!isTableLocked)
+                {
+                    if (player1ID != 0)
+                    {
+                        numberOfPlayers++;
+                    }
+
+                    if (player2ID != 0)
+                    {
+                        numberOfPlayers++;
+                    }
+
+                    if (player3ID != 0)
+                    {
+                        numberOfPlayers++;
+                    }
+
+                    if (player4ID != 0)
+                    {
+                        numberOfPlayers++;
+                    }
+                }
+
+                isGameModePractice = localPlayerID == 0 && numberOfPlayers == 1;
+
+                int playerID = Networking.LocalPlayer.playerId;
+                if (hasPaidToSignUp && player1ID != playerID && player2ID != playerID && player3ID != playerID &&
+                    player4ID != playerID)
+                {
+                    hasPaidToSignUp = false;
+                    PayBack(TotalPrice);
+                }
+
+                hasRunSyncOnce = true;
+
+                return;
+            }
+
+            // Effects colliders need to be turned off when not simulating
+            // to improve pickups being glitchy
+            // if (gameIsSimulating)
+            // {
+            //     if (tableCollisionParent)
+            //     {
+            //         tableCollisionParent.SetActive(true);
+            //     }
+            // }
+            // else
+            // {
+            //     if (tableCollisionParent)
+            //     {
+            //         tableCollisionParent.SetActive(false);
+            //     }
+            // }
+
+            if (isFourBall)
+            {
+                ballPocketedState = 0xFDF2u;
+            }
+
+            // Check this every read
+            // Its basically 'turn start' event
+            if (isPlayerAllowedToPlay)
+            {
+                if (((localPlayerID >= 0) && (playerIsTeam2 == newIsTeam2Turn)) || isGameModePractice)
+                {
+                    // Update for desktop
+                    isDesktopLocalTurn = true;
+
+                    // Reset hit point
+                    desktopHitCursor = vectorZero;
+                }
+                else
+                {
+                    isDesktopLocalTurn = false;
+                }
+
+                if (isNineBall)
+                {
+                    int target = GetLowestNumberedBall(ballPocketedState);
+
+                    if (marker9Ball)
+                    {
+                        marker9Ball.SetActive(true);
+                        marker9Ball.transform.localPosition = currentBallPositions[target];
+                    }
+                }
+
+                if (!tableModelHasRails || !hasRunSyncOnce)
+                {
+                    PlaceSunkBallsIntoRestingPlace();
+                }
+
+                if (timerType > 0 && !isTimerRunning)
+                {
+                    ResetTimer();
+                }
+            }
+            else
+            {
+                if (marker9Ball)
+                {
+                    marker9Ball.SetActive(false);
+                }
+
+                isTimerRunning = false;
+                isMadePoint = false;
+                isMadeFoul = false;
+                isFirstHit = 0;
+                isSecondHit = 0;
+                isThirdHit = 0;
+
+                if (devhit)
+                {
+                    devhit.SetActive(false);
+                }
+
+                if (guideline)
+                {
+                    guideline.gameObject.SetActive(false);
+                }
+            }
+
+            hasRunSyncOnce = true;
+        }
+        
+        /// <summary>
+        /// Pocketless table
+        /// </summary>
+        /// <param name="id"></param>
+        private void BounceBallOffCushionIfApplicable(int id)
+        {
+            float zz, zx;
+            Vector3 A = currentBallPositions[id];
+
+            // Setup major regions
+            zx = Mathf.Sign(A.x);
+            zz = Mathf.Sign(A.z);
+
+            if (A.x * zx > TABLE_WIDTH)
+            {
+                currentBallPositions[id].x = TABLE_WIDTH * zx;
+                ApplyBounceCushion(id, Vector3.left * zx);
+            }
+
+            if (A.z * zz > TABLE_HEIGHT)
+            {
+                currentBallPositions[id].z = TABLE_HEIGHT * zz;
+                ApplyBounceCushion(id, Vector3.back * zz);
+            }
+        }
+
+                /// <summary>
+        /// Apply cushion bounce
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="N"></param>
+        private void ApplyBounceCushion(int id, Vector3 N)
+        {
+            // Mathematical expressions derived from: https://billiards.colostate.edu/physics_articles/Mathavan_IMechE_2010.pdf
+            //
+            // (Note): subscript gamma, u, are used in replacement of Y and Z in these expressions because
+            // unicode does not have them.
+            //
+            // f = 2/7
+            // f₁ = 5/7
+            //
+            // Velocity delta:
+            //   Δvₓ = −vₓ∙( f∙sin²θ + (1+e)∙cos²θ ) − Rωᵤ∙sinθ
+            //   Δvᵧ = 0
+            //   Δvᵤ = f₁∙vᵤ + fR( ωₓ∙sinθ - ωᵧ∙cosθ ) - vᵤ
+            //
+            // Aux:
+            //   Sₓ = vₓ∙sinθ - vᵧ∙cosθ+ωᵤ
+            //   Sᵧ = 0
+            //   Sᵤ = -vᵤ - ωᵧ∙cosθ + ωₓ∙cosθ
+            //
+            //   k = (5∙Sᵤ) / ( 2∙mRA );
+            //   c = vₓ∙cosθ - vᵧ∙cosθ
+            //
+            // Angular delta:
+            //   ωₓ = k∙sinθ
+            //   ωᵧ = k∙cosθ
+            //   ωᵤ = (5/(2m))∙(-Sₓ / A + ((sinθ∙c∙(e+1)) / B)∙(cosθ - sinθ));
+            //
+            // These expressions are in the reference frame of the cushion, so V and ω inputs need to be rotated
+
+            // Reject bounce if velocity is going the same way as normal
+            // this state means we tunneled, but it happens only on the corner
+            // vertexes
+            Vector3 source_v = currentBallVelocities[id];
+            if (Vector3.Dot(source_v, N) > 0.0f)
+            {
+                return;
+            }
+
+            // Rotate V, W to be in the reference frame of cushion
+            Quaternion rq = Quaternion.AngleAxis(Mathf.Atan2(-N.z, -N.x) * Mathf.Rad2Deg, Vector3.up);
+            Quaternion rb = Quaternion.Inverse(rq);
+            Vector3 V = rq * source_v;
+            Vector3 W = rq * currentAngularVelocities[id];
+
+            Vector3 V1;
+            Vector3 W1;
+            float k, c, s_x, s_z;
+
+            //V1.x = -V.x * ((2.0f/7.0f) * SINA2 + EP1 * COSA2) - (2.0f/7.0f) * BALL_PL_X * W.z * SINA;
+            //V1.z = (5.0f/7.0f)*V.z + (2.0f/7.0f) * BALL_PL_X * (W.x * SINA - W.y * COSA) - V.z;
+            //V1.y = 0.0f;
+            // (baked):
+            V1.x = (-V.x * F) - (0.00240675711f * W.z);
+            V1.z = (0.71428571428f * V.z) + (0.00857142857f * ((W.x * SIN_A) - (W.y * COS_A))) - V.z;
+            V1.y = 0.0f;
+
+            // s_x = V.x * SINA - V.y * COSA + W.z;
+            // (baked): y component not used:
+            s_x = (V.x * SIN_A) + W.z;
+            s_z = -V.z - (W.y * COS_A) + (W.x * SIN_A);
+
+            // k = (5.0f * s_z) / ( 2 * BALL_MASS * A );
+            // (baked):
+            k = s_z * 0.71428571428f;
+
+            // c = V.x * COSA - V.y * COSA;
+            // (baked): y component not used
+            c = V.x * COS_A;
+
+            W1.x = k * SIN_A;
+
+            //W1.z = (5.0f / (2.0f * BALL_MASS)) * (-s_x / A + ((SINA * c * EP1) / B) * (COSA - SINA));
+            // (baked):
+            W1.z = 15.625f * ((-s_x * 0.04571428571f) + (c * 0.0546021744f));
+            W1.y = k * COS_A;
+
+            // Unrotate result
+            currentBallVelocities[id] += rb * V1;
+            currentAngularVelocities[id] += rb * W1;
+        }
+                
+        #endregion
+        
         public void _ReEnableShadowConstraints()
         {
             foreach (PositionConstraint con in ballShadowPosConstraints)
@@ -1235,15 +2310,15 @@ namespace VRCBilliards
         //akalink added, toggles a bool on this behavior, this behavior allows players to interact with it while true.
         private void EnableCustomBallColorSlider(bool enabledState)
         {
-            if (BallCustomColours)
+            if (ballCustomColours)
             {
-                if ((BlueTeamSliders == null) || (OrangeTeamSliders == null))
+                if ((blueTeamSliders == null) || (orangeTeamSliders == null))
                 {
                     Debug.Log("At least one of color behaviours are not assigned, did you include the color panels prefab?");
                     //leaves this message if unassignment crashes the PoolStateMananger
                 }
-                BlueTeamSliders._EnableDisable(enabledState);
-                OrangeTeamSliders._EnableDisable(enabledState);     
+                blueTeamSliders._EnableDisable(enabledState);
+                orangeTeamSliders._EnableDisable(enabledState);     
             }
         } 
         //end
@@ -1745,421 +2820,7 @@ namespace VRCBilliards
 
             OnDesktopTopDownViewExit();
         }
-
-        private void AdvancePhysicsStep()
-        {
-            ballsMoving = false;
-
-            uint ballBit = 0x1u;
-
-            // Cue angular velocity
-            if ((ballPocketedState & 0x1U) == 0) // If cueball is not sunk
-            {
-                if (!IsCollisionWithCueBallInevitable())
-                {
-                    // Apply movement
-                    currentBallPositions[0] += currentBallVelocities[0] * FIXED_TIME_STEP;
-                }
-
-                AdvanceSimulationForBall(0);
-            }
-
-            // Run main simulation / inter-ball collision
-            for (int i = 1; i < NUMBER_OF_SIMULATED_BALLS; i++)
-            {
-                ballBit <<= 1;
-
-                if ((ballBit & ballPocketedState) == 0U) // If the ball in question is not sunk
-                {
-                    currentBallPositions[i] += currentBallVelocities[i] * FIXED_TIME_STEP;
-
-                    AdvanceSimulationForBall(i);
-                }
-            }
-
-            // Check if simulation has settled
-            if (!ballsMoving && gameIsSimulating)
-            {
-                gameIsSimulating = false;
-
-                // Make sure we only run this from the client who initiated the move
-                if (isSimulatedByUs)
-                {
-                    HandleEndOfTurn();
-                }
-
-                // Check if there was a network update on hold
-                if (isUpdateLocked)
-                {
-                    isUpdateLocked = false;
-
-                    ReadNetworkData();
-                }
-
-                return;
-            }
-
-            if (isFourBall)
-            {
-                BounceBallOffCushionIfApplicable(0);
-                BounceBallOffCushionIfApplicable(2);
-                BounceBallOffCushionIfApplicable(3);
-                BounceBallOffCushionIfApplicable(9);
-
-                return;
-            }
-
-            ballBit = 0x1U;
-
-            // Run edge collision
-            for (int index = 0; index < NUMBER_OF_SIMULATED_BALLS; index++)
-            {
-                if ((ballBit & ballPocketedState) == 0U)
-                {
-                    float zy, zx, zk, zw, d, k, i, j, l, r;
-                    Vector3 A, N;
-
-                    A = currentBallPositions[index];
-
-                    // REGIONS
-                    /*
-                        *  QUADS:							SUBSECTION:				SUBSECTION:
-                        *    zx, zy:							zz:						zw:
-                        *
-                        *  o----o----o  +:  1			\_________/				\_________/
-                        *  | -+ | ++ |  -: -1		     |	    /		              /  /
-                        *  |----+----|					  -  |  +   |		      -     /   |
-                        *  | -- | +- |						  |	   |		          /  +  |
-                        *  o----o----o						  |      |             /       |
-                        *
-                        */
-
-                    // Setup major regions
-                    zx = Mathf.Sign(A.x);
-                    zy = Mathf.Sign(A.z);
-
-                    // within pocket regions
-                    if ((A.z * zy > (TABLE_HEIGHT - POCKET_RADIUS)) &&
-                        (A.x * zx > (TABLE_WIDTH - POCKET_RADIUS) || A.x * zx < POCKET_RADIUS))
-                    {
-                        // Subregions
-                        zw = A.z * zy > (A.x * zx) - TABLE_WIDTH + TABLE_HEIGHT ? 1.0f : -1.0f;
-
-                        // Normalization / line coefficients change depending on sub-region
-                        if (A.x * zx > TABLE_WIDTH * 0.5f)
-                        {
-                            zk = 1.0f;
-                            r = ONE_OVER_ROOT_TWO;
-                        }
-                        else
-                        {
-                            zk = -2.0f;
-                            r = ONE_OVER_ROOT_FIVE;
-                        }
-
-                        // Collider line EQ
-                        d = zx * zy * zk; // Coefficient
-                        k = (-(TABLE_WIDTH * Mathf.Max(zk, 0.0f)) + (POCKET_RADIUS * zw * Mathf.Abs(zk)) +
-                             TABLE_HEIGHT) * zy; // Konstant
-
-                        // Check if colliding
-                        l = zw * zy;
-                        if (A.z * l > ((A.x * d) + k) * l)
-                        {
-                            // Get line normal
-                            N.x = zx * zk;
-                            N.z = -zy;
-                            N.y = 0.0f;
-                            N *= zw * r;
-
-                            // New position
-                            i = ((A.x * d) + A.z - k) / (2.0f * d);
-                            j = (i * d) + k;
-
-                            currentBallPositions[index].x = i;
-                            currentBallPositions[index].z = j;
-
-                            // Reflect velocity
-                            ApplyBounceCushion(index, N);
-                        }
-                    }
-                    else // edges
-                    {
-                        if (A.x * zx > TABLE_WIDTH)
-                        {
-                            currentBallPositions[index].x = TABLE_WIDTH * zx;
-                            ApplyBounceCushion(index, Vector3.left * zx);
-                        }
-
-                        if (A.z * zy > TABLE_HEIGHT)
-                        {
-                            currentBallPositions[index].z = TABLE_HEIGHT * zy;
-                            ApplyBounceCushion(index, Vector3.back * zy);
-                        }
-                    }
-                }
-
-                ballBit <<= 1;
-            }
-
-            ballBit = 0x1U;
-
-            // Run triggers
-            for (int i = 0; i < NUMBER_OF_SIMULATED_BALLS; i++)
-            {
-                if ((ballBit & ballPocketedState) == 0U)
-                {
-                    float zz, zx;
-                    Vector3 A = currentBallPositions[i];
-
-                    // Setup major regions
-                    zx = Mathf.Sign(A.x);
-                    zz = Mathf.Sign(A.z);
-
-                    // Its in a pocket
-                    if (
-                        A.z * zz > TABLE_HEIGHT + POCKET_DEPTH ||
-                        A.z * zz > (A.x * -zx) + TABLE_WIDTH + TABLE_HEIGHT + POCKET_DEPTH
-                    )
-                    {
-                        uint total = 0U;
-
-                        // Get total for X positioning
-                        int count_extent = isNineBall ? 10 : NUMBER_OF_SIMULATED_BALLS;
-                        for (int j = 1; j < count_extent; j++)
-                        {
-                            total += (ballPocketedState >> j) & 0x1U;
-                        }
-
-                        // set this for later
-                        currentBallPositions[i].x = -0.9847f + (total * BALL_DIAMETER);
-                        currentBallPositions[i].z = 0.768f;
-
-                        // This is where we actually save the pocketed/non-pocketed state of balls.
-                        ballPocketedState ^= 1U << i;
-
-                        uint bmask = 0x1FCU <<
-                                     ((int)(Convert.ToUInt32(newIsTeam2Turn) ^ Convert.ToUInt32(isPlayer2Blue)) * 7);
-                        mainSrc.PlayOneShot(sinkSfx, 1.0f);
-
-                        // If good pocket
-                        if (((0x1U << i) & (bmask | (isOpen ? 0xFFFCU : 0x0000U) |
-                                            ((bmask & ballPocketedState) == bmask ? 0x2U : 0x0U))) > 0)
-                        {
-                            // Make a bright flash
-                            tableCurrentColour *= 1.9f;
-                        }
-                        else
-                        {
-                            tableCurrentColour = pointerColourErr;
-                        }
-
-                        // VFX ( make ball move )
-                        Rigidbody body = ballTransforms[i].GetComponent<Rigidbody>();
-                        body.isKinematic = false;
-
-                        body.velocity = baseObject.transform.rotation * new Vector3(
-                            Mathf.Clamp(currentBallVelocities[i].x, (pocketVelocityClamp * -1), pocketVelocityClamp),
-                            0.0f,
-                            Mathf.Clamp(currentBallVelocities[i].z, (pocketVelocityClamp * -1), pocketVelocityClamp)
-                        );
-                        // Debug.Log("Ball sunk velocity, " + body.velocity);
-                    }
-                }
-
-                ballBit <<= 1;
-            }
-        }
-
-        private void HandleEndOfTurn()
-        {
-            isSimulatedByUs = false;
-
-            // We are updating the game state so make sure we are network owner
-            Networking.SetOwner(Networking.LocalPlayer, gameObject);
-
-            // Owner state checks
-
-            /*
-            FSP note: For clarity, I've moved Harry's bitmasking here to use binary notation (0b) rather than hex (0x).
-
-            Some notes on what's going on below:
-            &= is bitwise AND. 0b0101 &= 0b0100 is 0b0100
-            |= is bitwise OR. 0b0101 |= 0b0100 is 0b0101
-            << is a bitshift leftwards.
-            */
-
-            uint bmask = 0b1111111111111100;
-            uint emask = 0b0000000000000000;
-
-            // Quash down the mask if table has closed
-            if (!isOpen)
-            {
-                bmask &= 0x1FCu << ((int)(Convert.ToUInt32(isPlayer2Blue) ^ Convert.ToUInt32(newIsTeam2Turn)) * 7);
-                emask = 0x1FCu << ((int)(Convert.ToUInt32(isPlayer2Blue) ^ Convert.ToUInt32(!newIsTeam2Turn)) * 7);
-            }
-
-            // Common informations
-            bool isSetComplete = (ballPocketedState & bmask) == bmask;
-
-            bool isScratch = (ballPocketedState & 0x1U) == 0x1U;
-
-            // Append black to mask if set is done
-            if (isSetComplete)
-            {
-                bmask |= 0x2U;
-            }
-
-            // These are the resultant states we can set for each mode
-            // then the rest is taken care of
-            bool
-                isObjectiveSink,
-                isOpponentSink,
-                winCondition,
-                foulCondition,
-                deferLossCondition
-                ;
-
-            if (is8Ball) // Standard 8 ball
-            {
-                isObjectiveSink = (ballPocketedState & bmask) > (oldPocketed & bmask);
-                isOpponentSink = (ballPocketedState & emask) > (oldPocketed & emask);
-                // Calculate if objective was not hit first
-                bool isWrongHit = ((0x1U << isFirstHit) & bmask) == 0;
-                bool is8Sink = (ballPocketedState & 0x2U) == 0x2U;
-                winCondition = isSetComplete && is8Sink;
-                foulCondition = isScratch || isWrongHit;
-                deferLossCondition = is8Sink;
-            }
-            else if (isNineBall) // 9 ball
-            {
-                // Rules are from: https://www.youtube.com/watch?v=U0SbHOXCtFw
-
-                // Rule #1: Cueball must strike the lowest number ball, first
-                bool isWrongHit = GetLowestNumberedBall(oldPocketed) != isFirstHit;
-
-                // Rule #2: Pocketing cueball, is a foul
-
-                // Win condition: Pocket 9 ball ( at anytime )
-                winCondition = (ballPocketedState & 0x200u) == 0x200u;
-
-                // this video is hard to follow so im just gonna guess this is right
-                isObjectiveSink = (ballPocketedState & 0x3FEu) > (oldPocketed & 0x3FEu);
-
-                isOpponentSink = false;
-                deferLossCondition = false;
-
-                foulCondition = isWrongHit || isScratch;
-
-                // TODO: Implement rail contact requirement
-            }
-            else if (isFourBall) // 4 ball
-            {
-                isObjectiveSink = isMadePoint;
-                isOpponentSink = isMadeFoul;
-                foulCondition = false;
-                deferLossCondition = false;
-
-                winCondition = scores[Convert.ToInt32(newIsTeam2Turn)] >= 10;
-            }
-            else // Unkown mode
-            {
-                isObjectiveSink = true;
-                isOpponentSink = false;
-                winCondition = false;
-                foulCondition = false;
-                deferLossCondition = false;
-
-                if ((ballPocketedState & 0x1u) == 0x1u)
-                {
-                    isFoul = true;
-                    OnRemoteTurnChange();
-                }
-            }
-
-            if (winCondition)
-            {
-                if (foulCondition)
-                {
-                    // Loss
-                    OnTurnOverGameWon(!newIsTeam2Turn);
-                }
-                else
-                {
-                    // Win
-                    OnTurnOverGameWon(newIsTeam2Turn);
-                }
-            }
-            else if (deferLossCondition)
-            {
-                // Loss
-                OnTurnOverGameWon(!newIsTeam2Turn);
-            }
-            else if (foulCondition)
-            {
-                // Foul
-                OnTurnOverFoul();
-            }
-            else if (isObjectiveSink && !isOpponentSink)
-            {
-                // Continue
-                // Close table if it was open ( 8 ball specific )
-                if (is8Ball && isOpen)
-                {
-                    uint sunkOranges = 0;
-                    uint sunkBlues = 0;
-                    uint pmask = ballPocketedState >> 2;
-
-                    for (int i = 0; i < 7; i++)
-                    {
-                        if ((pmask & 0x1u) == 0x1u)
-                        {
-                            sunkBlues++;
-                        }
-
-                        pmask >>= 1;
-                    }
-
-                    for (int i = 0; i < 7; i++)
-                    {
-                        if ((pmask & 0x1u) == 0x1u)
-                        {
-                            sunkOranges++;
-                        }
-
-                        pmask >>= 1;
-                    }
-
-                    if (sunkBlues != sunkOranges)
-                    {
-                        isPlayer2Blue = (sunkBlues > sunkOranges) ? newIsTeam2Turn : !newIsTeam2Turn;
-
-                        isOpen = false;
-                        ApplyTableColour(newIsTeam2Turn);
-                    }
-                }
-
-                // Keep playing
-                isPlayerAllowedToPlay = true;
-
-                RefreshNetworkData(newIsTeam2Turn);
-            }
-            else
-            {
-                // Pass
-                isPlayerAllowedToPlay = true;
-
-                if (isFourBall)
-                {
-                    Vector3 temp = currentBallPositions[0];
-                    currentBallPositions[0] = currentBallPositions[9];
-                    currentBallPositions[9] = temp;
-                }
-
-                RefreshNetworkData(!newIsTeam2Turn);
-            }
-        }
-
+        
         private void RefreshNetworkData(bool newIsTeam2Playing)
         {
             if (logger)
@@ -2173,248 +2834,7 @@ namespace VRCBilliards
             RequestSerialization();
             ReadNetworkData();
         }
-
-        /// <summary>
-        /// Decode networking string
-        /// </summary>
-        private void ReadNetworkData()
-        {
-            if (logger)
-            {
-                logger._Log(name, "ReadNetworkData");
-            }
-
-            if (marker)
-            {
-                marker.SetActive(false);
-            }
-
-            // Events ==========================================================================================================
-
-            if (gameID > oldGameID && !isGameInMenus)
-            {
-                OnRemoteNewGame();
-
-                if (((localPlayerID >= 0) && (playerIsTeam2 == newIsTeam2Turn)) || isGameModePractice)
-                {
-                    if (logger)
-                    {
-                        logger._Log(name, "enabling marker because it is the start of the game and we are breaking");
-                    }
-
-                    isRepositioningCueBall = true;
-                    repoMaxX = -SPOT_POSITION_X;
-                    ballRigidbodies[0].isKinematic = true;
-
-                    if (marker)
-                    {
-                        markerTransform.localPosition = currentBallPositions[0];
-                        if (!isFourBall)
-                        {
-                            marker.SetActive(true);
-                        }
-
-                        ((VRC_Pickup)marker.gameObject.GetComponent(typeof(VRC_Pickup))).pickupable = true;
-                    }
-                }
-                else
-                {
-                    markerTransform.localPosition = currentBallPositions[0];
-
-                    if (!isFourBall)
-                    {
-                        marker.SetActive(true);
-                    }
-
-                    ((VRC_Pickup)marker.gameObject.GetComponent(typeof(VRC_Pickup))).pickupable = false;
-                }
-            }
-
-            if (newIsTeam2Turn != oldIsTeam2Turn)
-            {
-                OnRemoteTurnChange();
-            }
-
-            oldIsTeam2Turn = newIsTeam2Turn;
-
-            if (oldOpen && !isOpen)
-            {
-                ApplyTableColour(newIsTeam2Turn);
-            }
-
-            if (!oldIsGameInMenus && isGameInMenus)
-            {
-                OnRemoteGameOver();
-            }
-
-            CopyGameStateToOldState();
-
-            if (isTableLocked)
-            {
-                poolMenu._EnableUnlockTableButton();
-                ResetScores();
-            }
-            else if (!isGameInMenus)
-            {
-                poolMenu._EnableResetButton();
-                UpdateScores();
-            }
-            else
-            {
-                poolMenu._EnableMainMenu();
-                ResetScores();
-            }
-
-            poolMenu._UpdateMainMenuView(
-                isTeams,
-                newIsTeam2Turn,
-                (int)gameMode,
-                //colorBalls,
-                isKorean,
-                (int)timerType,
-                player1ID,
-                player2ID,
-                player3ID,
-                player4ID,
-                guideLineEnabled
-            );
-
-            if (isGameInMenus)
-            {
-                if (lastTimerType != timerType)
-                {
-                    mainSrc.PlayOneShot(spinSfx);
-                    lastTimerType = timerType;
-                }
-
-                int numberOfPlayers = 0;
-
-                if (!isTableLocked)
-                {
-                    if (player1ID != 0)
-                    {
-                        numberOfPlayers++;
-                    }
-
-                    if (player2ID != 0)
-                    {
-                        numberOfPlayers++;
-                    }
-
-                    if (player3ID != 0)
-                    {
-                        numberOfPlayers++;
-                    }
-
-                    if (player4ID != 0)
-                    {
-                        numberOfPlayers++;
-                    }
-                }
-
-                isGameModePractice = localPlayerID == 0 && numberOfPlayers == 1;
-
-                int playerID = Networking.LocalPlayer.playerId;
-                if (hasPaidToSignUp && player1ID != playerID && player2ID != playerID && player3ID != playerID &&
-                    player4ID != playerID)
-                {
-                    hasPaidToSignUp = false;
-                    PayBack(TotalPrice);
-                }
-
-                hasRunSyncOnce = true;
-
-                return;
-            }
-
-            // Effects colliders need to be turned off when not simulating
-            // to improve pickups being glitchy
-            // if (gameIsSimulating)
-            // {
-            //     if (tableCollisionParent)
-            //     {
-            //         tableCollisionParent.SetActive(true);
-            //     }
-            // }
-            // else
-            // {
-            //     if (tableCollisionParent)
-            //     {
-            //         tableCollisionParent.SetActive(false);
-            //     }
-            // }
-
-            if (isFourBall)
-            {
-                ballPocketedState = 0xFDF2u;
-            }
-
-            // Check this every read
-            // Its basically 'turn start' event
-            if (isPlayerAllowedToPlay)
-            {
-                if (((localPlayerID >= 0) && (playerIsTeam2 == newIsTeam2Turn)) || isGameModePractice)
-                {
-                    // Update for desktop
-                    isDesktopLocalTurn = true;
-
-                    // Reset hit point
-                    desktopHitCursor = vectorZero;
-                }
-                else
-                {
-                    isDesktopLocalTurn = false;
-                }
-
-                if (isNineBall)
-                {
-                    int target = GetLowestNumberedBall(ballPocketedState);
-
-                    if (marker9ball)
-                    {
-                        marker9ball.SetActive(true);
-                        marker9ball.transform.localPosition = currentBallPositions[target];
-                    }
-                }
-
-                if (!tableModelHasRails || !hasRunSyncOnce)
-                {
-                    PlaceSunkBallsIntoRestingPlace();
-                }
-
-                if (timerType > 0 && !isTimerRunning)
-                {
-                    ResetTimer();
-                }
-            }
-            else
-            {
-                if (marker9ball)
-                {
-                    marker9ball.SetActive(false);
-                }
-
-                isTimerRunning = false;
-                isMadePoint = false;
-                isMadeFoul = false;
-                isFirstHit = 0;
-                isSecondHit = 0;
-                isThirdHit = 0;
-
-                if (devhit)
-                {
-                    devhit.SetActive(false);
-                }
-
-                if (guideline)
-                {
-                    guideline.gameObject.SetActive(false);
-                }
-            }
-
-            hasRunSyncOnce = true;
-        }
-
+        
         public void OnDisable()
         {
             // Disabling the table means we're in an identical state to a late-joiner - the table will have progressed
@@ -2499,14 +2919,14 @@ namespace VRCBilliards
             cueGrips[Convert.ToInt32(newIsTeam2Turn)].SetColor(uniformMarkerColour, gripColourActive);
             cueGrips[Convert.ToInt32(!newIsTeam2Turn)].SetColor(uniformMarkerColour, gripColourInactive);
             //akalink added, changes the color of the balls. Also toggles off the shader effect when in 4 and 9 ball mode.
-            if (BallCustomColours)
+            if (ballCustomColours)
             {
                 if (isFourBall || isNineBall)
                 {
                     float MaskToggle = 1; //disable
                     for (int i = 0; i < ballRenderers.Length; i++)
                     {
-                        ballRenderers[i].material.SetFloat(BallMaskToggle, MaskToggle);
+                        ballRenderers[i].material.SetFloat(ballMaskToggle, MaskToggle);
                     }
                 }
                 else
@@ -2517,13 +2937,13 @@ namespace VRCBilliards
                     {
                         if (i < 9) //9 is where it switches to stripes
                         {
-                            ballRenderers[i].material.SetFloat(BallMaskToggle, MaskToggle);
+                            ballRenderers[i].material.SetFloat(ballMaskToggle, MaskToggle);
                             ballRenderers[i].material.SetColor(uniformBallColour, tableBlue);
                             ballRenderers[i].material.SetFloat(uniformBallFloat, ShaderToggleFloat);
                         }
                         else
                         {
-                            ballRenderers[i].material.SetFloat(BallMaskToggle, MaskToggle);
+                            ballRenderers[i].material.SetFloat(ballMaskToggle, MaskToggle);
                             ballRenderers[i].material.SetColor(uniformBallColour, tableOrange);
                             ballRenderers[i].material.SetFloat(uniformBallFloat, ShaderToggleFloat);
                         }
@@ -2532,8 +2952,6 @@ namespace VRCBilliards
             }
             //end
         }
-
-
         
         private void SpawnPlusOne(Transform ball)
         {
@@ -2635,9 +3053,9 @@ namespace VRCBilliards
                 poolMenu._TeamWins(isTeam2Winner);
             }
 
-            if (marker9ball)
+            if (marker9Ball)
             {
-                marker9ball.SetActive(false);
+                marker9Ball.SetActive(false);
             }
 
             // if (tableCollisionParent)
@@ -2896,16 +3314,16 @@ namespace VRCBilliards
 
             if (isNineBall) // 9 ball specific
             {
-                if (marker9ball)
+                if (marker9Ball)
                 {
-                    marker9ball.SetActive(true);
+                    marker9Ball.SetActive(true);
                 }
             }
             else
             {
-                if (marker9ball)
+                if (marker9Ball)
                 {
-                    marker9ball.SetActive(false);
+                    marker9Ball.SetActive(false);
                 }
             }
 
@@ -3101,445 +3519,7 @@ namespace VRCBilliards
                 ball_bit <<= 1;
             }
         }
-
-        /// <summary>
-        /// Is cue touching another ball?
-        /// </summary>
-        private bool IsCueContacting()
-        {
-            // 8 ball, practice, portal
-            if (gameMode != 1u)
-            {
-                // Check all
-                for (int i = 1; i < NUMBER_OF_SIMULATED_BALLS; i++)
-                {
-                    if ((currentBallPositions[0] - currentBallPositions[i]).sqrMagnitude < BALL_DSQR)
-                    {
-                        return true;
-                    }
-                }
-            }
-            else // 9 ball
-            {
-                // Only check to 9 ball
-                for (int i = 1; i <= 9; i++)
-                {
-                    if ((currentBallPositions[0] - currentBallPositions[i]).sqrMagnitude < BALL_DSQR)
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Apply cushion bounce
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="N"></param>
-        private void ApplyBounceCushion(int id, Vector3 N)
-        {
-            // Mathematical expressions derived from: https://billiards.colostate.edu/physics_articles/Mathavan_IMechE_2010.pdf
-            //
-            // (Note): subscript gamma, u, are used in replacement of Y and Z in these expressions because
-            // unicode does not have them.
-            //
-            // f = 2/7
-            // f₁ = 5/7
-            //
-            // Velocity delta:
-            //   Δvₓ = −vₓ∙( f∙sin²θ + (1+e)∙cos²θ ) − Rωᵤ∙sinθ
-            //   Δvᵧ = 0
-            //   Δvᵤ = f₁∙vᵤ + fR( ωₓ∙sinθ - ωᵧ∙cosθ ) - vᵤ
-            //
-            // Aux:
-            //   Sₓ = vₓ∙sinθ - vᵧ∙cosθ+ωᵤ
-            //   Sᵧ = 0
-            //   Sᵤ = -vᵤ - ωᵧ∙cosθ + ωₓ∙cosθ
-            //
-            //   k = (5∙Sᵤ) / ( 2∙mRA );
-            //   c = vₓ∙cosθ - vᵧ∙cosθ
-            //
-            // Angular delta:
-            //   ωₓ = k∙sinθ
-            //   ωᵧ = k∙cosθ
-            //   ωᵤ = (5/(2m))∙(-Sₓ / A + ((sinθ∙c∙(e+1)) / B)∙(cosθ - sinθ));
-            //
-            // These expressions are in the reference frame of the cushion, so V and ω inputs need to be rotated
-
-            // Reject bounce if velocity is going the same way as normal
-            // this state means we tunneled, but it happens only on the corner
-            // vertexes
-            Vector3 source_v = currentBallVelocities[id];
-            if (Vector3.Dot(source_v, N) > 0.0f)
-            {
-                return;
-            }
-
-            // Rotate V, W to be in the reference frame of cushion
-            Quaternion rq = Quaternion.AngleAxis(Mathf.Atan2(-N.z, -N.x) * Mathf.Rad2Deg, Vector3.up);
-            Quaternion rb = Quaternion.Inverse(rq);
-            Vector3 V = rq * source_v;
-            Vector3 W = rq * currentAngularVelocities[id];
-
-            Vector3 V1;
-            Vector3 W1;
-            float k, c, s_x, s_z;
-
-            //V1.x = -V.x * ((2.0f/7.0f) * SINA2 + EP1 * COSA2) - (2.0f/7.0f) * BALL_PL_X * W.z * SINA;
-            //V1.z = (5.0f/7.0f)*V.z + (2.0f/7.0f) * BALL_PL_X * (W.x * SINA - W.y * COSA) - V.z;
-            //V1.y = 0.0f;
-            // (baked):
-            V1.x = (-V.x * F) - (0.00240675711f * W.z);
-            V1.z = (0.71428571428f * V.z) + (0.00857142857f * ((W.x * SIN_A) - (W.y * COS_A))) - V.z;
-            V1.y = 0.0f;
-
-            // s_x = V.x * SINA - V.y * COSA + W.z;
-            // (baked): y component not used:
-            s_x = (V.x * SIN_A) + W.z;
-            s_z = -V.z - (W.y * COS_A) + (W.x * SIN_A);
-
-            // k = (5.0f * s_z) / ( 2 * BALL_MASS * A );
-            // (baked):
-            k = s_z * 0.71428571428f;
-
-            // c = V.x * COSA - V.y * COSA;
-            // (baked): y component not used
-            c = V.x * COS_A;
-
-            W1.x = k * SIN_A;
-
-            //W1.z = (5.0f / (2.0f * BALL_MASS)) * (-s_x / A + ((SINA * c * EP1) / B) * (COSA - SINA));
-            // (baked):
-            W1.z = 15.625f * ((-s_x * 0.04571428571f) + (c * 0.0546021744f));
-            W1.y = k * COS_A;
-
-            // Unrotate result
-            currentBallVelocities[id] += rb * V1;
-            currentAngularVelocities[id] += rb * W1;
-        }
-
-        /// <summary>
-        /// Pocketless table
-        /// </summary>
-        /// <param name="id"></param>
-        private void BounceBallOffCushionIfApplicable(int id)
-        {
-            float zz, zx;
-            Vector3 A = currentBallPositions[id];
-
-            // Setup major regions
-            zx = Mathf.Sign(A.x);
-            zz = Mathf.Sign(A.z);
-
-            if (A.x * zx > TABLE_WIDTH)
-            {
-                currentBallPositions[id].x = TABLE_WIDTH * zx;
-                ApplyBounceCushion(id, Vector3.left * zx);
-            }
-
-            if (A.z * zz > TABLE_HEIGHT)
-            {
-                currentBallPositions[id].z = TABLE_HEIGHT * zz;
-                ApplyBounceCushion(id, Vector3.back * zz);
-            }
-        }
-
-        /// <summary>
-        /// Advance simulation 1 step for ball id
-        /// </summary>
-        /// <param name="ballID"></param>
-        private void AdvanceSimulationForBall(int ballID)
-        {
-            // Since v1.5.0
-            Vector3 V = currentBallVelocities[ballID];
-            Vector3 W = currentAngularVelocities[ballID];
-
-            // Equations derived from: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.89.4627&rep=rep1&type=pdf
-            //
-            // R: Contact location with ball and floor aka: (0,-r,0)
-            // µₛ: Slipping friction coefficient
-            // µᵣ: Rolling friction coefficient
-            // i: Up vector aka: (0,1,0)
-            // g: Planet Earth's gravitation acceleration ( 9.80665 )
-            //
-            // Relative contact velocity (marlow):
-            //   c = v + R✕ω
-            //
-            // Ball is classified as 'rolling' or 'slipping'. Rolling is when the relative velocity is none and the ball is
-            // said to be in pure rolling motion
-            //
-            // When ball is classified as rolling:
-            //   Δv = -µᵣ∙g∙Δt∙(v/|v|)
-            //
-            // Angular momentum can therefore be derived as:
-            //   ωₓ = -vᵤ/R
-            //   ωᵧ =  0
-            //   ωᵤ =  vₓ/R
-            //
-            // In the slipping state:
-            //   Δω = ((-5∙µₛ∙g)/(2/R))∙Δt∙i✕(c/|c|)
-            //   Δv = -µₛ∙g∙Δt(c/|c|)
-
-            // Relative contact velocity of ball and table
-            Vector3 cv = V + Vector3.Cross(CONTACT_POINT, W);
-
-            // Rolling is achieved when cv's length is approaching 0
-            // The epsilon is quite high here because of the fairly large timestep we are working with
-            if (cv.magnitude <= 0.1f)
-            {
-                //V += -F_ROLL * GRAVITY * FIXED_TIME_STEP * V.normalized;
-                // (baked):
-                V += -0.00122583125f * V.normalized;
-
-                // Calculate rolling angular velocity
-                W.x = -V.z * BALL_1OR;
-
-                if (0.3f > Mathf.Abs(W.y))
-                {
-                    W.y = 0.0f;
-                }
-                else
-                {
-                    W.y -= Mathf.Sign(W.y) * 0.3f;
-                }
-
-                W.z = V.x * BALL_1OR;
-
-                // Stopping scenario
-                if (V.magnitude < 0.01f && W.magnitude < 0.2f)
-                {
-                    W = vectorZero;
-                    V = vectorZero;
-                }
-                else
-                {
-                    ballsMoving = true;
-                }
-            }
-            else // Slipping
-            {
-                Vector3 nv = cv.normalized;
-
-                // Angular slipping friction
-                //W += ((-5.0f * F_SLIDE * 9.8f)/(2.0f * 0.03f)) * FIXED_TIME_STEP * Vector3.Cross( Vector3.up, nv );
-                // (baked):
-                W += -2.04305208f * Vector3.Cross(Vector3.up, nv);
-                V += -F_SLIDE * 9.8f * FIXED_TIME_STEP * nv;
-
-                ballsMoving = true;
-            }
-
-            currentAngularVelocities[ballID] = W;
-            currentBallVelocities[ballID] = V;
-
-            // FSP [22/03/21]: Use the base object's rotation as a factor in the axis. This stops the balls spinning incorrectly.
-            ballTransforms[ballID].Rotate((baseObject.transform.rotation * W).normalized,
-                W.magnitude * FIXED_TIME_STEP * -Mathf.Rad2Deg, Space.World);
-
-            uint ball_bit = 0x1U << ballID;
-
-            // ball/ball collisions
-            for (int i = ballID + 1; i < NUMBER_OF_SIMULATED_BALLS; i++)
-            {
-                ball_bit <<= 1;
-
-                // If the ball has been pocketed it cannot be collided with.
-                if ((ball_bit & ballPocketedState) != 0U)
-                {
-                    continue;
-                }
-
-                Vector3 delta = currentBallPositions[i] - currentBallPositions[ballID];
-                float dist = delta.magnitude;
-
-                if (dist < BALL_DIAMETER)
-                {
-                    Vector3 normal = delta / dist;
-
-                    Vector3 velocityDelta = currentBallVelocities[ballID] - currentBallVelocities[i];
-
-                    float dot = Vector3.Dot(velocityDelta, normal);
-
-                    if (dot > 0.0f)
-                    {
-                        Vector3 reflection = normal * dot;
-                        currentBallVelocities[ballID] -= reflection;
-                        currentBallVelocities[i] += reflection;
-
-                        // Prevent sound spam if it happens
-                        if (currentBallVelocities[ballID].sqrMagnitude > 0 && currentBallVelocities[i].sqrMagnitude > 0)
-                        {
-                            int clip = UnityEngine.Random.Range(0, hitsSfx.Length - 1);
-                            float vol = Mathf.Clamp01(currentBallVelocities[ballID].magnitude * reflection.magnitude);
-                            ballPoolTransforms[ballID].position = ballTransforms[ballID].position;
-                            ballPool[ballID].PlayOneShot(hitsSfx[clip], vol);
-                        }
-
-                        // First hit detected
-                        if (ballID == 0)
-                        {
-                            if (isFourBall)
-                            {
-                                if (isKorean) // KR 사구 ( Sagu )
-                                {
-                                    if (i == 9)
-                                    {
-                                        if (!isMadeFoul)
-                                        {
-                                            isMadeFoul = true;
-                                            scores[Convert.ToUInt32(newIsTeam2Turn)]--;
-
-                                            if (scores[Convert.ToUInt32(newIsTeam2Turn)] < 0)
-                                            {
-                                                scores[Convert.ToUInt32(newIsTeam2Turn)] = 0;
-                                            }
-
-                                            SpawnMinusOne(ballTransforms[i]);
-                                        }
-                                    }
-                                    else if (isFirstHit == 0)
-                                    {
-                                        isFirstHit = i;
-                                    }
-                                    else if (i != isFirstHit)
-                                    {
-                                        if (isSecondHit == 0)
-                                        {
-                                            isSecondHit = i;
-                                            OnLocalCaromPoint(ballTransforms[i]);
-                                        }
-                                    }
-                                }
-                                else // JP 四つ玉 ( Yotsudama )
-                                {
-                                    if (isFirstHit == 0)
-                                    {
-                                        isFirstHit = i;
-                                    }
-                                    else if (isSecondHit == 0)
-                                    {
-                                        if (i != isFirstHit)
-                                        {
-                                            isSecondHit = i;
-                                            OnLocalCaromPoint(ballTransforms[i]);
-                                        }
-                                    }
-                                    else if (isThirdHit == 0)
-                                    {
-                                        if (i != isFirstHit && i != isSecondHit)
-                                        {
-                                            isThirdHit = i;
-                                            OnLocalCaromPoint(ballTransforms[i]);
-                                        }
-                                    }
-                                }
-                            }
-                            else if (isFirstHit == 0)
-                            {
-                                isFirstHit = i;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // TODO: This is a single-use function we can refactor. Note that its use is to equate a bool,
-        //       so it's more acceptable to hold on to.
-        // ( Since v0.2.0a ) Check if we can predict a collision before move update happens to improve accuracy
-        private bool IsCollisionWithCueBallInevitable()
-        {
-            // Get what will be the next position
-            Vector3 originalDelta = currentBallVelocities[0] * FIXED_TIME_STEP;
-            Vector3 norm = currentBallVelocities[0].normalized;
-
-            Vector3 h;
-            float lf, s, nmag;
-
-            // Closest found values
-            float minlf = 9999999.0f;
-            int minid = 0;
-            float mins = 0;
-
-            uint ball_bit = 0x1U;
-
-            // Loop balls look for collisions
-            for (int i = 1; i < NUMBER_OF_SIMULATED_BALLS; i++)
-            {
-                ball_bit <<= 1;
-
-                if ((ball_bit & ballPocketedState) != 0U)
-                {
-                    continue;
-                }
-
-                h = currentBallPositions[i] - currentBallPositions[0];
-                lf = Vector3.Dot(norm, h);
-                s = BALL_DSQRPE - Vector3.Dot(h, h) + (lf * lf);
-
-                if (s < 0.0f)
-                {
-                    continue;
-                }
-
-                if (lf < minlf)
-                {
-                    minlf = lf;
-                    minid = i;
-                    mins = s;
-                }
-            }
-
-            if (minid > 0)
-            {
-                nmag = minlf - Mathf.Sqrt(mins);
-
-                // Assign new position if got appropriate magnitude
-                if (nmag * nmag < originalDelta.sqrMagnitude)
-                {
-                    currentBallPositions[0] += norm * nmag;
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        // TODO: This is a single-use function we can refactor. Note that its use is to equate a bool,
-        //       so it's more acceptable to hold on to.
-        private bool IsIntersectingWithSphere(Vector3 start, Vector3 dir, Vector3 sphere)
-        {
-            Vector3 nrm = dir.normalized;
-            Vector3 h = sphere - start;
-            float lf = Vector3.Dot(nrm, h);
-            float s = BALL_RADIUS_SQUARED - Vector3.Dot(h, h) + (lf * lf);
-
-            if (s < 0.0f)
-            {
-                return false;
-            }
-
-            s = Mathf.Sqrt(s);
-
-            if (lf < s)
-            {
-                if (lf + s >= 0)
-                {
-                    s = -s;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-
-            raySphereOutput = start + (nrm * (lf - s));
-            return true;
-        }
-
+        
         /// <summary>
         /// Find the lowest numbered ball, that isnt the cue, on the table
         /// This function finds the VISUALLY represented lowest ball,
@@ -3798,52 +3778,7 @@ namespace VRCBilliards
             desktopCursorObject.transform.localPosition = deskTopCursor;
             desktopOverlayPower.transform.localScale = new Vector3(1.0f - (shootAmt * 2.0f), 1.0f, 1.0f);
         }
-
-        private void HitBallWithCue()
-        {
-            if (logger)
-            {
-                logger._Log(name, "disabling marker because the ball hase been hit");
-            }
-
-            isRepositioningCueBall = false;
-
-            if (marker)
-            {
-                marker.SetActive(false);
-            }
-
-            if (devhit)
-            {
-                devhit.SetActive(false);
-            }
-
-            if (guideline)
-            {
-                guideline.gameObject.SetActive(false);
-            }
-
-            // Remove locks
-            _EndHit();
-            isPlayerAllowedToPlay = false;
-            isFoul = false; // In case did not drop foul marker
-
-            // Commit changes
-            gameIsSimulating = true;
-            oldPocketed = ballPocketedState;
-
-            // Make sure we definately are the network owner
-            Networking.SetOwner(localPlayer, gameObject);
-
-            RefreshNetworkData(newIsTeam2Turn);
-
-            isSimulatedByUs = true;
-
-            float vol = Mathf.Clamp(currentBallVelocities[0].magnitude * 0.1f, 0f, 0.6f);
-            cueTipSrc.transform.position = cueTipTransform.position;
-            cueTipSrc.PlayOneShot(hitBallSfx, vol);
-        }
-
+        
         private void UpdateScores()
         {
             if (logger)
