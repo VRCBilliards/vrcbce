@@ -3,23 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="4af35eb5-646f-4826-bd4b-e42878f57d11" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.VRCBilliards/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.VRCBilliards/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/VRCBilliardsCE/InternalComponents.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/VRCBilliardsCE/InternalComponents.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Scripts/ActivaterUdonEvent.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Scripts/ActivaterUdonEvent.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Scripts/CameraSizeScroller.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Scripts/CameraSizeScroller.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Scripts/ColorPicker.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Scripts/ColorPicker.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Scripts/InteractToggle.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Scripts/InteractToggle.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Scripts/Logger.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Scripts/Logger.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Scripts/PoolCue.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Scripts/PoolCue.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Scripts/PoolMenu.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Scripts/PoolMenu.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Scripts/PoolOtherHand.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Scripts/PoolOtherHand.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Scripts/PoolPositioner.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Scripts/PoolPositioner.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Scripts/PoolStateManager.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Scripts/PoolStateManager.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Materials/CueGrip.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Materials/CueGrip.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Materials/CueGripColor.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Materials/CueGripColor.mat" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Scripts/PoolStateManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Scripts/PoolStateManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Scripts/PrefabColor.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Scripts/PrefabColor.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Scripts/ShotGuideController.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Scripts/ShotGuideController.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Scripts/TriggerEventTriggerer.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Scripts/TriggerEventTriggerer.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Scripts/UIAnimationManager.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/VRCBilliardsCE/Scripts/UIAnimationManager.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/VRCBilliardsCE/VRCBCE (Esnya).prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/VRCBilliardsCE/VRCBCE (Esnya).prefab" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,11 +20,13 @@
     <setting file="file://$PROJECT_DIR$/Assets/Udon/Editor/UdonBehaviourEditor.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.postprocessing@3.1.1/PostProcessing/Runtime/Effects/SubpixelMorphologicalAntialiasing.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://C:/Program Files/Unity/Hub/Editor/2019.4.29f1/Editor/Data/Resources/PackageManager/BuiltInPackages/com.unity.2d.tilemap/Editor/GridPaintingState.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/0e7c1c9367c544fa83b5270f5a69cf11118200/73/e05a8a86/LayerMask.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.collab-proxy@1.6.0/Editor/PlasticSCM/Views/Changesets/ChangesetsListHeaderState.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.cinemachine@2.8.0/Editor/Editors/CinemachineBrainEditor.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Udon/UdonBehaviour.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://C:/Program Files/Unity/Hub/Editor/2019.4.29f1/Editor/Data/Resources/PackageManager/BuiltInPackages/com.unity.ugui/Tests/Runtime/InputField/GenericInputFieldTests.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/7ba95b659aa3463a834af5e192b3032d22200/cf/c2586540/ParticleSystem.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/FPSLimiter.cs" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="ProjectId" id="1xMx0jVwzdYElUT7sNkWtn4YXUU" />
   <component name="ProjectViewState">

@@ -1142,16 +1142,16 @@ namespace VRCBilliards
 
                     // REGIONS
                     /*
-                        *  QUADS:							SUBSECTION:				SUBSECTION:
-                        *    zx, zy:							zz:						zw:
-                        *
-                        *  o----o----o  +:  1			\_________/				\_________/
-                        *  | -+ | ++ |  -: -1		     |	    /		              /  /
-                        *  |----+----|					  -  |  +   |		      -     /   |
-                        *  | -- | +- |						  |	   |		          /  +  |
-                        *  o----o----o						  |      |             /       |
-                        *
-                        */
+                    *  QUADS:							SUBSECTION:				SUBSECTION:
+                    *    zx, zy:							zz:						zw:
+                    *
+                    *  o----o----o  +:  1			\_________/				\_________/
+                    *  | -+ | ++ |  -: -1		     |	    /		              /  /
+                    *  |----+----|					  -  |  +   |		      -     /   |
+                    *  | -- | +- |						  |	   |		          /  +  |
+                    *  o----o----o						  |      |             /       |
+                    *
+                    */
 
                     // Setup major regions
                     zx = Mathf.Sign(A.x);
@@ -1235,7 +1235,7 @@ namespace VRCBilliards
                     zx = Mathf.Sign(A.x);
                     zz = Mathf.Sign(A.z);
 
-                    // Its in a pocket
+                    // It's in a pocket
                     if (
                         A.z * zz > TABLE_HEIGHT + POCKET_DEPTH ||
                         A.z * zz > (A.x * -zx) + TABLE_WIDTH + TABLE_HEIGHT + POCKET_DEPTH
@@ -1249,10 +1249,6 @@ namespace VRCBilliards
                         {
                             total += (ballPocketedState >> j) & 0x1U;
                         }
-
-                        // set this for later
-                        currentBallPositions[i].x = -0.9847f + (total * BALL_DIAMETER);
-                        currentBallPositions[i].z = 0.768f;
 
                         // This is where we actually save the pocketed/non-pocketed state of balls.
                         ballPocketedState ^= 1U << i;
@@ -1273,12 +1269,15 @@ namespace VRCBilliards
                             tableCurrentColour = pointerColourErr;
                         }
 
-                        // VFX ( make ball move )
+                        ballTransforms[i].localPosition = new Vector3(currentBallPositions[i].x, ballTransforms[i].localPosition.y, currentBallPositions[i].z);
                         Rigidbody body = ballTransforms[i].GetComponent<Rigidbody>();
                         body.isKinematic = false;
-
-                        body.velocity = baseObject.transform.rotation * new Vector3(currentBallVelocities[i].x, 0.0f,
-                            currentBallVelocities[i].z);
+                        body.collisionDetectionMode = CollisionDetectionMode.Continuous;
+                        body.velocity = currentBallVelocities[i];
+                        
+                        // Set the sunk ball to its final resting place on non-railed table.
+                        currentBallPositions[i].x = -0.9847f + (total * BALL_DIAMETER);
+                        currentBallPositions[i].z = 0.768f;
                     }
                 }
 
@@ -3171,6 +3170,7 @@ namespace VRCBilliards
                 {
                     isRepositioningCueBall = true;
                     ballRigidbodies[0].isKinematic = true;
+                    ballRigidbodies[0].collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
                     repoMaxX = TABLE_WIDTH;
 
                     if (logger)
@@ -3509,6 +3509,7 @@ namespace VRCBilliards
             for (int i = 0; i < NUMBER_OF_SIMULATED_BALLS; i++)
             {
                 ballTransforms[i].GetComponent<Rigidbody>().isKinematic = true;
+                ballRigidbodies[i].collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
 
                 if ((ball_bit & ballPocketedState) == ball_bit)
                 {
