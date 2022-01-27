@@ -12,7 +12,7 @@ using VRCBilliards;
 namespace VRCBilliards
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
-    public class colorpicker : UdonSharpBehaviour
+    public class ColorPicker : UdonSharpBehaviour
     {
         [Header("Interface with the core code")]
         public PoolStateManager PoolTable;
