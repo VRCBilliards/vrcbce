@@ -1095,29 +1095,7 @@ namespace VRCBilliards
                 }
             }
         }
-
-        private void FixedUpdate()
-        {
-            if (isGameInMenus)
-            {
-                return;
-            }
-
-            Vector3 referencePosition = transform.position;
-
-            foreach (Rigidbody poolBall in ballRigidbodies)
-            {
-                if (poolBall.isKinematic || !((referencePosition.y - poolBall.position.y) < 0))
-                {
-                    continue;
-                }
-
-                Vector3 differenceNormalized = poolBall.position - referencePosition;
-                differenceNormalized = Vector3.Normalize(differenceNormalized) * repulsionForce;
-
-                poolBall.AddForce(differenceNormalized);
-            }
-        }
+        
         public void _ReEnableShadowConstraints()
         {
             foreach (PositionConstraint con in ballShadowPosConstraints)
@@ -1225,22 +1203,6 @@ namespace VRCBilliards
             RefreshNetworkData(false);
         }
         
-        //akalink added, toggles a bool on this behavior, this behavior allows players to interact with it while true.
-        private void EnableCustomBallColorSlider(bool enabledState)
-        {
-            if (ballCustomColours)
-            {
-                if ((blueTeamSliders == null) || (orangeTeamSliders == null))
-                {
-                    Debug.Log("At least one of color behaviours are not assigned, did you include the color panels prefab?");
-                    //leaves this message if unassignment crashes the PoolStateMananger
-                }
-                blueTeamSliders._EnableDisable(enabledState);
-                orangeTeamSliders._EnableDisable(enabledState);     
-            }
-        } 
-        //end
-
         public void _LeaveGame()
         {
             if (logger)
@@ -1276,7 +1238,23 @@ namespace VRCBilliards
             EnableCustomBallColorSlider(false);
             //end
         }
-
+        
+        //akalink added, toggles a bool on this behavior, this behavior allows players to interact with it while true.
+        private void EnableCustomBallColorSlider(bool enabledState)
+        {
+            if (ballCustomColours)
+            {
+                if ((blueTeamSliders == null) || (orangeTeamSliders == null))
+                {
+                    Debug.Log("At least one of color behaviours are not assigned, did you include the color panels prefab?");
+                    //leaves this message if unassignment crashes the PoolStateMananger
+                }
+                blueTeamSliders._EnableDisable(enabledState);
+                orangeTeamSliders._EnableDisable(enabledState);     
+            }
+        } 
+        //end
+        
         private void RemovePlayerFromGame(int playerID)
         {
             Networking.SetOwner(localPlayer, gameObject);
@@ -1454,73 +1432,6 @@ namespace VRCBilliards
             Networking.SetOwner(localPlayer, gameObject);
 
             RefreshNetworkData(false);
-            
-        }
-
-        private void Initialize9Ball()
-        {
-            //ballPocketedState = 0xFC00u;
-            ballsArePocketed = new bool[] {false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, true};
-
-            for (int i = 0, k = 0; i < 5; i++)
-            {
-                int rown = breakRows9ball[i];
-                for (int j = 0; j <= rown; j++)
-                {
-                    currentBallPositions[rackOrder9Ball[k++]] = new Vector3
-                    (
-                        SPOT_POSITION_X + (i * BALL_PL_Y) + UnityEngine.Random.Range(-RANDOMIZE_F, RANDOMIZE_F),
-                        0.0f,
-                        ((-rown + (j * 2)) * BALL_PL_X) + UnityEngine.Random.Range(-RANDOMIZE_F, RANDOMIZE_F)
-                    );
-
-                    currentBallVelocities[k] = vectorZero;
-                    currentAngularVelocities[k] = vectorZero;
-                }
-            }
-        }
-
-        private void Initialize4Ball()
-        {
-            //ballPocketedState = 0xFDF2u;
-            ballsArePocketed = new bool[] {false, true, false, false, true, true, true, true, true, false, true, true, true, true, true, true};
-            
-            currentBallPositions[0] = new Vector3(-SPOT_CAROM_X, 0.0f, 0.0f);
-            currentBallPositions[9] = new Vector3(SPOT_CAROM_X, 0.0f, 0.0f);
-            currentBallPositions[2] = new Vector3(SPOT_POSITION_X, 0.0f, 0.0f);
-            currentBallPositions[3] = new Vector3(-SPOT_POSITION_X, 0.0f, 0.0f);
-
-            currentBallVelocities[0] = vectorZero;
-            currentBallVelocities[9] = vectorZero;
-            currentBallVelocities[2] = vectorZero;
-            currentBallVelocities[3] = vectorZero;
-
-            currentAngularVelocities[0] = vectorZero;
-            currentAngularVelocities[9] = vectorZero;
-            currentAngularVelocities[2] = vectorZero;
-            currentAngularVelocities[3] = vectorZero;
-        }
-
-        private void Initialize8Ball()
-        {
-            // ballPocketedState = 0x00u; // No balls are pocketed.
-            ballsArePocketed = new bool[] {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
-
-            for (int i = 0, k = 0; i < 5; i++)
-            {
-                for (int j = 0; j <= i; j++)
-                {
-                    currentBallPositions[rackOrder8Ball[k++]] = new Vector3
-                    (
-                        SPOT_POSITION_X + (i * BALL_PL_Y) + UnityEngine.Random.Range(-RANDOMIZE_F, RANDOMIZE_F),
-                        0.0f,
-                        ((-i + (j * 2)) * BALL_PL_X) + UnityEngine.Random.Range(-RANDOMIZE_F, RANDOMIZE_F)
-                    );
-
-                    currentBallVelocities[k] = vectorZero;
-                    currentAngularVelocities[k] = vectorZero;
-                }
-            }
         }
 
         public void _Select8Ball()
@@ -1584,7 +1495,72 @@ namespace VRCBilliards
             gameMode = 2u;
             RefreshNetworkData(false);
         }
+        
+        private void Initialize9Ball()
+        {
+            //ballPocketedState = 0xFC00u;
+            ballsArePocketed = new bool[] {false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, true};
 
+            for (int i = 0, k = 0; i < 5; i++)
+            {
+                int rown = breakRows9ball[i];
+                for (int j = 0; j <= rown; j++)
+                {
+                    currentBallPositions[rackOrder9Ball[k++]] = new Vector3
+                    (
+                        SPOT_POSITION_X + (i * BALL_PL_Y) + UnityEngine.Random.Range(-RANDOMIZE_F, RANDOMIZE_F),
+                        0.0f,
+                        ((-rown + (j * 2)) * BALL_PL_X) + UnityEngine.Random.Range(-RANDOMIZE_F, RANDOMIZE_F)
+                    );
+
+                    currentBallVelocities[k] = vectorZero;
+                    currentAngularVelocities[k] = vectorZero;
+                }
+            }
+        }
+
+        private void Initialize4Ball()
+        {
+            //ballPocketedState = 0xFDF2u;
+            ballsArePocketed = new bool[] {false, true, false, false, true, true, true, true, true, false, true, true, true, true, true, true};
+            
+            currentBallPositions[0] = new Vector3(-SPOT_CAROM_X, 0.0f, 0.0f);
+            currentBallPositions[9] = new Vector3(SPOT_CAROM_X, 0.0f, 0.0f);
+            currentBallPositions[2] = new Vector3(SPOT_POSITION_X, 0.0f, 0.0f);
+            currentBallPositions[3] = new Vector3(-SPOT_POSITION_X, 0.0f, 0.0f);
+
+            currentBallVelocities[0] = vectorZero;
+            currentBallVelocities[9] = vectorZero;
+            currentBallVelocities[2] = vectorZero;
+            currentBallVelocities[3] = vectorZero;
+
+            currentAngularVelocities[0] = vectorZero;
+            currentAngularVelocities[9] = vectorZero;
+            currentAngularVelocities[2] = vectorZero;
+            currentAngularVelocities[3] = vectorZero;
+        }
+
+        private void Initialize8Ball()
+        {
+            ballsArePocketed = new bool[] {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
+
+            for (int i = 0, k = 0; i < 5; i++)
+            {
+                for (int j = 0; j <= i; j++)
+                {
+                    currentBallPositions[rackOrder8Ball[k++]] = new Vector3
+                    (
+                        SPOT_POSITION_X + (i * BALL_PL_Y) + UnityEngine.Random.Range(-RANDOMIZE_F, RANDOMIZE_F),
+                        0.0f,
+                        ((-i + (j * 2)) * BALL_PL_X) + UnityEngine.Random.Range(-RANDOMIZE_F, RANDOMIZE_F)
+                    );
+
+                    currentBallVelocities[k] = vectorZero;
+                    currentAngularVelocities[k] = vectorZero;
+                }
+            }
+        }
+        
         /// CUE ACTIONS
         /// <summary>
         /// Player is holding input trigger
@@ -1986,7 +1962,6 @@ namespace VRCBilliards
             bool deferLossCondition = false;
             bool isWrongHit = false;
             bool is8Sink = false;
-            bool isScratch = false;
             int numberOfSunkBlues = 0;
             int numberOfSunkOranges = 0;
 
@@ -2010,7 +1985,6 @@ namespace VRCBilliards
                     }
                 }
                 
-                Debug.Log("Sunk blues: " + numberOfSunkBlues + " Sunk oranges: " + numberOfSunkOranges);
                 for (int i = 0; i < NUMBER_OF_SIMULATED_BALLS; i++)
                 {
                     if (ballsArePocketed[i] != oldBallsArePocketed[i])
@@ -2018,18 +1992,15 @@ namespace VRCBilliards
                         // white ball sunk; foul
                         if (i == 0)
                         {
-                            Debug.Log("White sunk");
                             foulCondition = true;
                         }
                         // black ball sunk; game over
                         else if (i == 1)
                         {
-                            Debug.Log("8 sunk");
                             is8Sink = true;
                         }
                         else if (isOpen)
                         {
-                            Debug.Log("Table is open and a ball was sunk");
                             isCorrectBallSunk = true;
                         }
                         // blue ball sunk
@@ -2037,12 +2008,10 @@ namespace VRCBilliards
                         {
                             if (i > 1 && i < 9)
                             {
-                                Debug.Log("blue sunk correctly");
                                 isCorrectBallSunk = true;
                             }
                             else
                             {
-                                Debug.Log("blue sunk incorrectly");
                                 isOpponentColourSunk = true;
                             }
                         }
@@ -2051,12 +2020,10 @@ namespace VRCBilliards
                         {
                             if (i >= 9)
                             {
-                                Debug.Log("orange sunk correctly");
                                 isCorrectBallSunk = true;
                             }
                             else
                             {
-                                Debug.Log("orange sunk incorrectly");
                                 isOpponentColourSunk = true;
                             }
                         }
@@ -2199,6 +2166,8 @@ namespace VRCBilliards
 
                 if (isFourBall)
                 {
+                    Debug.Log("4ball: swapping position of 0 and 9th balls");
+                    
                     Vector3 temp = currentBallPositions[0];
                     currentBallPositions[0] = currentBallPositions[9];
                     currentBallPositions[9] = temp;
@@ -2427,9 +2396,6 @@ namespace VRCBilliards
                 isTimerRunning = false;
                 isMadePoint = false;
                 isMadeFoul = false;
-                firstHitBallThisTurn = 0;
-                secondBallHitThisTurn = 0;
-                thirdBallHitThisTurn = 0;
 
                 if (devhit)
                 {
@@ -2441,7 +2407,12 @@ namespace VRCBilliards
                     guideline.gameObject.SetActive(false);
                 }
             }
-
+            
+            // Start of turn so we've hit nothing
+            firstHitBallThisTurn = 0;
+            secondBallHitThisTurn = 0;
+            thirdBallHitThisTurn = 0;
+            
             hasRunSyncOnce = true;
         }
 
@@ -2456,7 +2427,7 @@ namespace VRCBilliards
         /// <summary>
         /// Updates table colour target to appropriate player colour
         /// </summary>
-        private void ApplyTableColour(bool isTeam2Turn)
+        private void ApplyTableColour(bool isTeam2Color)
         {
             if (logger)
             {
@@ -2487,7 +2458,7 @@ namespace VRCBilliards
             }
             else if (!isOpen)
             {
-                if (isTeam2Turn)
+                if (isTeam2Color)
                 {
                     if (isTeam2Blue)
                     {
@@ -2528,39 +2499,37 @@ namespace VRCBilliards
 
             cueGrips[Convert.ToInt32(this.isTeam2Turn)].SetColor(uniformMarkerColour, gripColourActive);
             cueGrips[Convert.ToInt32(!this.isTeam2Turn)].SetColor(uniformMarkerColour, gripColourInactive);
-            //akalink added, changes the color of the balls. Also toggles off the shader effect when in 4 and 9 ball mode.
-            if (ballCustomColours)
-            {
-                if (isFourBall || isNineBall)
-                {
-                    float MaskToggle = 1; //disable
-                    for (int i = 0; i < ballRenderers.Length; i++)
-                    {
-                        ballRenderers[i].material.SetFloat(ballMaskToggle, MaskToggle);
-                    }
-                }
-                else
-                {
 
-                    float MaskToggle = 0; //enable
-                    for (int i = 2; i < ballTransforms.Length; i++)
+            if (!ballCustomColours)
+            {
+                return;
+            }
+            
+            if (isFourBall || isNineBall)
+            {
+                foreach (MeshRenderer meshRenderer in ballRenderers)
+                {
+                    meshRenderer.material.SetFloat(ballMaskToggle, 1);
+                }
+            }
+            else
+            {
+                for (var i = 2; i < ballTransforms.Length; i++)
+                {
+                    if (i < 9) //9 is where it switches to stripes
                     {
-                        if (i < 9) //9 is where it switches to stripes
-                        {
-                            ballRenderers[i].material.SetFloat(ballMaskToggle, MaskToggle);
-                            ballRenderers[i].material.SetColor(uniformBallColour, tableBlue);
-                            ballRenderers[i].material.SetFloat(uniformBallFloat, ShaderToggleFloat);
-                        }
-                        else
-                        {
-                            ballRenderers[i].material.SetFloat(ballMaskToggle, MaskToggle);
-                            ballRenderers[i].material.SetColor(uniformBallColour, tableOrange);
-                            ballRenderers[i].material.SetFloat(uniformBallFloat, ShaderToggleFloat);
-                        }
+                        ballRenderers[i].material.SetFloat(ballMaskToggle, 0);
+                        ballRenderers[i].material.SetColor(uniformBallColour, tableBlue);
+                        ballRenderers[i].material.SetFloat(uniformBallFloat, ShaderToggleFloat);
+                    }
+                    else
+                    {
+                        ballRenderers[i].material.SetFloat(ballMaskToggle, 0);
+                        ballRenderers[i].material.SetColor(uniformBallColour, tableOrange);
+                        ballRenderers[i].material.SetFloat(uniformBallFloat, ShaderToggleFloat);
                     }
                 }
             }
-            //end
         }
         
         private void SpawnPlusOne(Transform ball)
@@ -3403,77 +3372,87 @@ namespace VRCBilliards
                         }
 
                         // First hit detected
-                        if (ballID == 0)
+                        if (ballID != 0)
                         {
-                            if (isFourBall)
+                            continue;
+                        }
+                        
+                        if (isFourBall)
+                        {
+                            if (isKorean)
                             {
-                                if (isKorean) // KR 사구 ( Sagu )
+                                if (i == 9)
                                 {
-                                    if (i == 9)
+                                    if (isMadeFoul)
                                     {
-                                        if (!isMadeFoul)
-                                        {
-                                            isMadeFoul = true;
-                                            scores[Convert.ToUInt32(isTeam2Turn)]--;
+                                        continue;
+                                    }
+                                        
+                                    isMadeFoul = true;
+                                    scores[Convert.ToUInt32(isTeam2Turn)]--;
 
-                                            if (scores[Convert.ToUInt32(isTeam2Turn)] < 0)
-                                            {
-                                                scores[Convert.ToUInt32(isTeam2Turn)] = 0;
-                                            }
+                                    if (scores[Convert.ToUInt32(isTeam2Turn)] < 0)
+                                    {
+                                        scores[Convert.ToUInt32(isTeam2Turn)] = 0;
+                                    }
 
-                                            SpawnMinusOne(ballTransforms[i]);
-                                        }
-                                    }
-                                    else if (firstHitBallThisTurn == 0)
-                                    {
-                                        firstHitBallThisTurn = i;
-                                    }
-                                    else if (i != firstHitBallThisTurn)
-                                    {
-                                        if (secondBallHitThisTurn == 0)
-                                        {
-                                            secondBallHitThisTurn = i;
-                                            OnLocalCaromPoint(ballTransforms[i]);
-                                        }
-                                    }
+                                    SpawnMinusOne(ballTransforms[i]);
                                 }
-                                else // JP 四つ玉 ( Yotsudama )
+                                else if (firstHitBallThisTurn == 0)
                                 {
-                                    if (firstHitBallThisTurn == 0)
+                                    firstHitBallThisTurn = i;
+                                }
+                                else if (i != firstHitBallThisTurn)
+                                {
+                                    if (secondBallHitThisTurn == 0)
                                     {
-                                        firstHitBallThisTurn = i;
-                                    }
-                                    else if (secondBallHitThisTurn == 0)
-                                    {
-                                        if (i != firstHitBallThisTurn)
-                                        {
-                                            secondBallHitThisTurn = i;
-                                            OnLocalCaromPoint(ballTransforms[i]);
-                                        }
-                                    }
-                                    else if (thirdBallHitThisTurn == 0)
-                                    {
-                                        if (i != firstHitBallThisTurn && i != secondBallHitThisTurn)
-                                        {
-                                            thirdBallHitThisTurn = i;
-                                            OnLocalCaromPoint(ballTransforms[i]);
-                                        }
+                                        secondBallHitThisTurn = i;
+                                        OnLocalCaromPoint(ballTransforms[i]);
                                     }
                                 }
                             }
-                            else if (firstHitBallThisTurn == 0)
+                            else
                             {
-                                firstHitBallThisTurn = i;
+                                if (firstHitBallThisTurn == 0)
+                                {
+                                    firstHitBallThisTurn = i;
+                                }
+                                else if (secondBallHitThisTurn == 0)
+                                {
+                                    if (i == firstHitBallThisTurn)
+                                    {
+                                        continue;
+                                    }
+                                        
+                                    secondBallHitThisTurn = i;
+                                    
+                                    Debug.Log($"Scoring a point due to hitting balls {firstHitBallThisTurn} and {secondBallHitThisTurn}");
+                                    OnLocalCaromPoint(ballTransforms[i]);
+                                }
+                                else if (thirdBallHitThisTurn == 0)
+                                {
+                                    if (i == firstHitBallThisTurn || i == secondBallHitThisTurn)
+                                    {
+                                        continue;
+                                    }
+                                        
+                                    thirdBallHitThisTurn = i;
+                                    Debug.Log($"Scoring a point due to hitting balls {firstHitBallThisTurn} and {secondBallHitThisTurn} and {thirdBallHitThisTurn}");
+                                    OnLocalCaromPoint(ballTransforms[i]);
+                                }
                             }
+                        }
+                        else if (firstHitBallThisTurn == 0)
+                        {
+                            firstHitBallThisTurn = i;
                         }
                     }
                 }
             }
         }
-
-        // TODO: This is a single-use function we can refactor. Note that its use is to equate a bool,
-        //       so it's more acceptable to hold on to.
-        // ( Since v0.2.0a ) Check if we can predict a collision before move update happens to improve accuracy
+        
+        // A correction function that tries to mitigate for discrete physics steps with a low framerate.
+        // It has limited success, but is better than nothing.
         private bool IsCollisionWithCueBallInevitable()
         {
             // Get what will be the next position
@@ -3488,13 +3467,9 @@ namespace VRCBilliards
             int minid = 0;
             float mins = 0;
 
-            uint ball_bit = 0x1U;
-
             // Loop balls look for collisions
             for (int i = 1; i < NUMBER_OF_SIMULATED_BALLS; i++)
             {
-                ball_bit <<= 1;
-
                 if (ballsArePocketed[i])
                 {
                     continue;
