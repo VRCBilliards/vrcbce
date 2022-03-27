@@ -85,7 +85,7 @@ namespace VRCBilliards
         /// <summary>
         /// ball diameter squared plus epsilon
         /// </summary>
-        private const float BALL_DSQRPE = 0.003598f;
+        private const float BALL_DIAMETER_SQUARED_PLUS_EPSILON = 0.003598f;
 
         /// <summary>
         /// Full diameter of pockets (exc ball radi)
@@ -1723,7 +1723,7 @@ namespace VRCBilliards
             // Cue angular velocity
             if (!ballsArePocketed[0]) // If cueball is not sunk
             {
-                if (!IsCollisionWithCueBallInevitable())
+                if (!WillCueBallCollide())
                 {
                     // Apply movement
                     currentBallPositions[0] += currentBallVelocities[0] * FIXED_TIME_STEP;
@@ -1778,15 +1778,18 @@ namespace VRCBilliards
             // Run edge collision
             for (int index = 0; index < NUMBER_OF_SIMULATED_BALLS; index++)
             {
-                if (!ballsArePocketed[index])
+                if (ballsArePocketed[index])
                 {
-                    float zy, zx, zk, zw, d, k, i, j, l, r;
-                    Vector3 A, N;
+                    continue;
+                }
+                
+                float signZ, signX, zk, zw, d, k, i, j, l, r;
+                Vector3 currentBallPosition, N;
 
-                    A = currentBallPositions[index];
+                currentBallPosition = currentBallPositions[index];
 
-                    // REGIONS
-                    /*
+                // REGIONS
+                /*
                     *  QUADS:							SUBSECTION:				SUBSECTION:
                     *    zx, zy:							zz:						zw:
                     *
@@ -1798,68 +1801,66 @@ namespace VRCBilliards
                     *
                     */
 
-                    // Setup major regions
-                    zx = Mathf.Sign(A.x);
-                    zy = Mathf.Sign(A.z);
+                // Setup major regions
+                signX = Mathf.Sign(currentBallPosition.x);
+                signZ = Mathf.Sign(currentBallPosition.z);
 
-                    // within pocket regions
-                    if ((A.z * zy > (TABLE_HEIGHT - POCKET_RADIUS)) &&
-                        (A.x * zx > (TABLE_WIDTH - POCKET_RADIUS) || A.x * zx < POCKET_RADIUS))
+                // within pocket regions
+                if ((currentBallPosition.z * signZ > (TABLE_HEIGHT - POCKET_RADIUS)) && (currentBallPosition.x * signX > (TABLE_WIDTH - POCKET_RADIUS) || currentBallPosition.x * signX < POCKET_RADIUS))
+                {
+                    // Subregions
+                    zw = currentBallPosition.z * signZ > (currentBallPosition.x * signX) - TABLE_WIDTH + TABLE_HEIGHT ? 1.0f : -1.0f;
+
+                    // Normalization / line coefficients change depending on sub-region
+                    if (currentBallPosition.x * signX > TABLE_WIDTH * 0.5f)
                     {
-                        // Subregions
-                        zw = A.z * zy > (A.x * zx) - TABLE_WIDTH + TABLE_HEIGHT ? 1.0f : -1.0f;
-
-                        // Normalization / line coefficients change depending on sub-region
-                        if (A.x * zx > TABLE_WIDTH * 0.5f)
-                        {
-                            zk = 1.0f;
-                            r = ONE_OVER_ROOT_TWO;
-                        }
-                        else
-                        {
-                            zk = -2.0f;
-                            r = ONE_OVER_ROOT_FIVE;
-                        }
-
-                        // Collider line EQ
-                        d = zx * zy * zk; // Coefficient
-                        k = (-(TABLE_WIDTH * Mathf.Max(zk, 0.0f)) + (POCKET_RADIUS * zw * Mathf.Abs(zk)) +
-                             TABLE_HEIGHT) * zy; // Constant
-
-                        // Check if colliding
-                        l = zw * zy;
-                        if (A.z * l > ((A.x * d) + k) * l)
-                        {
-                            // Get line normal
-                            N.x = zx * zk;
-                            N.z = -zy;
-                            N.y = 0.0f;
-                            N *= zw * r;
-
-                            // New position
-                            i = ((A.x * d) + A.z - k) / (2.0f * d);
-                            j = (i * d) + k;
-
-                            currentBallPositions[index].x = i;
-                            currentBallPositions[index].z = j;
-
-                            // Reflect velocity
-                            ApplyBounceCushion(index, N);
-                        }
+                        zk = 1.0f;
+                        r = ONE_OVER_ROOT_TWO;
                     }
-                    else // edges
+                    else
                     {
-                        if (A.x * zx > TABLE_WIDTH)
-                        {
-                            currentBallPositions[index].x = TABLE_WIDTH * zx;
-                            ApplyBounceCushion(index, Vector3.left * zx);
-                        }
+                        zk = -2.0f;
+                        r = ONE_OVER_ROOT_FIVE;
+                    }
 
-                        if (A.z * zy > TABLE_HEIGHT)
-                        {
-                            currentBallPositions[index].z = TABLE_HEIGHT * zy;
-                            ApplyBounceCushion(index, Vector3.back * zy);
-                        }
+                    // Collider line EQ
+                    d = signX * signZ * zk; // Coefficient
+                    k = (-(TABLE_WIDTH * Mathf.Max(zk, 0.0f)) + (POCKET_RADIUS * zw * Mathf.Abs(zk)) +
+                         TABLE_HEIGHT) * signZ; // Constant
+
+                    // Check if colliding
+                    l = zw * signZ;
+                    if (currentBallPosition.z * l > ((currentBallPosition.x * d) + k) * l)
+                    {
+                        // Get line normal
+                        N.x = signX * zk;
+                        N.z = -signZ;
+                        N.y = 0.0f;
+                        N *= zw * r;
+
+                        // New position
+                        i = ((currentBallPosition.x * d) + currentBallPosition.z - k) / (2.0f * d);
+                        j = (i * d) + k;
+
+                        currentBallPositions[index].x = i;
+                        currentBallPositions[index].z = j;
+
+                        // Reflect velocity
+                        ApplyBounceCushion(index, N);
+                    }
+                }
+                else // edges
+                {
+                    if (currentBallPosition.x * signX > TABLE_WIDTH)
+                    {
+                        currentBallPositions[index].x = TABLE_WIDTH * signX;
+                        ApplyBounceCushion(index, Vector3.left * signX);
+                    }
+
+                    if (currentBallPosition.z * signZ > TABLE_HEIGHT)
+                    {
+                        currentBallPositions[index].z = TABLE_HEIGHT * signZ;
+                        ApplyBounceCushion(index, Vector3.back * signZ);
                     }
                 }
             }
@@ -1992,6 +1993,10 @@ namespace VRCBilliards
                         // white ball sunk; foul
                         if (i == 0)
                         {
+                            if (logger)
+                            {
+                                logger._Log(name, "white ball sunk; foul");
+                            }
                             foulCondition = true;
                         }
                         // black ball sunk; game over
@@ -2030,12 +2035,14 @@ namespace VRCBilliards
                     }
                 }
 
+                winCondition = isBlue ? numberOfSunkBlues == 7 && is8Sink : numberOfSunkOranges == 7 && is8Sink;
+                
                 if (!isOpen)
                 {
                     // Did we hit the correct ball first?
                     if (isBlue) // if blue's turn
                     {
-                        if (firstHitBallThisTurn < 2 || firstHitBallThisTurn > 8)
+                        if (!(firstHitBallThisTurn == 1 && winCondition) && (firstHitBallThisTurn < 2 || firstHitBallThisTurn > 8))
                         {
                             isWrongHit = true;
                         }
@@ -2043,7 +2050,7 @@ namespace VRCBilliards
                     // orange's turn
                     else
                     {
-                        if (firstHitBallThisTurn < 9)
+                        if (!(firstHitBallThisTurn == 1 && winCondition) && firstHitBallThisTurn < 9)
                         {
                             isWrongHit = true;
                         }
@@ -2052,10 +2059,23 @@ namespace VRCBilliards
 
                 if (!foulCondition)
                 {
+                    if (isWrongHit)
+                    {
+                        if (logger)
+                        {
+                            logger._Log(name, "foul, wrong ball hit");
+                        }
+                    } else if (firstHitBallThisTurn == 0)
+                    {
+                        if (logger)
+                        {
+                            logger._Log(name, "foul, no ball hit");
+                        }
+                    }
+                    
                     foulCondition = isWrongHit || firstHitBallThisTurn == 0;
                 }
                 
-                winCondition = isBlue ? numberOfSunkBlues == 7 && is8Sink : numberOfSunkOranges == 7 && is8Sink;
                 deferLossCondition = is8Sink;
             }
             else if (isNineBall) // 9 ball
@@ -2120,17 +2140,30 @@ namespace VRCBilliards
             {
                 if (foulCondition)
                 {
+                    if (logger)
+                    {
+                        logger._Log(name, "Game is over, but a foul means the other team won");
+                    }
                     // Loss
                     OnTurnOverGameWon(!isTeam2Turn);
                 }
                 else
                 {
+                    if (logger)
+                    {
+                        logger._Log(name, "Game is over, the currently-playing team won");
+                    }
                     // Win
                     OnTurnOverGameWon(isTeam2Turn);
                 }
             }
             else if (deferLossCondition)
             {
+                if (logger)
+                {
+                    logger._Log(name, "Game is over via a foul, other team won");
+                }
+                
                 // Loss
                 OnTurnOverGameWon(!isTeam2Turn);
             }
@@ -3246,7 +3279,6 @@ namespace VRCBilliards
         /// <param name="ballID"></param>
         private void AdvanceSimulationForBall(int ballID)
         {
-            // Since v1.5.0
             Vector3 V = currentBallVelocities[ballID];
             Vector3 W = currentAngularVelocities[ballID];
 
@@ -3331,14 +3363,10 @@ namespace VRCBilliards
             // FSP [22/03/21]: Use the base object's rotation as a factor in the axis. This stops the balls spinning incorrectly.
             ballTransforms[ballID].Rotate((baseObject.transform.rotation * W).normalized,
                 W.magnitude * FIXED_TIME_STEP * -Mathf.Rad2Deg, Space.World);
-
-            uint ball_bit = 0x1U << ballID;
-
+            
             // ball/ball collisions
             for (int i = ballID + 1; i < NUMBER_OF_SIMULATED_BALLS; i++)
             {
-                ball_bit <<= 1;
-
                 // If the ball has been pocketed it cannot be collided with.
                 if (ballsArePocketed[i])
                 {
@@ -3347,105 +3375,106 @@ namespace VRCBilliards
 
                 Vector3 delta = currentBallPositions[i] - currentBallPositions[ballID];
                 float dist = delta.magnitude;
-
-                if (dist < BALL_DIAMETER)
+                
+                if (dist >= BALL_DIAMETER)
                 {
-                    Vector3 normal = delta / dist;
+                    continue;
+                }
+                
+                Vector3 normal = delta / dist;
 
-                    Vector3 velocityDelta = currentBallVelocities[ballID] - currentBallVelocities[i];
+                Vector3 velocityDelta = currentBallVelocities[ballID] - currentBallVelocities[i];
 
-                    float dot = Vector3.Dot(velocityDelta, normal);
+                float dot = Vector3.Dot(velocityDelta, normal);
 
-                    if (dot > 0.0f)
+                if (dot > 0.0f)
+                {
+                    Vector3 reflection = normal * dot;
+                    currentBallVelocities[ballID] -= reflection;
+                    currentBallVelocities[i] += reflection;
+
+                    // Prevent sound spam if it happens
+                    if (currentBallVelocities[ballID].sqrMagnitude > 0 && currentBallVelocities[i].sqrMagnitude > 0)
                     {
-                        Vector3 reflection = normal * dot;
-                        currentBallVelocities[ballID] -= reflection;
-                        currentBallVelocities[i] += reflection;
+                        int clip = UnityEngine.Random.Range(0, hitsSfx.Length - 1);
+                        float vol = Mathf.Clamp01(currentBallVelocities[ballID].magnitude * reflection.magnitude);
+                        ballPoolTransforms[ballID].position = ballTransforms[ballID].position;
+                        ballPool[ballID].PlayOneShot(hitsSfx[clip], vol);
+                    }
 
-                        // Prevent sound spam if it happens
-                        if (currentBallVelocities[ballID].sqrMagnitude > 0 && currentBallVelocities[i].sqrMagnitude > 0)
-                        {
-                            int clip = UnityEngine.Random.Range(0, hitsSfx.Length - 1);
-                            float vol = Mathf.Clamp01(currentBallVelocities[ballID].magnitude * reflection.magnitude);
-                            ballPoolTransforms[ballID].position = ballTransforms[ballID].position;
-                            ballPool[ballID].PlayOneShot(hitsSfx[clip], vol);
-                        }
-
-                        // First hit detected
-                        if (ballID != 0)
-                        {
-                            continue;
-                        }
+                    if (ballID != 0)
+                    {
+                        continue;
+                    }
                         
-                        if (isFourBall)
+                    if (isFourBall)
+                    {
+                        if (isKorean)
                         {
-                            if (isKorean)
+                            if (i == 9)
                             {
-                                if (i == 9)
+                                if (isMadeFoul)
                                 {
-                                    if (isMadeFoul)
-                                    {
-                                        continue;
-                                    }
+                                    continue;
+                                }
                                         
-                                    isMadeFoul = true;
-                                    scores[Convert.ToUInt32(isTeam2Turn)]--;
+                                isMadeFoul = true;
+                                scores[Convert.ToUInt32(isTeam2Turn)]--;
 
-                                    if (scores[Convert.ToUInt32(isTeam2Turn)] < 0)
-                                    {
-                                        scores[Convert.ToUInt32(isTeam2Turn)] = 0;
-                                    }
+                                if (scores[Convert.ToUInt32(isTeam2Turn)] < 0)
+                                {
+                                    scores[Convert.ToUInt32(isTeam2Turn)] = 0;
+                                }
 
-                                    SpawnMinusOne(ballTransforms[i]);
-                                }
-                                else if (firstHitBallThisTurn == 0)
-                                {
-                                    firstHitBallThisTurn = i;
-                                }
-                                else if (i != firstHitBallThisTurn)
-                                {
-                                    if (secondBallHitThisTurn == 0)
-                                    {
-                                        secondBallHitThisTurn = i;
-                                        OnLocalCaromPoint(ballTransforms[i]);
-                                    }
-                                }
+                                SpawnMinusOne(ballTransforms[i]);
                             }
-                            else
+                            else if (firstHitBallThisTurn == 0)
                             {
-                                if (firstHitBallThisTurn == 0)
+                                firstHitBallThisTurn = i;
+                            }
+                            else if (i != firstHitBallThisTurn)
+                            {
+                                if (secondBallHitThisTurn == 0)
                                 {
-                                    firstHitBallThisTurn = i;
-                                }
-                                else if (secondBallHitThisTurn == 0)
-                                {
-                                    if (i == firstHitBallThisTurn)
-                                    {
-                                        continue;
-                                    }
-                                        
                                     secondBallHitThisTurn = i;
-                                    
-                                    Debug.Log($"Scoring a point due to hitting balls {firstHitBallThisTurn} and {secondBallHitThisTurn}");
-                                    OnLocalCaromPoint(ballTransforms[i]);
-                                }
-                                else if (thirdBallHitThisTurn == 0)
-                                {
-                                    if (i == firstHitBallThisTurn || i == secondBallHitThisTurn)
-                                    {
-                                        continue;
-                                    }
-                                        
-                                    thirdBallHitThisTurn = i;
-                                    Debug.Log($"Scoring a point due to hitting balls {firstHitBallThisTurn} and {secondBallHitThisTurn} and {thirdBallHitThisTurn}");
                                     OnLocalCaromPoint(ballTransforms[i]);
                                 }
                             }
                         }
-                        else if (firstHitBallThisTurn == 0)
+                        else
                         {
-                            firstHitBallThisTurn = i;
+                            if (firstHitBallThisTurn == 0)
+                            {
+                                firstHitBallThisTurn = i;
+                            }
+                            else if (secondBallHitThisTurn == 0)
+                            {
+                                if (i == firstHitBallThisTurn)
+                                {
+                                    continue;
+                                }
+                                        
+                                secondBallHitThisTurn = i;
+                                    
+                                Debug.Log($"Scoring a point due to hitting balls {firstHitBallThisTurn} and {secondBallHitThisTurn}");
+                                OnLocalCaromPoint(ballTransforms[i]);
+                            }
+                            else if (thirdBallHitThisTurn == 0)
+                            {
+                                if (i == firstHitBallThisTurn || i == secondBallHitThisTurn)
+                                {
+                                    continue;
+                                }
+                                        
+                                thirdBallHitThisTurn = i;
+                                Debug.Log($"Scoring a point due to hitting balls {firstHitBallThisTurn} and {secondBallHitThisTurn} and {thirdBallHitThisTurn}");
+                                OnLocalCaromPoint(ballTransforms[i]);
+                            }
                         }
+                    }
+                    else if (firstHitBallThisTurn == 0)
+                    {
+                        firstHitBallThisTurn = i;
                     }
                 }
             }
@@ -3453,18 +3482,18 @@ namespace VRCBilliards
         
         // A correction function that tries to mitigate for discrete physics steps with a low framerate.
         // It has limited success, but is better than nothing.
-        private bool IsCollisionWithCueBallInevitable()
+        private bool WillCueBallCollide()
         {
             // Get what will be the next position
             Vector3 originalDelta = currentBallVelocities[0] * FIXED_TIME_STEP;
             Vector3 norm = currentBallVelocities[0].normalized;
 
-            Vector3 h;
-            float lf, s, nmag;
+            Vector3 ballDelta;
+            float collisionDistance, s, nmag;
 
             // Closest found values
-            float minlf = 9999999.0f;
-            int minid = 0;
+            float minCollisionDistance = 9999999.0f;
+            bool collided = false;
             float mins = 0;
 
             // Loop balls look for collisions
@@ -3475,26 +3504,29 @@ namespace VRCBilliards
                     continue;
                 }
 
-                h = currentBallPositions[i] - currentBallPositions[0];
-                lf = Vector3.Dot(norm, h);
-                s = BALL_DSQRPE - Vector3.Dot(h, h) + (lf * lf);
+                ballDelta = currentBallPositions[i] - currentBallPositions[0];
+                collisionDistance = Vector3.Dot(norm, ballDelta);
+                s = BALL_DIAMETER_SQUARED_PLUS_EPSILON - Vector3.Dot(ballDelta, ballDelta) + (collisionDistance * collisionDistance);
 
                 if (s < 0.0f)
                 {
                     continue;
                 }
 
-                if (lf < minlf)
+                if (collisionDistance >= minCollisionDistance)
                 {
-                    minlf = lf;
-                    minid = i;
-                    mins = s;
+                    continue;
                 }
+                
+                minCollisionDistance = collisionDistance;
+                mins = s;
+
+                collided = true;
             }
 
-            if (minid > 0)
+            if (collided)
             {
-                nmag = minlf - Mathf.Sqrt(mins);
+                nmag = minCollisionDistance - Mathf.Sqrt(mins);
 
                 // Assign new position if got appropriate magnitude
                 if (nmag * nmag < originalDelta.sqrMagnitude)
@@ -3824,7 +3856,6 @@ namespace VRCBilliards
             // Commit changes
             gameIsSimulating = true;
             
-            Debug.Log("committing the current ball sunk state to cache");
             for (int i = 0; i < NUMBER_OF_SIMULATED_BALLS; i++)
             {
                 oldBallsArePocketed[i] = ballsArePocketed[i];
