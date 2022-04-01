@@ -2,6 +2,8 @@
 #ifndef FILAMENT_SHADING_STANDARD_INCLUDED
 #define FILAMENT_SHADING_STANDARD_INCLUDED
 
+#include "FilamentBRDF.cginc"
+
 #if defined(MATERIAL_HAS_SHEEN_COLOR)
 float3 sheenLobe(const PixelParams pixel, float NoV, float NoL, float NoH) {
     float D = distributionCloth(pixel.sheenRoughness, NoH);

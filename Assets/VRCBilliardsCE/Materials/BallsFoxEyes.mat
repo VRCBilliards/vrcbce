@@ -28,7 +28,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DFG:
-        m_Texture: {fileID: 2800000, guid: 15666b1e4a43bd44ab4d0fde9f680eb1, type: 3}
+        m_Texture: {fileID: 2800000, guid: b6b1f1fa6be1ce54f8bcd5428c160a28, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
@@ -99,6 +99,18 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _RNM0:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _RNM1:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _RNM2:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _SpecularPrimary:
         m_Texture: {fileID: 2800000, guid: 0bf1dc4cbb9677d4d999d5450fd9004b, type: 3}
         m_Scale: {x: 1, y: 1}
@@ -106,9 +118,12 @@ Material:
     m_Floats:
     - _AudioLinkFurInfluence: 0
     - _AudioLinkInfluence: 0
+    - _Bakery: 0
     - _Brightness: 4.18
     - _BrightnessPrimary: -0.8
     - _BumpScale: 1
+    - _BumpShadowHardness: 50
+    - _BumpShadowHeightScale: 0.2
     - _Color: 33
     - _CullMode: 2
     - _Cutoff: 0.5
@@ -144,10 +159,14 @@ Material:
     - _HueShift: 107
     - _Invert: 0.022
     - _InvertPrimary: -5
+    - _LTCGI: 0
+    - _LightmapSpecular: 1
+    - _LightmapSpecularMaxSmoothness: 1
     - _Metallic: 0.2
     - _Mirror: 0
     - _MirrorTextureUV: 0
     - _Mode: 0
+    - _NormalMapShadows: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _RadHueOffset: 6
@@ -168,6 +187,8 @@ Material:
     - _SrcBlend: 1
     - _UVSec: 0
     - _ZWrite: 1
+    - _specularAntiAliasingThreshold: 0.25
+    - _specularAntiAliasingVariance: 0.15
     - m_end_mirrorOptions: 0
     - m_start_mirrorOptions: 0
     m_Colors:

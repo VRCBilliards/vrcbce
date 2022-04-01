@@ -71,6 +71,7 @@ struct MaterialInputs {
     float4  postLightingColor;
 #endif
 
+#if !defined(SHADING_MODEL_CLOTH) && !defined(SHADING_MODEL_SUBSURFACE) && !defined(SHADING_MODEL_UNLIT)
 #if defined(HAS_REFRACTION)
 #if defined(MATERIAL_HAS_ABSORPTION)
     float3 absorption;
@@ -83,6 +84,11 @@ struct MaterialInputs {
 #endif
 #if defined(MATERIAL_HAS_MICRO_THICKNESS) && (REFRACTION_TYPE == REFRACTION_TYPE_THIN)
     float microThickness;
+#endif
+#elif !defined(SHADING_MODEL_SPECULAR_GLOSSINESS)
+#if defined(MATERIAL_HAS_IOR)
+    float ior;
+#endif
 #endif
 #endif
 };
@@ -154,6 +160,7 @@ void initMaterial(out MaterialInputs material) {
     material.postLightingColor = float4(0.0.xxx);
 #endif
 
+#if !defined(SHADING_MODEL_CLOTH) && !defined(SHADING_MODEL_SUBSURFACE) && !defined(SHADING_MODEL_UNLIT)
 #if defined(HAS_REFRACTION)
 #if defined(MATERIAL_HAS_ABSORPTION)
     material.absorption = float3(0.0.xxx);
@@ -167,7 +174,32 @@ void initMaterial(out MaterialInputs material) {
 #if defined(MATERIAL_HAS_MICRO_THICKNESS) && (REFRACTION_TYPE == REFRACTION_TYPE_THIN)
     material.microThickness = 0.0;
 #endif
+#elif !defined(SHADING_MODEL_SPECULAR_GLOSSINESS)
+#if defined(MATERIAL_HAS_IOR)
+    material.ior = 1.5;
+#endif
+#endif
 #endif
 }
+
+#if defined(MATERIAL_HAS_CUSTOM_SURFACE_SHADING)
+/** @public-api */
+struct LightData {
+    float4  colorIntensity;
+    float3  l;
+    float NdotL;
+    float3  worldPosition;
+    float attenuation;
+    float visibility;
+};
+
+/** @public-api */
+struct ShadingData {
+    float3  diffuseColor;
+    float perceptualRoughness;
+    float3  f0;
+    float roughness;
+};
+#endif
 
 #endif // FILAMENT_MATERIAL_INPUTS

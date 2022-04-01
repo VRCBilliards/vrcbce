@@ -63,6 +63,15 @@ sampler2D   _EmissionMap;
 
 // New settings
 half       _ExposureOcclusion;
+half       _LightmapSpecularMaxSmoothness;
+
+half       _BumpShadowHeightScale;
+half       _BumpShadowHardness;
+
+#if !defined(USE_GEOMETRIC_SPECULAR_AA_DEFAULT)
+half       _specularAntiAliasingVariance;
+half       _specularAntiAliasingThreshold;
+#endif
 
 //-------------------------------------------------------------------------------------
 // Input functions
@@ -78,6 +87,9 @@ struct VertexInput
 #endif
 #ifdef _TANGENT_TO_WORLD
     half4 tangent   : TANGENT;
+#endif
+#if defined(HAS_ATTRIBUTE_COLOR)
+    float4 color    : COLOR;
 #endif
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
@@ -212,6 +224,29 @@ half3 Emission(float2 uv)
 #endif
 }
 
+half4 SheenColorGlossCloth(float2 uv)
+{
+    half4 sg;
+#ifdef _SPECGLOSSMAP
+    #if defined(_SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A)
+        sg.rgb = tex2D(_SpecGlossMap, uv).rgb;
+        sg.a = tex2D(_MainTex, uv).a;
+    #else
+        sg = tex2D(_SpecGlossMap, uv);
+    #endif
+    sg.rgb *= _SpecColor.rgb;
+    sg.a *= _GlossMapScale;
+#else
+    sg.rgb = _SpecColor.rgb;
+    #ifdef _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
+        sg.a = tex2D(_MainTex, uv).a * _GlossMapScale;
+    #else
+        sg.a = _Glossiness;
+    #endif
+#endif
+    return sg;
+}
+
 #ifdef _NORMALMAP
 half3 NormalInTangentSpace(float4 texcoords)
 {
@@ -243,6 +278,8 @@ struct PerPixelHeightDisplacementParam
     float2 dX;
     float2 dY;
 };
+
+#if (!defined(PARALLAX_CUSTOM_INPUT))
 
 PerPixelHeightDisplacementParam InitPerPixelHeightDisplacementParam(float2 uv)
 {
@@ -293,6 +330,15 @@ float4 Parallax (float4 texcoords, half3 viewDir)
     return texcoords;
 }
 
+#else
+// Dummy function
+float4 Parallax (float4 texcoords, half3 viewDir)
+{
+    return texcoords;
+}
+
+#endif
+
 #if (defined(_NORMALMAP) && defined(NORMALMAP_SHADOW))
 struct NormalMapShadowsParam
 {
@@ -320,8 +366,8 @@ float3 SampleNormalMap (NormalMapShadowsParam nmsParam, float2 offset) {
 
 float NormalTangentShadow(float4 texcoords, half3 lightDirTS, float noise)
 {
-    float _HeightScale = 0.2;
-    float _ShadowHardness = 50.0;
+    float _HeightScale = _BumpShadowHeightScale;
+    float _ShadowHardness = _BumpShadowHardness;
     NormalMapShadowsParam nms = InitNormalMapShadowsParam(texcoords);
     nms.uv = texcoords;
     return NormalMapShadows (lightDirTS, nms, noise, _HeightScale, _ShadowHardness);
@@ -337,6 +383,11 @@ half getMaskThreshold()
 half getExposureOcclusionBias()
 {
     return 1.0/(_ExposureOcclusion);
+}
+
+half getLightmapSpecularMaxSmoothness()
+{
+    return _LightmapSpecularMaxSmoothness;
 }
 
 #endif // UNITY_STANDARD_INPUT_INCLUDED

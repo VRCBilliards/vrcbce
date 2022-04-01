@@ -25,14 +25,10 @@
 #include "UnityGBuffer.cginc"
 #include "UnityGlobalIllumination.cginc"
 
-#include "FilamentBRDF.cginc"
-#include "FilamentShadingStandard.cginc"
-#include "FilamentLightIndirect.cginc"
-#include "FilamentLightDirectional.cginc"
-#include "FilamentLightPunctual.cginc"
 #include "FilamentShadingLit.cginc"
 
 #include "AutoLight.cginc"
+#include "SharedFilteringLib.hlsl"
 //-------------------------------------------------------------------------------------
 // counterpart for NormalizePerPixelNormal
 // skips normalization per-vertex and expects normalization to happen per-pixel
@@ -55,11 +51,64 @@ float3 NormalizePerPixelNormal (float3 n)
 }
 
 //-------------------------------------------------------------------------------------
+
+fixed4 SampleShadowMaskBicubic(float2 uv)
+{
+    #ifdef SHADER_API_D3D11
+        float width, height;
+        unity_ShadowMask.GetDimensions(width, height);
+
+        float4 unity_ShadowMask_TexelSize = float4(width, height, 1.0/width, 1.0/height);
+
+        return SampleTexture2DBicubicFilter(TEXTURE2D_PARAM(unity_ShadowMask, samplerunity_ShadowMask),
+            uv, unity_ShadowMask_TexelSize);
+    #else
+        return SAMPLE_TEXTURE2D(unity_ShadowMask, samplerunity_ShadowMask, uv);
+    #endif
+}
+fixed UnitySampleBakedOcclusionBicubic (float2 lightmapUV, float3 worldPos)
+{
+    #if defined (SHADOWS_SHADOWMASK)
+        #if defined(LIGHTMAP_ON)
+            fixed4 rawOcclusionMask = SampleShadowMaskBicubic(lightmapUV.xy);
+        #else
+            fixed4 rawOcclusionMask = fixed4(1.0, 1.0, 1.0, 1.0);
+            #if UNITY_LIGHT_PROBE_PROXY_VOLUME
+                if (unity_ProbeVolumeParams.x == 1.0)
+                    rawOcclusionMask = LPPV_SampleProbeOcclusion(worldPos);
+                else
+                    rawOcclusionMask = SampleShadowMaskBicubic(lightmapUV.xy);
+            #else
+                rawOcclusionMask = SampleShadowMaskBicubic(lightmapUV.xy);
+            #endif
+        #endif
+        return saturate(dot(rawOcclusionMask, unity_OcclusionMaskSelector));
+
+    #else
+
+        //In forward dynamic objects can only get baked occlusion from LPPV, light probe occlusion is done on the CPU by attenuating the light color.
+        fixed atten = 1.0f;
+        #if defined(UNITY_INSTANCING_ENABLED) && defined(UNITY_USE_SHCOEFFS_ARRAYS)
+            // ...unless we are doing instancing, and the attenuation is packed into SHC array's .w component.
+            atten = unity_SHC.w;
+        #endif
+
+        #if UNITY_LIGHT_PROBE_PROXY_VOLUME && !defined(LIGHTMAP_ON) && !UNITY_STANDARD_SIMPLE
+            fixed4 rawOcclusionMask = atten.xxxx;
+            if (unity_ProbeVolumeParams.x == 1.0)
+                rawOcclusionMask = LPPV_SampleProbeOcclusion(worldPos);
+            return saturate(dot(rawOcclusionMask, unity_OcclusionMaskSelector));
+        #endif
+
+        return atten;
+    #endif
+}
+
 void GetBakedAttenuation(inout float atten, float2 lightmapUV, float3 worldPos)
 {
     // Base pass with Lightmap support is responsible for handling ShadowMask / blending here for performance reason
     #if defined(HANDLE_SHADOWS_BLENDING_IN_GI)
-        half bakedAtten = UnitySampleBakedOcclusion(lightmapUV.xy, worldPos);
+        half bakedAtten = UnitySampleBakedOcclusionBicubic(lightmapUV.xy, worldPos);
         float zDist = dot(_WorldSpaceCameraPos - worldPos, UNITY_MATRIX_V[2].xyz);
         float fadeDist = UnityComputeShadowFadeDistance(worldPos, zDist);
         atten = UnityMixRealtimeAndBakedShadows(atten, bakedAtten, UnityComputeShadowFade(fadeDist));
@@ -97,6 +146,25 @@ void GetBakedAttenuation(inout float atten, float2 lightmapUV, float3 worldPos)
 #define MATERIAL_SETUP_FWDADD(x) MaterialInputs x = \
     MaterialSetup(i.tex, i.eyeVec.xyz, IN_VIEWDIR4PARALLAX_FWDADD(i), i.tangentToWorldAndLightDir, IN_WORLDPOS_FWDADD(i));
 
+#if defined(SHADING_MODEL_CLOTH)
+    #define SETUP_BRDF_INPUT ClothMaterialSetup
+inline MaterialInputs ClothMaterialSetup (float4 i_tex)
+{   
+    half4 baseColor = half4(Albedo(i_tex), Alpha(i_tex));
+    half4 specGloss = SheenColorGlossCloth(i_tex.xy);
+    half3 specColor = specGloss.rgb;
+    half smoothness = specGloss.a;
+
+    MaterialInputs material = (MaterialInputs)0;
+    initMaterial(material);
+    material.baseColor = baseColor;
+    #if defined(MATERIAL_HAS_SHEEN_COLOR)
+    material.sheenColor = specColor;
+    #endif
+    material.roughness = computeRoughnessFromGlossiness(smoothness);
+    return material;
+}
+#else
 
 // Filament's preferred model, but not Unity's default
 #if defined(SHADING_MODEL_METALLIC_ROUGHNESS)
@@ -151,6 +219,7 @@ inline MaterialInputs MetallicMaterialSetup (float4 i_tex)
     material.roughness = computeRoughnessFromGlossiness(smoothness);
     return material;
 }
+#endif
 #endif
 #endif
 
@@ -222,7 +291,7 @@ struct VertexOutputForwardBase
     float4 tex                            : TEXCOORD0;
     float4 eyeVec                         : TEXCOORD1;    // eyeVec.xyz | fogCoord
     float4 tangentToWorldAndPackedData[3] : TEXCOORD2;    // [3x3:tangentToWorld | 1x3:viewDirForParallax or worldPos]
-    half4 ambientOrLightmapUV             : TEXCOORD5;    // SH or Lightmap UV
+    half4 ambientOrLightmapUV             : TEXCOORD5_centroid;    // SH or Lightmap UV
     UNITY_LIGHTING_COORDS(6,7)
 
     // next ones would not fit into SM2.0 limits, but they are always for SM3.0+
@@ -230,8 +299,12 @@ struct VertexOutputForwardBase
     float3 posWorld                     : TEXCOORD8;
 #endif
 
-#if defined(NORMALMAP_SHADOW)
+#if (defined(_NORMALMAP) && defined(NORMALMAP_SHADOW))
     float3 lightDirTS                   : TEXCOORD9;
+#endif
+
+#if defined(HAS_ATTRIBUTE_COLOR)
+    float4 color                        : COLOR_centroid;
 #endif
 
     UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -292,6 +365,10 @@ VertexOutputForwardBase vertForwardBase (VertexInput v)
     float3 lightDirWS = normalize(_WorldSpaceLightPos0.xyz - posWorld.xyz * _WorldSpaceLightPos0.w);
     o.lightDirTS = TransformToTangentSpace(tangentToWorld[0],tangentToWorld[1],tangentToWorld[2],lightDirWS);
     #endif
+    #endif
+
+    #if defined(HAS_ATTRIBUTE_COLOR)
+    o.color = v.color;
     #endif
 
     UNITY_TRANSFER_FOG_COMBINED_WITH_EYE_VEC(o,o.pos);
@@ -384,6 +461,10 @@ struct VertexOutputForwardAdd
     float3 lightDirTS                   : TEXCOORD9;
 #endif
 
+#if defined(HAS_ATTRIBUTE_COLOR)
+    float4 color                        : COLOR;
+#endif
+
     UNITY_VERTEX_OUTPUT_STEREO
 };
 
@@ -434,6 +515,10 @@ VertexOutputForwardAdd vertForwardAdd (VertexInput v)
     float3 lightDirWS = normalize(_WorldSpaceLightPos0.xyz - posWorld.xyz * _WorldSpaceLightPos0.w);
     o.lightDirTS = TransformToTangentSpace(tangentToWorld[0],tangentToWorld[1],tangentToWorld[2],lightDirWS);
     #endif
+    #endif
+
+    #if defined(HAS_ATTRIBUTE_COLOR)
+    o.color = v.color;
     #endif
 
     UNITY_TRANSFER_FOG_COMBINED_WITH_EYE_VEC(o, o.pos);

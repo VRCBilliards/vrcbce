@@ -41,6 +41,22 @@ Shader "Silent/Filamented"
 
         // New settings
         _ExposureOcclusion("Lightmap Occlusion Sensitivity", Range(0, 1)) = 0.2
+        [Toggle(_LIGHTMAPSPECULAR)]_LightmapSpecular("Lightmap Specular", Range(0, 1)) = 1
+        _LightmapSpecularMaxSmoothness("Lightmap Specular Max Smoothness", Range(0, 1)) = 1
+
+        [Toggle(_NORMALMAP_SHADOW)]_NormalMapShadows("Normal Map Shadows", Range(0, 1)) = 0
+        _BumpShadowHeightScale("Height Scale", Range(0, 1)) = 0.2
+        _BumpShadowHardness("Shadow Hardness", Range(0, 100)) = 50
+ 
+        _specularAntiAliasingVariance("Specular AA Variance",  Range(0, 1)) = 0.15
+        _specularAntiAliasingThreshold("Specular AA Threshold", Range(0, 1)) = 0.25
+
+        [KeywordEnum(None, SH, RNM)] _Bakery ("Bakery Mode", Int) = 0
+            _RNM0("RNM0", 2D) = "black" {}
+            _RNM1("RNM1", 2D) = "black" {}
+            _RNM2("RNM2", 2D) = "black" {}
+
+        [Toggle(_LTCGI)] _LTCGI ("LTCGI", Int) = 0
 
         [Enum(UnityEngine.Rendering.CullMode)]_CullMode("Cull Mode", Int) = 2
 
@@ -56,11 +72,15 @@ Shader "Silent/Filamented"
     CGINCLUDE
         // OcclusionMap is always defined
         #define MATERIAL_HAS_AMBIENT_OCCLUSION 
+        // Use specular AA controls
+        #define USE_GEOMETRIC_SPECULAR_AA
+        // _DFG is present
+        #define USE_DFG_LUT
     ENDCG
 
     SubShader
     {
-        Tags { "RenderType"="Opaque" "PerformanceChecks"="False" }
+        Tags { "RenderType"="Opaque" "PerformanceChecks"="False" "LTCGI" = "_LTCGI" }
         LOD 300
 
         Cull [_CullMode]
@@ -90,6 +110,11 @@ Shader "Silent/Filamented"
             #pragma shader_feature_local _SPECULARHIGHLIGHTS_OFF
             #pragma shader_feature_local _GLOSSYREFLECTIONS_OFF
             #pragma shader_feature_local _PARALLAXMAP
+            
+            #pragma shader_feature_local _LIGHTMAPSPECULAR
+            #pragma shader_feature_local _NORMALMAP_SHADOW
+            #pragma shader_feature_local _ _BAKERY_RNM _BAKERY_SH
+            #pragma shader_feature_local _LTCGI
 
             #pragma multi_compile_fwdbase
             #pragma multi_compile_fog
@@ -127,6 +152,8 @@ Shader "Silent/Filamented"
             #pragma shader_feature_local _SPECULARHIGHLIGHTS_OFF
             #pragma shader_feature_local _DETAIL_MULX2
             #pragma shader_feature_local _PARALLAXMAP
+
+            #pragma shader_feature_local _NORMALMAP_SHADOW
 
             #pragma multi_compile_fwdadd_fullshadows
             #pragma multi_compile_fog

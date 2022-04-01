@@ -5,14 +5,35 @@
 
 // Filamented configuration
 
-// Whether to read the _DFG texture for DFG instead of the approximate one. 
-//#define USE_DFG_LUT
+#define FILAMENT_QUALITY_LOW    0
+#define FILAMENT_QUALITY_NORMAL 1
+#define FILAMENT_QUALITY_HIGH   2
+
+// Sets a different quality level for mobile and other platforms.
+#if !(defined(SHADER_API_MOBILE))
+#define FILAMENT_QUALITY FILAMENT_QUALITY_HIGH
+#else
+#define FILAMENT_QUALITY FILAMENT_QUALITY_LOW
+#define TARGET_MOBILE
+#endif
 
 #define SPECULAR_AMBIENT_OCCLUSION SPECULAR_AO_SIMPLE
 #define MULTI_BOUNCE_AMBIENT_OCCLUSION 1
-#define GEOMETRIC_SPECULAR_AA
-#define _specularAntiAliasingVariance 0.15
-#define _specularAntiAliasingThreshold 0.25
+
+// Whether to use specular AA by default 
+// in shaders that don't specify USE_GEOMETRIC_SPECULAR_AA.
+#if !defined(USE_GEOMETRIC_SPECULAR_AA)
+#define USE_GEOMETRIC_SPECULAR_AA_DEFAULT
+#endif
+
+
+// Whether to read the _DFG texture for DFG instead of the approximate one. 
+// The shader must have a _DFG texture property, so don't enable this here.
+// For example, you can use this ShaderLab semantic to specify a DFG texture.
+// [NonModifiableTextureData][HideInInspector] _DFG("DFG", 2D) = "white" {}
+// Then, set the default texture on the .shader in Unity
+// and it will propagate to all materials.
+// #define USE_DFG_LUT
 
 // Filament cross-compatibility defines
 
@@ -22,15 +43,18 @@
 #if (POINT || SPOT)
 #define HAS_DYNAMIC_LIGHTING 
 #endif
-#if _EMISSION
-#define MATERIAL_HAS_EMISSIVE 
-#endif
 #if (SHADOWS_SCREEN || SHADOWS_SHADOWMASK || LIGHTMAP_SHADOW)
 #define HAS_SHADOWING 
 #endif
 
+#if _EMISSION
+#define MATERIAL_HAS_EMISSIVE 
+#endif
 #if defined(MATERIAL_HAS_NORMAL)
 #define _NORMALMAP 1
+#endif
+#if _NORMALMAP
+#define MATERIAL_HAS_NORMAL
 #endif
 
 #if (MATERIAL_NEEDS_TBN)
@@ -50,19 +74,45 @@
 // By default, Standard assumes meshes have normals
 #define HAS_ATTRIBUTE_TANGENTS
 
-#if _NORMALMAP
-#define MATERIAL_HAS_NORMAL
-//#define NORMALMAP_SHADOW
-#endif
-
 //#define MATERIAL_HAS_AMBIENT_OCCLUSION 
 
-#if 1
+// If USE_GEOMETRIC_SPECULAR_AA is set, don't use the default values
+#if defined(USE_GEOMETRIC_SPECULAR_AA)
+#define GEOMETRIC_SPECULAR_AA
+#else
+#if defined(USE_GEOMETRIC_SPECULAR_AA_DEFAULT)
+#define GEOMETRIC_SPECULAR_AA
+#define _specularAntiAliasingVariance 0.15
+#define _specularAntiAliasingThreshold 0.25
+#endif
+#endif
+
+#if defined(_LIGHTMAPSPECULAR)
 #define LIGHTMAP_SPECULAR
 #endif
 
+#if defined(_NORMALMAP_SHADOW) && defined(MATERIAL_HAS_NORMAL) && defined(HAS_SHADOWING)
+#define NORMALMAP_SHADOW
+#endif
+
 #if defined(USE_DFG_LUT)
-uniform sampler2D _DFG;
+UNITY_DECLARE_TEX2D_FLOAT(_DFG);
+#endif
+
+#if defined(_BAKERY_RNM) || defined(_BAKERY_SH)
+#define USING_BAKERY
+UNITY_DECLARE_TEX2D_HALF(_RNM0);
+UNITY_DECLARE_TEX2D_HALF(_RNM1);
+UNITY_DECLARE_TEX2D_HALF(_RNM2);
+#endif
+
+// Refraction source texture
+#if REFRACTION_MODE == REFRACTION_MODE_SCREEN
+    #ifndef REFRACTION_SOURCE
+    #define REFRACTION_SOURCE _GrabPass
+    #define REFRACTION_MULTIPLIER 1.0
+    #endif
+UNITY_DECLARE_TEX2D_FLOAT(REFRACTION_SOURCE);
 #endif
 
 // Define Specular cubemap constants

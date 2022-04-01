@@ -1,32 +1,31 @@
 /*
-Filamented example template.
-This is a template of how to use Filamented to make a simple shader
-that passes its own properties through to Filament, in a manner
-similar to a Unity surface shader - but with less jank. 
-
-Instead of reading multiple seperate maps, it just asks for
-an albedo map, a normal map, and a MOES map. 
+Filamented triplanar example.
 */ 
-Shader "Silent/Filamented Template"
+Shader "Silent/Filamented Extras/Simple Triplanar Filamented"
 {
     Properties
     {
-        _MainTex("Albedo", 2D) = "white" {}
+        _Color("Color", Color) = (1,1,1,1)
+        [NoScaleOffset]_MainTex("Albedo", 2D) = "white" {}
+        [Space]
         [Normal] _BumpMap("Normal", 2D) = "bump" {}
         _BumpScale("Normal Scale", Float) = 1
         [Space]
-        _MOESMap("MOES Map", 2D) = "white" {}
-        _MetallicScale("Metallic", Range( 0 , 1)) = 0
+        [NoScaleOffset]_MOESMap("MOES Map", 2D) = "white" {}
+        [NoScaleOffset]_MetallicScale("Metallic", Range( 0 , 1)) = 0
         _OcclusionScale("Occlusion", Range( 0 , 1)) = 0
         _SmoothnessScale("Smoothness", Range( 0 , 1)) = 0
         [Space]
         _Emission("Emission Power", Float) = 0
         _EmissionColor("Emission Color", Color) = (1,1,1,1)
         [Space]
+        _UVTransform0("UV Transform X", Vector) = (1, 0, 0, 0)
+        _UVTransform1("UV Transform Y", Vector) = (0, 1, 0, 0)
+        _UVTransform2("UV Transform Z", Vector) = (0, 0, 1, 0)
+        [Space]
         [Toggle(_LIGHTMAPSPECULAR)]_LightmapSpecular("Lightmap Specular", Range(0, 1)) = 1
         _LightmapSpecularMaxSmoothness("Lightmap Specular Max Smoothness", Range(0, 1)) = 1
         _ExposureOcclusion("Lightmap Occlusion Sensitivity", Range(0, 1)) = 0.2
-        [Space]
         [KeywordEnum(None, SH, RNM)] _Bakery ("Bakery Mode", Int) = 0
         [HideInInspector]_RNM0("RNM0", 2D) = "black" {}
         [HideInInspector]_RNM1("RNM1", 2D) = "black" {}
@@ -98,18 +97,80 @@ Shader "Silent/Filamented Template"
 	uniform half _SmoothnessScale;
 	uniform half _Emission;
 	// uniform half3 _EmissionColor;
+    uniform half4 _UVTransform0;
+    uniform half4 _UVTransform1;
+    uniform half4 _UVTransform2;
 
 	// Vertex functions are called from UnityStandardCore.
 	// You can alter values here, or copy the function in and modify it.
 	VertexOutputForwardBase vertBase (VertexInput v) { return vertForwardBase(v); }
 	VertexOutputForwardAdd vertAdd (VertexInput v) { return vertForwardAdd(v); }
 
+// https://iquilezles.org/www/articles/biplanar/biplanar.htm
+// "p" point being textured
+// "n" surface normal at "p"
+// "k" controls the sharpness of the blending in the transitions areas
+// "s" texture sampler
+float4 biplanar( sampler2D sam, float3 p, float3 n, float k )
+{
+    // grab coord derivatives for texturing
+    float3 dpdx = ddx(p);
+    float3 dpdy = ddy(p);
+    n = abs(n);
+
+    // determine major axis (in x; yz are following axis)
+    int3 ma =  (n.x>n.y && n.x>n.z) ? int3(0,1,2) :
+               (n.y>n.z)            ? int3(1,2,0) :
+                                      int3(2,0,1) ;
+    // determine minor axis (in x; yz are following axis)
+    int3 mi =  (n.x<n.y && n.x<n.z) ? int3(0,1,2) :
+               (n.y<n.z)            ? int3(1,2,0) :
+                                      int3(2,0,1) ;
+    // determine median axis (in x;  yz are following axis)
+    int3 me = clamp(3 - mi - ma, 0, 2); 
+    
+    // project+fetch
+    float4 x = tex2Dgrad( sam, float2(   p[ma.y],   p[ma.z]), 
+                               float2(dpdx[ma.y],dpdx[ma.z]), 
+                               float2(dpdy[ma.y],dpdy[ma.z]) );
+    float4 y = tex2Dgrad( sam, float2(   p[me.y],   p[me.z]), 
+                               float2(dpdx[me.y],dpdx[me.z]),
+                               float2(dpdy[me.y],dpdy[me.z]) );
+    
+    // blend factors
+    float2 w = float2(n[ma.x],n[me.x]);
+    // make local support
+    w = clamp( (w-0.5773)/(1.0-0.5773), 0.0, 1.0 );
+    // shape transition
+    w = pow( w, k/8.0 );
+    // blend and return
+    return (x*w.x + y*w.y) / (w.x + w.y);
+}
+
 	// The material function itself!  You can alter the code below to add extra properties. 
 inline MaterialInputs MyMaterialSetup (inout float4 i_tex, float3 i_eyeVec, half3 i_viewDirForParallax, float4 tangentToWorld[3], float3 i_posWorld)
 {   
-    half4 baseColor = tex2D (_MainTex, i_tex.xy);
-    half4 packedMap = tex2D (_MOESMap, i_tex.xy);
-    half3 normalTangent = UnpackScaleNormal(tex2D (_BumpMap, i_tex.xy), _BumpScale);
+    float3x3 tangentToWorldOnly = float3x3(tangentToWorld[0].xyz, tangentToWorld[1].xyz, tangentToWorld[2].xyz);
+
+    float3 normal = mul ( float3( 0, 0, 1 ), tangentToWorldOnly );
+
+    //float2 x0 = i_posWorld.xz * _UVTransform1.xy + _UVTransform1.zw;
+    //float2 y0 = i_posWorld.zy * _UVTransform0.xy + _UVTransform0.zw; 
+    //float2 z0 = i_posWorld.xy * _UVTransform2.xy + _UVTransform2.zw;
+
+    float3 transformedPos = float3(
+        dot(float4(i_posWorld.xyz, 1), _UVTransform0),
+        dot(float4(i_posWorld.xyz, 1), _UVTransform1),
+        dot(float4(i_posWorld.xyz, 1), _UVTransform2)
+        );
+    
+    float4 baseColor = 0;
+    fixed3 normalTangent = 0.0f;
+    float4 packedMap = 0;
+
+    baseColor = biplanar( _MainTex, transformedPos, normal, 1.0) * _Color;
+    normalTangent = UnpackScaleNormal(biplanar( _BumpMap, transformedPos, normal, 1.0), _BumpScale);
+    packedMap = biplanar( _MOESMap, transformedPos, normal, 1.0);
 
     half metallic = packedMap.x * _MetallicScale;
     half occlusion = lerp(1, packedMap.y, _OcclusionScale);
@@ -224,6 +285,7 @@ half4 fragAdd (VertexOutputForwardAdd i) : SV_Target { return fragForwardAddTemp
             #pragma shader_feature_local _SPECULARHIGHLIGHTS_OFF
             #pragma shader_feature_local _GLOSSYREFLECTIONS_OFF
             
+            #pragma shader_feature_local _LIGHTMAPSPECULAR
             #pragma shader_feature_local _ _BAKERY_RNM _BAKERY_SH
             #pragma shader_feature_local _LTCGI
 

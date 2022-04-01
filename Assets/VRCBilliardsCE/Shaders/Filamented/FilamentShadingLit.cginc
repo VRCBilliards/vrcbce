@@ -8,11 +8,20 @@
 #include "FilamentCommonMaterial.cginc"
 #include "FilamentCommonShading.cginc"
 
-#include "FilamentBRDF.cginc"
-#include "FilamentShadingStandard.cginc"
+
+#if defined(SHADING_MODEL_SUBSURFACE)
+    #include "FilamentShadingSubsurface.cginc"
+#elif defined(SHADING_MODEL_CLOTH)
+    #include "FilamentShadingCloth.cginc"
+#else
+    #include "FilamentShadingStandard.cginc"
+#endif
+
 #include "FilamentLightIndirect.cginc"
 #include "FilamentShadingLit.cginc"
 #include "FilamentLightDirectional.cginc"
+#include "FilamentLightPunctual.cginc"
+#include "FilamentLightLTCGI.cginc"
 
 #include "UnityStandardInput.cginc"
 
@@ -89,18 +98,14 @@ void getCommonPixelParams(const MaterialInputs material, inout PixelParams pixel
     pixel.diffuseColor = computeDiffuseColor(baseColor, metallic);
     pixel.f0 = specularColor;
 #elif !defined(SHADING_MODEL_CLOTH)
-#if defined(HAS_REFRACTION) && (!defined(MATERIAL_HAS_REFLECTANCE) && defined(MATERIAL_HAS_IOR))
-    pixel.diffuseColor = baseColor.rgb;
-    // If refraction is enabled, and reflectance is not set in the material, but ior is,
-    // then use it -- othterwise proceed as usual.
-    pixel.f0 = iorToF0(material.ior, 1.0);
-#else
     pixel.diffuseColor = computeDiffuseColor(baseColor, material.metallic);
+    #if !defined(SHADING_MODEL_SUBSURFACE) && (!defined(MATERIAL_HAS_REFLECTANCE) && defined(MATERIAL_HAS_IOR))
+    float reflectance = iorToF0(max(1.0, material.ior), 1.0);
+#else
     // Assumes an interface from air to an IOR of 1.5 for dielectrics
     float reflectance = computeDielectricF0(material.reflectance);
-    pixel.f0 = computeF0(baseColor, material.metallic, reflectance);
 #endif
-
+    pixel.f0 = computeF0(baseColor, material.metallic, reflectance);
 #else
     pixel.diffuseColor = baseColor.rgb;
     pixel.f0 = material.sheenColor;
@@ -109,6 +114,7 @@ void getCommonPixelParams(const MaterialInputs material, inout PixelParams pixel
 #endif
 #endif
 
+#if !defined(SHADING_MODEL_CLOTH) && !defined(SHADING_MODEL_SUBSURFACE)
 #if defined(HAS_REFRACTION)
     // Air's Index of refraction is 1.000277 at STP but everybody uses 1.0
     const float airIor = 1.0;
@@ -142,6 +148,7 @@ void getCommonPixelParams(const MaterialInputs material, inout PixelParams pixel
     pixel.uThickness = max(0.0, material.microThickness);
 #else
     pixel.uThickness = 0.0;
+#endif
 #endif
 #endif
 }
@@ -242,12 +249,10 @@ void getEnergyCompensationPixelParams(const ShadingParams shading, inout PixelPa
 #if !defined(SHADING_MODEL_CLOTH)
     // Energy compensation for multiple scattering in a microfacet model
     // See "Multiple-Scattering Microfacet BSDFs with the Smith Model"
-    pixel.energyCompensation = 1.0 + pixel.f0 * (1.0 / pixel.dfg.y - 1.0);
+    pixel.energyCompensation = 1.0 + pixel.f0 * (1.0 / pixel.dfg.yyy - 1.0);
 #else
     pixel.energyCompensation = (1.0);
 #endif
-    // Disabled until DFG is implemented properly
-    pixel.energyCompensation = (1.0);
 
 #if !defined(SHADING_MODEL_CLOTH)
 #if defined(MATERIAL_HAS_SHEEN_COLOR)

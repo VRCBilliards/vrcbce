@@ -1,6 +1,6 @@
 // Unity built-in shader source. Copyright (c) 2016 Unity Technologies. MIT license (see license.txt)
 
-Shader "Silent/Filamented (Specular setup)"
+Shader "Silent/Filamented (Cloth setup)"
 {
     Properties
     {
@@ -13,8 +13,8 @@ Shader "Silent/Filamented (Specular setup)"
         _GlossMapScale("Smoothness Factor", Range(0.0, 1.0)) = 1.0
         [Enum(Specular Alpha,0,Albedo Alpha,1)] _SmoothnessTextureChannel ("Smoothness texture channel", Float) = 0
 
-        _SpecColor("Specular", Color) = (0.2,0.2,0.2)
-        _SpecGlossMap("Specular", 2D) = "white" {}
+        _SpecColor("Sheen", Color) = (0.2,0.2,0.2)
+        _SpecGlossMap("Sheen Map", 2D) = "white" {}
         [ToggleOff] _SpecularHighlights("Specular Highlights", Float) = 1.0
         [ToggleOff] _GlossyReflections("Glossy Reflections", Float) = 1.0
 
@@ -60,6 +60,7 @@ Shader "Silent/Filamented (Specular setup)"
         [Enum(UnityEngine.Rendering.CullMode)]_CullMode("Cull Mode", Int) = 2
 
         [NonModifiableTextureData][HideInInspector] _DFG("DFG", 2D) = "white" {}
+        [HideInInspector] _ShaderType_Cloth("__cloth", Float) = 1.0
 
         // Blending state
         [HideInInspector] _Mode ("__mode", Float) = 0.0
@@ -69,7 +70,9 @@ Shader "Silent/Filamented (Specular setup)"
     }
 
     CGINCLUDE
-        #define SHADING_MODEL_SPECULAR_GLOSSINESS
+        #define SHADING_MODEL_CLOTH
+        #define MATERIAL_HAS_SHEEN_COLOR
+        //#define MATERIAL_HAS_SUBSURFACE_COLOR
         // OcclusionMap is always defined
         #define MATERIAL_HAS_AMBIENT_OCCLUSION 
         // Use specular AA controls
