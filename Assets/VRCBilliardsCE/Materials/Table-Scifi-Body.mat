@@ -10,6 +10,7 @@ Material:
   m_Name: Table-Scifi-Body
   m_Shader: {fileID: 4800000, guid: 1ff9e5e46b35d3f47b409808d5ddd3b2, type: 3}
   m_ShaderKeywords: BAKERY_BICUBIC BAKERY_LMSPEC BAKERY_SH BAKERY_SHNONLINEAR _EMISSION
+    _SPECULARHIGHLIGHTS_OFF
   m_LightmapFlags: 0
   m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
@@ -20,7 +21,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BumpMap:
-        m_Texture: {fileID: 2800000, guid: 9fd1b22e6876bcf49bac6db5d2fb41d5, type: 3}
+        m_Texture: {fileID: 2800000, guid: 475841c14f21a3c4393365ef4238ecdc, type: 3}
         m_Scale: {x: 50, y: 50}
         m_Offset: {x: 0, y: 0}
     - _DFG:
@@ -133,7 +134,7 @@ Material:
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _Emission: 0.25
-    - _EmissionBoost: 2
+    - _EmissionBoost: 1
     - _EnableEmission: 1
     - _ExposureOcclusion: 0.8
     - _FurDensity: 0.11
@@ -144,7 +145,7 @@ Material:
     - _Glossiness: 0.6
     - _GlossyReflections: 1
     - _Hue: 0
-    - _Metallic: 0.5
+    - _Metallic: 0.7
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
@@ -154,7 +155,7 @@ Material:
     - _Shininess: 8
     - _SmoothnessTextureChannel: 0
     - _Specular: 5
-    - _SpecularHighlights: 1
+    - _SpecularHighlights: 0
     - _SrcBlend: 1
     - _UVSec: 1
     - _ZWrite: 1
@@ -162,7 +163,7 @@ Material:
     m_Colors:
     - _ClothColour: {r: 0.3, g: 0.3, b: 0.3, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _EmissionColor: {r: 1.4980392, g: 1.4980392, b: 1.4980392, a: 1}
+    - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColour: {r: 2.227962e-37, g: 0.7500002, b: 1.7499996, a: 0}
     - _VolumeInvSize: {r: 1000001, g: 1000001, b: 1000001, a: 1}
     - _VolumeMin: {r: 0, g: 0, b: 0, a: 1}
