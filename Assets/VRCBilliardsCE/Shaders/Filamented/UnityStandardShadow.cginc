@@ -81,6 +81,26 @@ half SpecularSetup_ShadowGetOneMinusReflectivity(half2 uv)
     return (1 - SpecularStrength(specColor));
 }
 
+// Lazy workaround - I'd like to redo this later.
+half UNITY_SETUP_BRDF_INPUT_ShadowGetOneMinusReflectivity(half2 uv)
+{
+    #ifdef SHADING_MODEL_SPECULAR_GLOSSINESS
+        half3 specColor = _SpecColor.rgb;
+        #ifdef _SPECGLOSSMAP
+                specColor = tex2D(_SpecGlossMap, uv).rgb;
+        #endif
+            return (1 - SpecularStrength(specColor));
+        #else
+            half metallicity = _Metallic;
+        #ifdef _METALLICGLOSSMAP
+            metallicity = tex2D(_MetallicGlossMap, uv).r;
+        #endif
+        return OneMinusReflectivityFromMetallic(metallicity);
+    #endif
+
+}
+
+
 // SHADOW_ONEMINUSREFLECTIVITY(): workaround to get one minus reflectivity based on UNITY_SETUP_BRDF_INPUT
 #define SHADOW_JOIN2(a, b) a##b
 #define SHADOW_JOIN(a, b) SHADOW_JOIN2(a,b)

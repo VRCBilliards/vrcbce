@@ -20,8 +20,7 @@
 #define saturateMediump(x) x
 #endif
 
-#define saturate(x)        clamp(x, 0.0, 1.0)
-#define atan2(x, y)        atan(y, x)
+#define atan(x,y)          atan2(y,x)
 
 //------------------------------------------------------------------------------
 // Scalar operations
@@ -59,6 +58,18 @@ float max3(const float3 v) {
     return max(v.x, max(v.y, v.z));
 }
 
+float vmax(const float2 v) {
+    return max(v.x, v.y);
+}
+
+float vmax(const float3 v) {
+    return max(v.x, max(v.y, v.z));
+}
+
+float vmax(const float4 v) {
+    return max(max(v.x, v.y), max(v.y, v.z));
+}
+
 /**
  * Returns the minimum component of the specified vector.
  *
@@ -66,6 +77,18 @@ float max3(const float3 v) {
  */
 float min3(const float3 v) {
     return min(v.x, min(v.y, v.z));
+}
+
+float vmin(const float2 v) {
+    return min(v.x, v.y);
+}
+
+float vmin(const float3 v) {
+    return min(v.x, min(v.y, v.z));
+}
+
+float vmin(const float4 v) {
+    return min(min(v.x, v.y), min(v.y, v.z));
 }
 
 //------------------------------------------------------------------------------

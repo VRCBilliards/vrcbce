@@ -36,7 +36,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DFG:
-        m_Texture: {fileID: 2800000, guid: 15666b1e4a43bd44ab4d0fde9f680eb1, type: 3}
+        m_Texture: {fileID: 2800000, guid: b6b1f1fa6be1ce54f8bcd5428c160a28, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
@@ -71,13 +71,28 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _RNM0:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _RNM1:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _RNM2:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _SubsurfaceColorMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - _Anisotropy: 0
+    - _Bakery: 0
     - _BumpScale: 1
+    - _BumpShadowHardness: 50
+    - _BumpShadowHeightScale: 0.2
     - _Clearcoat: 0
     - _ClearcoatAnisotropy: 0
     - _ClearcoatGlossiness: 0.5
@@ -94,9 +109,13 @@ Material:
     - _Glossiness: 0.8
     - _GlossyReflections: 1
     - _LMStrength: 1
+    - _LTCGI: 0
     - _LightProbeMethod: 1
+    - _LightmapSpecular: 1
+    - _LightmapSpecularMaxSmoothness: 1
     - _Metallic: 0.8
     - _Mode: 0
+    - _NormalMapShadows: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _RTLMStrength: 1
@@ -115,6 +134,8 @@ Material:
     - _TriplanarFalloff: 1
     - _UVSec: 0
     - _ZWrite: 1
+    - _specularAntiAliasingThreshold: 0.25
+    - _specularAntiAliasingVariance: 0.15
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0.01, g: 0.01, b: 0.01, a: 1}

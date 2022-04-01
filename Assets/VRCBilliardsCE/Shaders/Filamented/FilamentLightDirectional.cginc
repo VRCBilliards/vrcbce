@@ -6,11 +6,8 @@
 // Directional light evaluation
 //------------------------------------------------------------------------------
 
-#ifndef FILAMENT_QUALITY
-#else
 #if FILAMENT_QUALITY < FILAMENT_QUALITY_HIGH
-#define SUN_AS_AREA_LIGHT
-#endif
+//#define SUN_AS_AREA_LIGHT
 #endif
 
 float3 sampleSunAreaLight(const float3 lightDirection, const ShadingParams shading) {

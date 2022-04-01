@@ -34,7 +34,7 @@ void computeShadingParams(inout ShadingParams shading, float3 vertex_worldNormal
 #endif
 #endif
 
-    shading.position = vertex_worldPosition;
+    shading.position = vertex_worldPosition.xyz;
     shading.view = normalize(frameUniforms_cameraPosition - shading.position);
 
     // we do this so we avoid doing (matrix multiply), but we burn 4 varyings:

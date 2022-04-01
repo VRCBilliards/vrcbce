@@ -12,7 +12,8 @@ namespace SilentTools
             Specular,
             Metallic,
             Dielectric,
-            Roughness
+            Roughness,
+            Cloth
         }
 
         public enum BlendMode
@@ -27,6 +28,12 @@ namespace SilentTools
         {
             SpecularMetallicAlpha,
             AlbedoAlpha,
+        }
+
+        private enum SettingsMode
+        {
+            Basic,
+            Full,
         }
 
         private static class Styles
@@ -51,14 +58,36 @@ namespace SilentTools
             public static GUIContent detailAlbedoText = EditorGUIUtility.TrTextContent("Detail Albedo x2", "Albedo (RGB) multiplied by 2");
             public static GUIContent detailNormalMapText = EditorGUIUtility.TrTextContent("Normal Map", "Normal Map");
             public static GUIContent cullModeText = EditorGUIUtility.TrTextContent("Cull Mode", "Which face of the polygon should be culled from rendering");
+
+            public static GUIContent filamentedOptionsLabel = EditorGUIUtility.TrTextContent("Filamented Options", "Settings which control functionality specific to Filamented.");
+            public static GUIContent specularAALabel = EditorGUIUtility.TrTextContent("Specular Anti-Aliasing", "Reduces specular aliasing and preserves the shape of specular highlights as an object moves away from the camera.");
+            public static GUIContent specularAAVarianceText = EditorGUIUtility.TrTextContent("Variance", "Sets the screen space variance of the filter kernel used when applying specular anti-aliasing. Higher values will increase the effect of the filter but may increase roughness in unwanted areas.");
+            public static GUIContent specularAAThresholdText = EditorGUIUtility.TrTextContent("Threshold", "Sets the clamping threshold used to suppress estimation errors when applying specular anti-aliasing. When set to 0, specular anti-aliasing is disabled.");
+
+            public static GUIContent lightmapOptionsLabel = EditorGUIUtility.TrTextContent("Lightmap Options", "Settings which only affect the object when it is affected by baked GI lightmapping.");
             public static GUIContent exposureOcclusionText = EditorGUIUtility.TrTextContent("Exposure Occlusion", "Controls occlusion of specular lighting by the lightmap");
+            public static GUIContent lightmapSpecularText = EditorGUIUtility.TrTextContent("Lightmap Specular", "Allows the material to derive specular lighting from the lightmap directionality.");
+            public static GUIContent lmSpecMaxSmoothnessText = EditorGUIUtility.TrTextContent("Specular Smoothness Mod", "Adjusts the maximum smoothness of the material for lightmap specular to avoid artifacts from imprecise directionality.");
+
+            public static GUIContent normalMapShadowsText = EditorGUIUtility.TrTextContent("Normal Map Shadows", "Additional shadows produced by marching along the material's normal map.");
+            public static GUIContent normalMapShadowsScaleText = EditorGUIUtility.TrTextContent("Height Scale", "Controls the length of normal map shadows.");
+            public static GUIContent normalMapShadowsHardnessText = EditorGUIUtility.TrTextContent("Hardness", "Controls the hardness of normal map shadows, which are dithered to avoid jagged artifacts.");
+
+            public static GUIContent bakeryModeText = EditorGUIUtility.TrTextContent("Bakery Mode", "Sets the material to use one of Bakery's directionality map modes.");
+            public static GUIContent bakeryRNMText = EditorGUIUtility.TrTextContent("Bakery Lightmap", "This texture is applied either by the Bakery runtime script or an external script according to the mesh renderer and can not be modified.");
+
+            public static GUIContent ltcgiModeText = EditorGUIUtility.TrTextContent("LTCGI Mode", "Sets whether the material can receive lights from LTCGI sources in the scene.");
+
+            public static GUIContent sheenText = EditorGUIUtility.TrTextContent("Sheen", "Sheen colour (RGB) and glossiness (A) for cloth");
 
             public static string primaryMapsText = "Main Maps";
             public static string secondaryMapsText = "Secondary Maps";
             public static string forwardText = "Forward Rendering Options";
             public static string renderingMode = "Rendering Mode";
+            public static string settingsMode = "Settings Mode";
             public static string advancedText = "Advanced Options";
             public static readonly string[] blendNames = Enum.GetNames(typeof(BlendMode));
+            public static readonly string[] settingNames = Enum.GetNames(typeof(SettingsMode));
         }
 
         MaterialProperty blendMode = null;
@@ -90,12 +119,29 @@ namespace SilentTools
         MaterialProperty detailNormalMap = null;
         MaterialProperty uvSetSecondary = null;
         MaterialProperty cullMode = null;
+        MaterialProperty specularAAVariance = null;
+        MaterialProperty specularAAThreshold = null;
         MaterialProperty exposureOcclusion = null;
+        MaterialProperty lightmapSpecular = null;
+        MaterialProperty lmSpecMaxSmoothness = null;
+        MaterialProperty normalMapShadows = null;
+        MaterialProperty normalMapShadowsScale = null;
+        MaterialProperty normalMapShadowsHardness = null;
+
+        MaterialProperty bakeryMode = null;
+        MaterialProperty bakeryRNM0 = null;
+        MaterialProperty bakeryRNM1 = null;
+        MaterialProperty bakeryRNM2 = null;
+
+        MaterialProperty ltcgiMode = null;
+        MaterialProperty isCloth = null;
 
         MaterialEditor m_MaterialEditor;
         WorkflowMode m_WorkflowMode = WorkflowMode.Specular;
 
         bool m_FirstTimeApply = true;
+
+        int m_SettingsMode = (int)SettingsMode.Basic;
 
         public void FindProperties(MaterialProperty[] props)
         {
@@ -107,8 +153,12 @@ namespace SilentTools
             specularColor = FindProperty("_SpecColor", props, false);
             metallicMap = FindProperty("_MetallicGlossMap", props, false);
             metallic = FindProperty("_Metallic", props, false);
+
+            isCloth = FindProperty("_ShaderType_Cloth", props, false);
             // todo: find a better way to handle this
-            if (specularMap != null && specularMap.displayName == "Roughness Map") 
+            if (isCloth != null)
+                m_WorkflowMode = WorkflowMode.Cloth;
+            else if (specularMap != null && specularMap.displayName == "Roughness Map") 
                 m_WorkflowMode = WorkflowMode.Roughness;
             else if (specularMap != null && specularColor != null)
                 m_WorkflowMode = WorkflowMode.Specular;
@@ -138,7 +188,23 @@ namespace SilentTools
             uvSetSecondary = FindProperty("_UVSec", props);
             cullMode = FindProperty("_CullMode", props);
 
+            specularAAVariance = FindProperty("_specularAntiAliasingVariance", props, false);
+            specularAAThreshold = FindProperty("_specularAntiAliasingThreshold", props, false);
+
             exposureOcclusion = FindProperty("_ExposureOcclusion", props, false);
+            lightmapSpecular = FindProperty("_LightmapSpecular", props, false);
+            lmSpecMaxSmoothness = FindProperty("_LightmapSpecularMaxSmoothness", props, false);
+
+            normalMapShadows = FindProperty("_NormalMapShadows", props, false);
+            normalMapShadowsScale = FindProperty("_BumpShadowHeightScale", props, false);
+            normalMapShadowsHardness = FindProperty("_BumpShadowHardness", props, false);
+
+            bakeryMode = FindProperty("_Bakery", props, false);
+            bakeryRNM0 = FindProperty("_RNM0", props, false);
+            bakeryRNM1 = FindProperty("_RNM1", props, false);
+            bakeryRNM2 = FindProperty("_RNM2", props, false);
+
+            ltcgiMode = FindProperty("_LTCGI", props, false);
         }
 
         public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] props)
@@ -152,6 +218,12 @@ namespace SilentTools
             // Do this before any GUI code has been issued to prevent layout issues in subsequent GUILayout statements (case 780071)
             if (m_FirstTimeApply)
             {
+                if (!Int32.TryParse(EditorUserSettings.GetConfigValue("filamented_settings_mode"), out m_SettingsMode))
+                {
+                    Debug.Log(m_SettingsMode);
+                    Debug.Log(EditorUserSettings.GetConfigValue("filamented_settings_mode"));
+                    m_SettingsMode = (int)SettingsMode.Basic;
+                }
                 MaterialChanged(material, m_WorkflowMode, false);
                 m_FirstTimeApply = false;
             }
@@ -194,18 +266,75 @@ namespace SilentTools
                 m_MaterialEditor.TextureScaleOffsetProperty(detailAlbedoMap);
                 m_MaterialEditor.ShaderProperty(uvSetSecondary, Styles.uvSetLabel.text);
 
-                // Third properties
+                EditorGUILayout.Space();
+
+                SettingsModePopup();
+
+                if(m_SettingsMode > (int)SettingsMode.Basic)
+                {
+                    // Third properties
+                    GUILayout.Label(Styles.filamentedOptionsLabel, EditorStyles.boldLabel);
+
+                    // Added properties
+                    GUILayout.Label(Styles.specularAALabel, EditorStyles.label);
+                    if (specularAAVariance != null)
+                        m_MaterialEditor.ShaderProperty(specularAAVariance, Styles.specularAAVarianceText, 2);
+                    if (specularAAThreshold != null)
+                        m_MaterialEditor.ShaderProperty(specularAAThreshold, Styles.specularAAThresholdText, 2);
+
+                    EditorGUILayout.Space();
+
+                    if (normalMapShadows != null)
+                        m_MaterialEditor.ShaderProperty(normalMapShadows, Styles.normalMapShadowsText);
+                    if (normalMapShadowsScale != null)
+                        m_MaterialEditor.ShaderProperty(normalMapShadowsScale, Styles.normalMapShadowsScaleText, 2);
+                    if (normalMapShadowsHardness != null)
+                        m_MaterialEditor.ShaderProperty(normalMapShadowsHardness, Styles.normalMapShadowsHardnessText, 2);
+
+                    EditorGUILayout.Space();
+
+                    GUILayout.Label(Styles.lightmapOptionsLabel, EditorStyles.boldLabel);
+    #if BAKERY_INCLUDED
+                    if (bakeryMode != null)
+                        m_MaterialEditor.ShaderProperty(bakeryMode, Styles.bakeryModeText);
+                    if ((BlendMode)material.GetFloat("_Bakery") != 0)
+                    {
+                        EditorGUI.BeginDisabledGroup(true);
+
+                        EditorGUI.indentLevel += 2;
+                        m_MaterialEditor.TexturePropertySingleLine(Styles.bakeryRNMText, bakeryRNM0);
+                        m_MaterialEditor.TexturePropertySingleLine(Styles.bakeryRNMText, bakeryRNM1);
+                        m_MaterialEditor.TexturePropertySingleLine(Styles.bakeryRNMText, bakeryRNM2);
+                        EditorGUI.indentLevel -= 2;
+                        EditorGUI.EndDisabledGroup();
+                    }
+    #endif
+
+    #if LTCGI_INCLUDED
+                    if (ltcgiMode != null)
+                        m_MaterialEditor.ShaderProperty(ltcgiMode, Styles.ltcgiModeText);
+    #else
+    // Force disabled when script isn't active to protect against compile failures.
+                    material.SetFloat("_LTCGI", 0.0f);
+                    material.DisableKeyword("_LTCGI");
+    #endif
+
+                    if (lightmapSpecular != null)
+                        m_MaterialEditor.ShaderProperty(lightmapSpecular, Styles.lightmapSpecularText);
+                    if (lmSpecMaxSmoothness != null)
+                        m_MaterialEditor.ShaderProperty(lmSpecMaxSmoothness, Styles.lmSpecMaxSmoothnessText, 2);
+                    if (exposureOcclusion != null)
+                        m_MaterialEditor.ShaderProperty(exposureOcclusion, Styles.exposureOcclusionText);
+
+                    EditorGUILayout.Space();
+                }
+
                 GUILayout.Label(Styles.forwardText, EditorStyles.boldLabel);
                 if (highlights != null)
                     m_MaterialEditor.ShaderProperty(highlights, Styles.highlightsText);
                 if (reflections != null)
                     m_MaterialEditor.ShaderProperty(reflections, Styles.reflectionsText);
 
-                EditorGUILayout.Space();
-
-                // Added properties
-                if (exposureOcclusion != null)
-                    m_MaterialEditor.ShaderProperty(exposureOcclusion, Styles.exposureOcclusionText);
                 EditorGUILayout.Space();
 
                 GUILayout.Label(Styles.advancedText, EditorStyles.boldLabel);
@@ -226,7 +355,9 @@ namespace SilentTools
 
         internal void DetermineWorkflow(MaterialProperty[] props)
         {
-            if (FindProperty("_SpecGlossMap", props, false) != null && FindProperty("_SpecColor", props, false) != null)
+            if (FindProperty("_ShaderType_Cloth", props, false) != null)
+                m_WorkflowMode = WorkflowMode.Cloth;
+            else if (FindProperty("_SpecGlossMap", props, false) != null && FindProperty("_SpecColor", props, false) != null)
                 m_WorkflowMode = WorkflowMode.Specular;
                 if (FindProperty("_SpecGlossMap", props, false).displayName == "Roughness Map") 
                     m_WorkflowMode = WorkflowMode.Roughness; 
@@ -282,6 +413,25 @@ namespace SilentTools
             {
                 m_MaterialEditor.RegisterPropertyChangeUndo("Rendering Mode");
                 blendMode.floatValue = (float)mode;
+            }
+
+            EditorGUI.showMixedValue = false;
+
+            return result;
+        }
+
+        bool SettingsModePopup()
+        {
+            EditorGUI.showMixedValue = blendMode.hasMixedValue;
+            var mode = (int)m_SettingsMode;
+
+            EditorGUI.BeginChangeCheck();
+            mode = EditorGUILayout.Popup(Styles.settingsMode, mode, Styles.settingNames);
+            bool result = EditorGUI.EndChangeCheck();
+            if (result)
+            {
+                EditorUserSettings.SetConfigValue("filamented_settings_mode", mode.ToString());
+                m_SettingsMode = mode;
             }
 
             EditorGUI.showMixedValue = false;
@@ -349,6 +499,12 @@ namespace SilentTools
             {
                 hasGlossMap = metallicMap.textureValue != null;
                 m_MaterialEditor.TexturePropertySingleLine(Styles.metallicMapText, metallicMap, hasGlossMap ? null : metallic);
+            }
+            else if (m_WorkflowMode == WorkflowMode.Cloth)
+            {
+                hasGlossMap = specularMap.textureValue != null;
+                // Always show colour for tinting
+                m_MaterialEditor.TexturePropertySingleLine(Styles.sheenText, specularMap, specularColor);
             }
 
             bool showSmoothnessScale = hasGlossMap;
@@ -453,7 +609,7 @@ namespace SilentTools
             } 
             else 
             {
-                if (workflowMode == WorkflowMode.Specular)
+                if (workflowMode == WorkflowMode.Specular || workflowMode == WorkflowMode.Cloth)
                     SetKeyword(material, "_SPECGLOSSMAP", material.GetTexture("_SpecGlossMap"));
                 else if (workflowMode == WorkflowMode.Metallic)
                     SetKeyword(material, "_METALLICGLOSSMAP", material.GetTexture("_MetallicGlossMap"));
@@ -472,6 +628,11 @@ namespace SilentTools
             {
                 SetKeyword(material, "_SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A", GetSmoothnessMapChannel(material) == SmoothnessMapChannel.AlbedoAlpha);
             }
+
+            // New properties
+
+            SetKeyword(material, "_LIGHTMAPSPECULAR", material.GetFloat("_LightmapSpecular") == 1? true : false);
+            SetKeyword(material, "_NORMALMAP_SHADOW", material.GetFloat("_NormalMapShadows") == 1? true : false);
         }
 
         static void MaterialChanged(Material material, WorkflowMode workflowMode, bool overrideRenderQueue)

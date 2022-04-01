@@ -7,7 +7,7 @@ similar to a Unity surface shader - but with less jank.
 Instead of reading multiple seperate maps, it just asks for
 an albedo map, a normal map, and a MOES map. 
 */ 
-Shader "Silent/Filamented Template"
+Shader "Silent/Filamented Extras/Filamented Refraction"
 {
     Properties
     {
@@ -22,6 +22,10 @@ Shader "Silent/Filamented Template"
         [Space]
         _Emission("Emission Power", Float) = 0
         _EmissionColor("Emission Color", Color) = (1,1,1,1)
+        [Space]
+        _Transmission("Transmission", Range(0, 1)) = 1.0
+        _Absorption("Absorbtion", Color) = (0, 0, 0, 0)
+        _IOR("IOR", Float) = 1.5
         [Space]
         [Toggle(_LIGHTMAPSPECULAR)]_LightmapSpecular("Lightmap Specular", Range(0, 1)) = 1
         _LightmapSpecularMaxSmoothness("Lightmap Specular Max Smoothness", Range(0, 1)) = 1
@@ -70,6 +74,26 @@ Shader "Silent/Filamented Template"
         // HAS_ATTRIBUTE_COLOR
         // If this is not defined, vertex colour will not be available.
 
+        #define HAS_REFRACTION
+        // If this is defined, the material supports refraction.
+
+        #define MATERIAL_HAS_TRANSMISSION
+        #define MATERIAL_HAS_ABSORPTION
+        #define MATERIAL_HAS_THICKNESS
+        #define MATERIAL_HAS_IOR
+        // These properties are controls for the refraction effect. 
+
+        // REFRACTION_TYPE REFRACTION_TYPE_THIN
+        // MATERIAL_HAS_MICRO_THICKNESS
+        // Micro thickness is only supported for thin refraction.
+
+        // REFRACTION_MODE REFRACTION_MODE_SCREEN
+        // Set to use the screen as a refraction source, which is typically very expensive. 
+
+        // REFRACTION_SOURCE _GrabPassRefraction
+        // REFRACTION_MULTIPLIER 1.0
+        // If screen refractions are enabled, you'll need to set these as well. 
+
         #define USE_DFG_LUT
         // Whether to use the lookup texture for specular reflection calculation.
         // Requires a shader property _DFG to be present and filled.
@@ -99,6 +123,11 @@ Shader "Silent/Filamented Template"
 	uniform half _Emission;
 	// uniform half3 _EmissionColor;
 
+    // Refraction-specific settings
+    uniform half _Transmission;
+    uniform half3 _Absorption;
+    uniform half _IOR;
+
 	// Vertex functions are called from UnityStandardCore.
 	// You can alter values here, or copy the function in and modify it.
 	VertexOutputForwardBase vertBase (VertexInput v) { return vertForwardBase(v); }
@@ -125,6 +154,11 @@ inline MaterialInputs MyMaterialSetup (inout float4 i_tex, float3 i_eyeVec, half
     material.emissive.rgb = baseColor.rgb * emissionMask * _Emission * _EmissionColor;
     material.emissive.a = 1.0;
     material.ambientOcclusion = occlusion;
+
+  
+    material.transmission = _Transmission;
+    material.absorption = _Absorption;
+    material.ior = _IOR;
     return material;
 }
 
