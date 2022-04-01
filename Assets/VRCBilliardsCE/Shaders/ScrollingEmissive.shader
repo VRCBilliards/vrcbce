@@ -18,6 +18,7 @@ Shader "Custom/StandardScrollingEmissive" {
 		_BumpScale("Normal Scale", Float) = 1
 		_Glossiness("Smoothness", Range(0,1)) = 0.0
 		_Metallic("Metallic", Range(0,1)) = 0.0
+  		[ToggleOff] _SpecularHighlights("Specular Highlights", Float) = 1.0
 		}
         SubShader
         {
@@ -35,6 +36,7 @@ Shader "Custom/StandardScrollingEmissive" {
 			#pragma shader_feature _METALLICGLOSSMAP
         	#pragma shader_feature _EMISSION
             #pragma target 3.0
+        	#pragma shader_feature_local _SPECULARHIGHLIGHTS_OFF
 
             sampler2D _MainTex;
             sampler2D _EmissionTex;
