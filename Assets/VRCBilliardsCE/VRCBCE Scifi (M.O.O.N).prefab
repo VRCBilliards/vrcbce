@@ -1071,6 +1071,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: VRCBCE (Scifi)
       objectReference: {fileID: 0}
+    - target: {fileID: 3820595742394735936, guid: ccd744a0742c88445a375cbbfd7ad555,
+        type: 3}
+      propertyPath: m_Sources.Array.data[0].sourceTransform
+      value: 
+      objectReference: {fileID: 1198594942}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ccd744a0742c88445a375cbbfd7ad555, type: 3}
 --- !u!4 &6399214794185444253 stripped
