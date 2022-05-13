@@ -1,4 +1,6 @@
-*<p align="center"><img src="https://avatars.githubusercontent.com/u/50210138?s=200&v=4" alt="Prefabs Logo"></p>
+<p align="center"><a href="https://github.com/VRCBilliards/vrcbce/blob/master/README.md">🇺🇸 English 🇬🇧</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="https://github.com/VRCBilliards/vrcbce/blob/master/README_es.md">🇲🇽 Spanish 🇪🇸</a></p>
+
+<p align="center"><img src="https://avatars.githubusercontent.com/u/50210138?s=200&v=4" alt="Prefabs Logo"></p>
 
 <p align="center"><i>Prefabsコミュニティーのサポ－トがなければ完成しませんでした！</i></p>
 
