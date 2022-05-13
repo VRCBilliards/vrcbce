@@ -10,7 +10,6 @@ Material:
   m_Name: CueScifi2
   m_Shader: {fileID: 4800000, guid: 1ff9e5e46b35d3f47b409808d5ddd3b2, type: 3}
   m_ShaderKeywords: BAKERY_BICUBIC BAKERY_LMSPEC BAKERY_SH BAKERY_SHNONLINEAR _EMISSION
-    _SPECULARHIGHLIGHTS_OFF
   m_LightmapFlags: 0
   m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
@@ -134,6 +133,7 @@ Material:
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _Emission: 0.25
+    - _EmissionBoost: 0
     - _EnableEmission: 1
     - _ExposureOcclusion: 0.8
     - _FurDensity: 0.11
@@ -154,7 +154,7 @@ Material:
     - _Shininess: 8
     - _SmoothnessTextureChannel: 0
     - _Specular: 5
-    - _SpecularHighlights: 0
+    - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _UVSec: 1
     - _ZWrite: 1

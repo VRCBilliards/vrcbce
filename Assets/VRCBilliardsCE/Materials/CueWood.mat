@@ -9,7 +9,7 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: CueWood
   m_Shader: {fileID: 4800000, guid: 9829e18681954944a8b25de9b080a0b6, type: 3}
-  m_ShaderKeywords: _DETAIL_MULX2 _EMISSION _SPECULARHIGHLIGHTS_OFF
+  m_ShaderKeywords: _DETAIL_MULX2 _EMISSION
   m_LightmapFlags: 0
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -112,7 +112,7 @@ Material:
     - _LMStrength: 1
     - _LTCGI: 0
     - _LightProbeMethod: 1
-    - _LightmapSpecular: 1
+    - _LightmapSpecular: 0
     - _LightmapSpecularMaxSmoothness: 1
     - _Metallic: 0
     - _Mode: 0
@@ -123,7 +123,7 @@ Material:
     - _Reflectance: 0.5
     - _SmoothnessTextureChannel: 0
     - _SpecLMOcclusionAdjust: 0.2
-    - _SpecularHighlights: 0
+    - _SpecularHighlights: 1
     - _SpecularLMOcclusion: 0
     - _SrcBlend: 1
     - _SubsurfaceInheritDiffuse: 0

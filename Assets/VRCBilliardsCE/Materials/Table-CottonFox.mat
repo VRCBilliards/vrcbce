@@ -10,7 +10,7 @@ Material:
   m_Name: Table-CottonFox
   m_Shader: {fileID: 4800000, guid: 9829e18681954944a8b25de9b080a0b6, type: 3}
   m_ShaderKeywords: BAKERY_BICUBIC BAKERY_LMSPEC BAKERY_SH BAKERY_SHNONLINEAR _DETAIL_MULX2
-    _EMISSION _SPECULARHIGHLIGHTS_OFF
+    _EMISSION _LIGHTMAPSPECULAR
   m_LightmapFlags: 0
   m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
@@ -155,7 +155,7 @@ Material:
     - _Shininess: 8
     - _SmoothnessTextureChannel: 0
     - _Specular: 5
-    - _SpecularHighlights: 0
+    - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _UVSec: 1
     - _ZWrite: 1
