@@ -2497,7 +2497,7 @@ namespace VRCBilliards
             ballColors[15] = new Color(0.59f, 0.29f, 0, 1);
         }
 
-        private void FourBallColors()
+        private void FourBallColors() // will be used later. Doesnt do much yet
         {
             ballColors[0] = Color.white;
             ballColors[9] = Color.yellow;
@@ -2522,16 +2522,16 @@ namespace VRCBilliards
             {
                 if (!this.isTeam2Turn)
                 {
+                    tableSrcColour = pointerColour0;
                     cueRenderObjs[0].materials[0].SetColor(uniformCueColour, pointerColour0);
                     cueRenderObjs[1].materials[0].SetColor(uniformCueColour, pointerColour1 * 0.5f);
                 }
                 else
                 {
+                    tableSrcColour = pointerColour1;
                     cueRenderObjs[0].materials[0].SetColor(uniformCueColour, pointerColour0 * 0.5f);
                     cueRenderObjs[1].materials[0].SetColor(uniformCueColour, pointerColour1);
                 }
-
-                tableSrcColour = tableBlack;
             }
             else if (isNineBall)
             {
