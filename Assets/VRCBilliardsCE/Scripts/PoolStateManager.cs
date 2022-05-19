@@ -209,8 +209,6 @@ namespace VRCBilliards
         public Color fabricBlue = new Color(0.1f, 0.6f, 1.0f, 1.0f);
         public Color fabricGreen = new Color(0.15f, 0.75f, 0.3f, 1.0f);
         
-        [ColorUsage(true, true)]
-        private Color[] ballColors = new Color[NUMBER_OF_SIMULATED_BALLS];
         //akalink added, the behaviors of the color panels, as well as the shader toggle.
         [Header("Colour Options")]  
         public bool ballCustomColours = false; //bypasses ball colour options for UI that doesn't use it. Add the behaviours and shader when in use
@@ -1519,7 +1517,6 @@ namespace VRCBilliards
                     currentAngularVelocities[k] = vectorZero;
                 }
             }
-            UsColors();
         }
 
         private void Initialize4Ball()
@@ -1541,7 +1538,6 @@ namespace VRCBilliards
             currentAngularVelocities[9] = vectorZero;
             currentAngularVelocities[2] = vectorZero;
             currentAngularVelocities[3] = vectorZero;
-            FourBallColors();
         }
 
         private void Initialize8Ball()
@@ -1563,7 +1559,6 @@ namespace VRCBilliards
                     currentAngularVelocities[k] = vectorZero;
                 }
             }
-            TeamColors();
         }
         
         /// CUE ACTIONS
@@ -2462,52 +2457,6 @@ namespace VRCBilliards
             hasRunSyncOnce = false;
         }
 
-        
-        private void TeamColors()
-        {
-            ballColors[0] = Color.white;
-            ballColors[1] = Color.black;
-            for (int i = 2; i < 9; i++)
-            {
-                ballColors[i] = tableBlue;
-            }
-            for (int i = 9; i < NUMBER_OF_SIMULATED_BALLS; i++)
-            {
-                ballColors[i] = tableOrange;
-            }
-        }
-        private void UsColors()
-        {
-            // Set colors
-            ballColors[0] = Color.white;
-            ballColors[1] = Color.black;
-            ballColors[2] = Color.yellow;
-            ballColors[3] = Color.blue;
-            ballColors[4] = Color.red;
-            ballColors[5] = Color.magenta;
-            ballColors[6] = new Color(1, 0.6f, 0, 1);
-            ballColors[7] = Color.green;
-            ballColors[8] = new Color(0.59f, 0.29f, 0, 1);
-            ballColors[9] = Color.yellow;
-            ballColors[10] = Color.blue;
-            ballColors[11] = Color.red;
-            ballColors[12] = Color.magenta;
-            ballColors[13] = new Color(1, 0.6f, 0, 1);
-            ballColors[14] = Color.green;
-            ballColors[15] = new Color(0.59f, 0.29f, 0, 1);
-        }
-
-        private void FourBallColors()
-        {
-            ballColors[0] = Color.white;
-            ballColors[9] = Color.yellow;
-            ballColors[2] = Color.red;
-            ballColors[3] = Color.red;
-
-        }
-        
-        
-        
         /// <summary>
         /// Updates table colour target to appropriate player colour
         /// </summary>
