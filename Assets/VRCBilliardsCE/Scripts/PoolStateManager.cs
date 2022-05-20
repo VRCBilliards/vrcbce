@@ -1666,6 +1666,9 @@ namespace VRCBilliards
         private void _Reset()
         {
             isGameInMenus = true;
+            isReplaying = false;
+            currentTurn = -1;
+            latestTurn = -1;
             poolCues[0].tableIsActive = false;
             poolCues[1].tableIsActive = false;
             isPlayerAllowedToPlay = false;
@@ -2189,7 +2192,10 @@ namespace VRCBilliards
 
                 // Keep playing
                 isPlayerAllowedToPlay = true;
-
+                if (isGameModePractice)
+                {
+                    _StoreEndTurn();
+                }
                 RefreshNetworkData(isTeam2Turn);
             }
             else
@@ -2362,7 +2368,17 @@ namespace VRCBilliards
                 }
 
                 isGameModePractice = localPlayerID == 0 && numberOfPlayers == 1;
-
+                
+                if (!isGameInMenus && isGameModePractice && poolPracticeMenu != null)
+                {
+                    poolPracticeMenu._EnablePracticeMenu();
+                    poolPracticeMenu._UpdateMenu(currentTurn,latestTurn);
+                }
+                else
+                {
+                    poolPracticeMenu._DisablePracticeMenu();
+                }
+                
                 int playerID = Networking.LocalPlayer.playerId;
                 if (hasPaidToSignUp && player1ID != playerID && player2ID != playerID && player3ID != playerID &&
                     player4ID != playerID)
@@ -3608,7 +3624,6 @@ namespace VRCBilliards
             isGameInMenus = true;
             poolCues[0].tableIsActive = false;
             poolCues[1].tableIsActive = false;
-
             isTeam2Winner = newIsTeam2Winner;
 
             RefreshNetworkData(isTeam2Turn);
@@ -3855,10 +3870,14 @@ namespace VRCBilliards
 
             // Commit changes
             gameIsSimulating = true;
-            
             for (int i = 0; i < NUMBER_OF_SIMULATED_BALLS; i++)
             {
                 oldBallsArePocketed[i] = ballsArePocketed[i];
+            }
+
+            if (isGameModePractice)
+            {
+                _StoreShot(); // Store shot for practice mode
             }
 
             // Make sure we are the network owner
@@ -4131,6 +4150,159 @@ namespace VRCBilliards
             Money += total;
         }
 
+        #endregion
+        
+        /// <summary>
+        /// Reruns the simulation for the current turn. Result should be the same.
+        /// </summary>
+        public void _ReplayPhysics()
+        {
+            if (!gameIsSimulating && currentTurn >= 0)
+            {
+                if (logger)
+                {
+                    logger._Log(name, "ReplayPhysics");
+                }
+                if (previousBallPositions[currentTurn-1] == null)
+                {
+                    if (logger)
+                    {
+                        logger._Error(name, "Unable to replay physics, no previous data stored");
+                    }
+                    return;
+                }
+                isArmed = false;
+                isReplaying = true;
+                gameIsSimulating = true;
+                currentAngularVelocities = new Vector3[NUMBER_OF_SIMULATED_BALLS];
+                currentBallVelocities = new Vector3[NUMBER_OF_SIMULATED_BALLS];
+                // Restore to state from the end of last turn.
+                currentBallPositions = (Vector3[])previousBallPositions[currentTurn-1].Clone();
+                currentBallVelocities[0] = initialCueBallVelocity[currentTurn];
+                currentAngularVelocities[0] = initialCueBallAngularVelocity[currentTurn];
+                ballsArePocketed = (bool[])previousBallPocketedState[currentTurn].Clone();
+            }
+        }
+
+        #region turnUndo
+        
+        /// <summary>
+        /// Shot Undo System
+        /// </summary>
+        [UdonSynced] [HideInInspector] public int currentTurn = 0;
+        [UdonSynced] [HideInInspector] public int latestTurn = 0; //for redo feature
+        private const int MAX_TURNS = 1000;
+        private Vector3[][] previousBallPositions = new Vector3[MAX_TURNS][];
+        private bool[][] previousBallPocketedState = new bool[MAX_TURNS][];
+        private bool[] previousIsOpen = new bool[MAX_TURNS];
+        private bool[] previousIsTeam2Turn = new bool[MAX_TURNS];
+        private bool[] previousIsPlayer2Solids = new bool[MAX_TURNS];
+        private bool[] previousPlayerTeam2 = new bool[MAX_TURNS];
+        private bool isReplaying = false;
+        private Vector3[] initialCueBallVelocity = new Vector3[MAX_TURNS];
+        private Vector3[] initialCueBallAngularVelocity = new Vector3[MAX_TURNS];
+        private PoolPracticeMenu poolPracticeMenu;
+        /// <summary>
+        /// Store the state of the game at the start of the current turn.
+        /// </summary>
+        public void _StoreShot()
+        {
+            if (!isGameModePractice || isReplaying) return;
+            else if (logger)
+            {
+                logger._Log(name, "StoreShot");
+            }
+            currentTurn++;
+            latestTurn = currentTurn;
+            //for physics replay, store initial state that matters
+            initialCueBallVelocity[currentTurn] = currentBallVelocities[0];
+            initialCueBallAngularVelocity[currentTurn] = currentAngularVelocities[0];
+        }
+
+        public void _StoreEndTurn()
+        {
+            if (!isGameModePractice) return;
+            if (isReplaying)
+            {
+                isReplaying = false;
+                return;
+            }
+            else if (logger)
+            {
+                logger._Log(name, "StoreEndTurn");
+            }
+            //For turn undo
+            previousIsOpen[currentTurn] = isOpen;
+            previousPlayerTeam2[currentTurn] = playerIsTeam2;
+            previousIsPlayer2Solids[currentTurn] = isTeam2Blue;
+            previousIsTeam2Turn[currentTurn] = isTeam2Turn;
+            previousBallPocketedState[currentTurn] = (bool[])ballsArePocketed.Clone();
+            previousBallPositions[currentTurn] = (Vector3[])currentBallPositions.Clone();
+        }
+        /// <summary>
+        /// Undo the last turn.
+        /// </summary>
+        public void _UndoTurn()
+        {
+            if (!gameIsSimulating && !isGameInMenus && currentTurn > -1 && isGameModePractice && isPlayerAllowedToPlay)
+            {
+                if (logger)
+                {
+                    logger._Log(name, "UndoTurn");
+                }
+                if (currentTurn > 0) // allow undoing the first turn
+                {
+                    currentTurn--;
+                }
+                // Return since state is not available.
+                if (previousIsOpen[currentTurn] == null)
+                {
+                    if (logger)
+                    {
+                        logger._Error(name, "UndoTurn: State is not available for turn " + currentTurn);
+                    }
+                    return;
+                }
+                isOpen = previousIsOpen[currentTurn];
+                playerIsTeam2 = previousPlayerTeam2[currentTurn];
+                isTeam2Blue = previousIsPlayer2Solids[currentTurn];
+                isTeam2Turn = previousIsTeam2Turn[currentTurn];
+                currentBallPositions = previousBallPositions[currentTurn];
+                ballsArePocketed = previousBallPocketedState[currentTurn];
+                Networking.SetOwner(localPlayer,gameObject);
+                RefreshNetworkData(false);
+            }
+        }
+        /// <summary>
+        /// Go forward one turn.
+        /// </summary>
+        public void _RedoTurn()
+        {
+            if (!gameIsSimulating && !isGameInMenus && currentTurn < latestTurn && isGameModePractice && isPlayerAllowedToPlay)
+            {
+                if (logger)
+                {
+                    logger._Log(name,"RedoTurn");
+                }
+                currentTurn++;
+                if (previousIsOpen[currentTurn] == null)
+                {
+                    if (logger)
+                    {
+                        logger._Error(name, "RedoTurn: State is not available for turn " + currentTurn);
+                    }
+                    return;
+                }
+                isOpen = previousIsOpen[currentTurn];
+                playerIsTeam2 = previousPlayerTeam2[currentTurn];
+                isTeam2Blue = previousIsPlayer2Solids[currentTurn];
+                isTeam2Turn = previousIsTeam2Turn[currentTurn];
+                currentBallPositions = previousBallPositions[currentTurn];
+                ballsArePocketed = (bool[])previousBallPocketedState[currentTurn].Clone();
+                Networking.SetOwner(localPlayer,gameObject);
+                RefreshNetworkData(false);
+            }
+        }
         #endregion
     }
 }
