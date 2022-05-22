@@ -2406,12 +2406,13 @@ namespace VRCBilliards
                 if (isNineBall)
                 {
                     int target = GetLowestNumberedBall(ballsArePocketed);
-
+                    
                     if (marker9ball)
                     {
                         marker9ball.SetActive(true);
                         marker9ball.transform.localPosition = currentBallPositions[target];
                     }
+                    ApplyTableColour(isTeam2Turn);
                 }
 
                 if (!tableModelHasRails || !hasRunSyncOnce)
