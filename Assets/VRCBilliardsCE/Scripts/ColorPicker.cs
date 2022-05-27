@@ -18,18 +18,18 @@ namespace VRCBilliards
         public PoolStateManager PoolTable;
         public bool solidsBlue = true;
         private bool isPanelEnabled = false;
-        
+
         [Header("Shader property name and the display material that will be colored")]
         public string ColorMaterialName = "_Color";
         private Renderer displayOutput;
-        
+
         [Header("HSV values from the Slider and the synced float variables")]
         private Slider[] slidersAll; //0 Hue, 1 Saturation, 2 Brightness, 3 Intensity
         [UdonSynced()] public float floatHue = 0;
         [UdonSynced()] public float floatSaturation = 0.75f;
         [UdonSynced()] public float floatBrightness = 1;
         [UdonSynced()] public float floatIntensity = 1;
-        
+
         [Header("The Colored Buttons that are already set up fro the player")]
         private PrefabColor[] colorButtons;
         [Header("The sound that plays when the buttons are pressed")]
@@ -49,8 +49,8 @@ namespace VRCBilliards
             displayOutput.material.SetColor(ColorMaterialName, Temp * floatIntensity);
             SetColor();
         }
-        
-        
+
+
 
 
         public void _SetHue()
