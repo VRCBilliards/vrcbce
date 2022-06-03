@@ -34,7 +34,7 @@ Metamaniac#3582 on Discord
 Requirements:
 
 1. A project with the latest VRChat SDK3 Release installed in it
-2. The project also has the latest [UdonSharp](https://github.com/MerlinVR/UdonSharp)
+2. The project also has the latest [UdonSharp](https://github.com/MerlinVR/UdonSharp/releases/download/v0.20.3/UdonSharp_v0.20.3.unitypackage) installed (specifically 0.20.3 as directly linked, we do not yet officially support the U#1.0 beta)
 3. The project also has TextMeshPro installed in it.
 
 Recommended:
