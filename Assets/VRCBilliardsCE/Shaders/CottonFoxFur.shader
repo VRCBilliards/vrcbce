@@ -42,9 +42,6 @@ Shader "CF-Pool/Fur"
         SubShader
         {
             Pass {
-                Tags { "LightMode" = "ShadowCaster" }
-            }
-            Pass {
                 CGPROGRAM
                 #pragma vertex vert_surface
                 #pragma fragment frag_surface
