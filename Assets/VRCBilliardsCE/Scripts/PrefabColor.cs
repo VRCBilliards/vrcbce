@@ -14,6 +14,9 @@ namespace VRCBilliards
         private ColorPicker PlayerPanel;
         public Color PrefabedColor = new Color(1.00f, 1.00f, 1.00f, 1.00f);
 
+        // Capped at 3 as it gets blinding depending shaders and world post processing setup
+        [Range(0, 3)] public float intensity = 1;
+
         public string materialName = "_Color";
 
         //public Renderer ButtonColor;
@@ -32,7 +35,7 @@ namespace VRCBilliards
             float H, S, V;
             Color.RGBToHSV(PrefabedColor, out H, out S, out V);
             Debug.Log("button works");
-            PlayerPanel._PrefabPicker(H, S, V);
+            PlayerPanel._PrefabPicker(H, S, V, intensity);
         }
 
         public void _ButtonColors(bool IO)

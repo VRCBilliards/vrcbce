@@ -18,17 +18,18 @@ namespace VRCBilliards
         public PoolStateManager PoolTable;
         public bool solidsBlue = true;
         private bool isPanelEnabled = false;
-        
+
         [Header("Shader property name and the display material that will be colored")]
         public string ColorMaterialName = "_Color";
         private Renderer displayOutput;
-        
+
         [Header("HSV values from the Slider and the synced float variables")]
-        private Slider[] slidersAll; //0 Hue, 1 Saturation, 2 Brightness
+        private Slider[] slidersAll; //0 Hue, 1 Saturation, 2 Brightness, 3 Intensity
         [UdonSynced()] public float floatHue = 0;
         [UdonSynced()] public float floatSaturation = 0.75f;
         [UdonSynced()] public float floatBrightness = 1;
-        
+        [UdonSynced()] public float floatIntensity = 1;
+
         [Header("The Colored Buttons that are already set up fro the player")]
         private PrefabColor[] colorButtons;
         [Header("The sound that plays when the buttons are pressed")]
@@ -40,16 +41,16 @@ namespace VRCBilliards
             displayOutput = GetComponentInChildren<Renderer>();
             colorButtons = GetComponentsInChildren<PrefabColor>();
             audioSource = GetComponentInChildren<AudioSource>();
-            if (slidersAll.Length != 3)
+            if (slidersAll.Length != 4)
             {
-                Debug.Log("sliders did not equal 3");
+                Debug.Log("sliders did not equal 4");
             }
             Color Temp = new Color(floatHue, floatSaturation, floatBrightness, 1);
-            displayOutput.material.SetColor(ColorMaterialName, Temp);
+            displayOutput.material.SetColor(ColorMaterialName, Temp * floatIntensity);
             SetColor();
         }
-        
-        
+
+
 
 
         public void _SetHue()
@@ -59,6 +60,18 @@ namespace VRCBilliards
             {
                 Networking.SetOwner(Networking.LocalPlayer, gameObject);
                 floatHue = slidersAll[0].value;
+                RequestSerialization();
+                SetColor();
+            }
+        }
+
+        public void _SetIntensity()
+        {
+
+            if (isPanelEnabled)
+            {
+                Networking.SetOwner(Networking.LocalPlayer, gameObject);
+                floatIntensity = slidersAll[3].value;
                 RequestSerialization();
                 SetColor();
             }
@@ -89,14 +102,14 @@ namespace VRCBilliards
         private void SetColor()
         {
             Color Temp = Color.HSVToRGB(floatHue, floatSaturation, floatBrightness, true);
-            displayOutput.material.SetColor(ColorMaterialName, Temp);
+            displayOutput.material.SetColor(ColorMaterialName, Temp * floatIntensity);
             if (solidsBlue)
             {
-                PoolTable.tableBlue = Temp;
+                PoolTable.tableBlue = Temp * floatIntensity;
             }
             else
             {
-                PoolTable.tableOrange = Temp;
+                PoolTable.tableOrange = Temp * floatIntensity;
             }
         }
 
@@ -105,7 +118,7 @@ namespace VRCBilliards
             SetColor();
         }
 
-        public void _PrefabPicker(float Hue, float Saturation, float Brightness)
+        public void _PrefabPicker(float Hue, float Saturation, float Brightness, float Intensity)
         {
             if (isPanelEnabled)
             {
@@ -113,6 +126,7 @@ namespace VRCBilliards
                 floatHue = Hue;
                 floatSaturation = Saturation;
                 floatBrightness = Brightness;
+                floatIntensity = Intensity;
                 RequestSerialization();
                 SetColor();
                 _PlayAudio(); //not sure if should be networked or not
