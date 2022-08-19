@@ -2,8 +2,7 @@
 
 ![Header](https://user-images.githubusercontent.com/6299186/173490378-0b81c2a0-b523-4893-96f3-4ac36935066c.png)
 
-#### Like this table?
-[Buy us a coffee on Ko-fi](https://ko-fi.com/fairlysadproductions)
+#### Like this table? [Buy us a coffee on Ko-fi](https://ko-fi.com/fairlysadproductions)
 
 ## The Essential VRChat game prefab - by the community, for the community
 
