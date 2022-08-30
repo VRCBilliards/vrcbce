@@ -7,7 +7,7 @@ using VRC.Udon;
 
 namespace VRCBilliards
 {
-    [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class PoolMenu : UdonSharpBehaviour
     {
         private PoolStateManager manager;
