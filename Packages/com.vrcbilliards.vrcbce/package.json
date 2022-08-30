@@ -1,0 +1,19 @@
+{
+  "name": "com.vrcbilliards.vrcbce",
+  "version": "1.6.0",
+  "displayName": "VRCBilliards: Community Edition",
+  "description": "A pool table prefab for VRChat SDK3 worlds.",
+  "unity": "2019.4",
+  "unityRelease": "29f1",
+  "author": {
+    "name": "VRCBilliards",
+    "url": "https://github.com/VRCBilliards"
+  },
+  "samples": [
+    {
+      "displayName": "Demo Scene - All Tables",
+      "description": "Demo scene with all of the table variants",
+      "path": "Samples~/Demo Scene"
+    }
+  ]
+}
