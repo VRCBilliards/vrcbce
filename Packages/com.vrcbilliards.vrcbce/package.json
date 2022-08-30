@@ -9,6 +9,9 @@
     "name": "VRCBilliards",
     "url": "https://github.com/VRCBilliards"
   },
+  "vpmDependencies": {
+    "com.vrchat.udonsharp": "1.x.x"
+  },
   "samples": [
     {
       "displayName": "Demo Scene - All Tables",
