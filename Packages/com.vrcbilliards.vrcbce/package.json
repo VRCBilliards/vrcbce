@@ -1,0 +1,21 @@
+{
+  "name": "com.vrcbilliards.vrcbce",
+  "version": "1.6.0",
+  "displayName": "VRCBilliards",
+  "description": "The definitive edition of VRChat's most popular game prefab!\nReliable, extensible, *and* heavily performant (even on Quest!)",
+  "unity": "2019.4",
+  "author": {
+    "name": "VRCBilliards",
+    "url": "https://github.com/VRCBilliards"
+  },
+  "vpmDependencies": {
+    "com.vrchat.udonsharp": "1.x.x"
+  },
+  "samples": [
+    {
+      "displayName": "Demo Scene - All Tables",
+      "description": "Demo scene with all of the table variants",
+      "path": "Samples~/Demo Scene"
+    }
+  ]
+}
