@@ -73,6 +73,8 @@ half       _specularAntiAliasingVariance;
 half       _specularAntiAliasingThreshold;
 #endif
 
+half       _CullMode;
+
 //-------------------------------------------------------------------------------------
 // Input functions
 
@@ -82,8 +84,11 @@ struct VertexInput
     half3 normal    : NORMAL;
     float2 uv0      : TEXCOORD0;
     float2 uv1      : TEXCOORD1;
-#if defined(DYNAMICLIGHTMAP_ON) || defined(UNITY_PASS_META)
+#if defined(DYNAMICLIGHTMAP_ON) || defined(UNITY_PASS_META) ||  defined(HAS_ATTRIBUTE_UV2)
     float2 uv2      : TEXCOORD2;
+#endif
+#if defined(HAS_ATTRIBUTE_UV3)
+    float2 uv3      : TEXCOORD2;
 #endif
 #ifdef _TANGENT_TO_WORLD
     half4 tangent   : TANGENT;
@@ -99,6 +104,12 @@ float4 TexCoords(VertexInput v)
     float4 texcoord;
     texcoord.xy = TRANSFORM_TEX(v.uv0, _MainTex); // Always source from uv0
     texcoord.zw = TRANSFORM_TEX(((_UVSec == 0) ? v.uv0 : v.uv1), _DetailAlbedoMap);
+#if defined(HAS_ATTRIBUTE_UV2)
+    texcoord.zw = TRANSFORM_TEX(((_UVSec == 2) ? v.uv2 : texcoord.zw), _DetailAlbedoMap);
+#endif
+#if defined(HAS_ATTRIBUTE_UV3)
+    texcoord.zw = TRANSFORM_TEX(((_UVSec == 3) ? v.uv3 : texcoord.zw), _DetailAlbedoMap);
+#endif
     return texcoord;
 }
 
@@ -378,6 +389,11 @@ float NormalTangentShadow(float4 texcoords, half3 lightDirTS, float noise)
 half getMaskThreshold()
 {
     return _Cutoff;
+}
+
+bool getIsDoubleSided()
+{
+    return _CullMode == 2;
 }
 
 half getExposureOcclusionBias()

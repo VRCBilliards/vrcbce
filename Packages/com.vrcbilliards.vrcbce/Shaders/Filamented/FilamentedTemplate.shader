@@ -27,11 +27,10 @@ Shader "Silent/Filamented Template"
         _LightmapSpecularMaxSmoothness("Lightmap Specular Max Smoothness", Range(0, 1)) = 1
         _ExposureOcclusion("Lightmap Occlusion Sensitivity", Range(0, 1)) = 0.2
         [Space]
-        [KeywordEnum(None, SH, RNM)] _Bakery ("Bakery Mode", Int) = 0
+        [KeywordEnum(None, SH, RNM, MonoSH)] _Bakery ("Bakery Mode", Int) = 0
         [HideInInspector]_RNM0("RNM0", 2D) = "black" {}
         [HideInInspector]_RNM1("RNM1", 2D) = "black" {}
         [HideInInspector]_RNM2("RNM2", 2D) = "black" {}
-
         [Toggle(_LTCGI)] _LTCGI ("LTCGI", Int) = 0
         [Space]
         [Enum(UnityEngine.Rendering.CullMode)]_CullMode("Cull Mode", Int) = 2
@@ -224,7 +223,7 @@ half4 fragAdd (VertexOutputForwardAdd i) : SV_Target { return fragForwardAddTemp
             #pragma shader_feature_local _SPECULARHIGHLIGHTS_OFF
             #pragma shader_feature_local _GLOSSYREFLECTIONS_OFF
             
-            #pragma shader_feature_local _ _BAKERY_RNM _BAKERY_SH
+            #pragma shader_feature_local _ _BAKERY_RNM _BAKERY_SH _BAKERY_MONOSH
             #pragma shader_feature_local _LTCGI
 
             #pragma multi_compile_fwdbase

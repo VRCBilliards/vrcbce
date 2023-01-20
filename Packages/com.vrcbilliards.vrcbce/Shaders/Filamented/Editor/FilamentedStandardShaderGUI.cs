@@ -58,6 +58,7 @@ namespace SilentTools
             public static GUIContent detailAlbedoText = EditorGUIUtility.TrTextContent("Detail Albedo x2", "Albedo (RGB) multiplied by 2");
             public static GUIContent detailNormalMapText = EditorGUIUtility.TrTextContent("Normal Map", "Normal Map");
             public static GUIContent cullModeText = EditorGUIUtility.TrTextContent("Cull Mode", "Which face of the polygon should be culled from rendering");
+            public static GUIContent alphaCoverageModeText = EditorGUIUtility.TrTextContent("Alpha to Coverage Mode", "Whether to use alpha-to-coverage on the edges of cutout materials to anti-alias them");
 
             public static GUIContent filamentedOptionsLabel = EditorGUIUtility.TrTextContent("Filamented Options", "Settings which control functionality specific to Filamented.");
             public static GUIContent specularAALabel = EditorGUIUtility.TrTextContent("Specular Anti-Aliasing", "Reduces specular aliasing and preserves the shape of specular highlights as an object moves away from the camera.");
@@ -119,6 +120,7 @@ namespace SilentTools
         MaterialProperty detailNormalMap = null;
         MaterialProperty uvSetSecondary = null;
         MaterialProperty cullMode = null;
+        MaterialProperty alphaCoverageMode = null;
         MaterialProperty specularAAVariance = null;
         MaterialProperty specularAAThreshold = null;
         MaterialProperty exposureOcclusion = null;
@@ -187,6 +189,7 @@ namespace SilentTools
             detailNormalMap = FindProperty("_DetailNormalMap", props);
             uvSetSecondary = FindProperty("_UVSec", props);
             cullMode = FindProperty("_CullMode", props);
+            alphaCoverageMode = FindProperty("_AlphaToMaskMode", props);
 
             specularAAVariance = FindProperty("_specularAntiAliasingVariance", props, false);
             specularAAThreshold = FindProperty("_specularAntiAliasingThreshold", props, false);
@@ -348,6 +351,10 @@ namespace SilentTools
             }
 
             m_MaterialEditor.ShaderProperty(cullMode, Styles.cullModeText.text);
+            if (((BlendMode)material.GetFloat("_Mode") == BlendMode.Cutout))
+            {
+                m_MaterialEditor.ShaderProperty(alphaCoverageMode, Styles.alphaCoverageModeText.text);
+            }
 
             m_MaterialEditor.EnableInstancingField();
             m_MaterialEditor.DoubleSidedGIField();
@@ -535,6 +542,7 @@ namespace SilentTools
                     material.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.One);
                     material.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.Zero);
                     material.SetFloat("_ZWrite", 1.0f);
+                    material.SetFloat("_AlphaToMaskMode", 0.0f);
                     material.DisableKeyword("_ALPHATEST_ON");
                     material.DisableKeyword("_ALPHABLEND_ON");
                     material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
@@ -547,6 +555,7 @@ namespace SilentTools
                     material.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.One);
                     material.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.Zero);
                     material.SetFloat("_ZWrite", 1.0f);
+                    material.SetFloat("_AlphaToMaskMode", 1.0f);
                     material.EnableKeyword("_ALPHATEST_ON");
                     material.DisableKeyword("_ALPHABLEND_ON");
                     material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
@@ -559,6 +568,7 @@ namespace SilentTools
                     material.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
                     material.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
                     material.SetFloat("_ZWrite", 0.0f);
+                    material.SetFloat("_AlphaToMaskMode", 0.0f);
                     material.DisableKeyword("_ALPHATEST_ON");
                     material.EnableKeyword("_ALPHABLEND_ON");
                     material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
@@ -571,6 +581,7 @@ namespace SilentTools
                     material.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.One);
                     material.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
                     material.SetFloat("_ZWrite", 0.0f);
+                    material.SetFloat("_AlphaToMaskMode", 0.0f);
                     material.DisableKeyword("_ALPHATEST_ON");
                     material.DisableKeyword("_ALPHABLEND_ON");
                     material.EnableKeyword("_ALPHAPREMULTIPLY_ON");

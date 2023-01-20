@@ -16,7 +16,7 @@ float4 cubic(float v)
 // Unity's SampleTexture2DBicubic doesn't exist in 2018, which is our target here.
 // So this is a similar function with tweaks to have similar semantics. 
 
-float4 SampleTexture2DBicubicFilter(TEXTURE2D_ARGS(tex, smp), float2 coord, float4 texSize)
+float4 SampleTexture2DBicubicFilter(TEXTURE2D_PARAM(tex, smp), float2 coord, float4 texSize)
 {
     coord = coord * texSize.xy - 0.5;
     float fx = frac(coord.x);

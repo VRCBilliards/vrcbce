@@ -5,6 +5,7 @@
 
 #include "UnityCG.cginc"
 #include "UnityStandardConfig.cginc"
+#include "SharedSamplingLib.hlsl"
 
 // Helper functions, maybe move into UnityCG.cginc
 
@@ -348,13 +349,6 @@ float noiseR2(float2 pixel) {
 #define LambertTerm(x,y) dot(x,y)
 
 //-------------------------------------------------------------------------------------
-
-// We need to create these functions so we can sample the lightmap textures without complaints. 
-#ifndef TEXTURE2D_ARGS
-#define TEXTURE2D_ARGS(textureName, samplerName) Texture2D textureName, SamplerState samplerName
-#define TEXTURE2D_PARAM(textureName, samplerName) textureName, samplerName
-#define SAMPLE_TEXTURE2D(textureName, samplerName, coord2) textureName.Sample(samplerName, coord2)
-#endif
 
 float remap_almostIdentity( float x, float m, float n )
 {

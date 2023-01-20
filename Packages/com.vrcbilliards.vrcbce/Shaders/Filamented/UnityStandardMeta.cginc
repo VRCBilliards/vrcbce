@@ -10,6 +10,7 @@
 #include "UnityStandardInput.cginc"
 #include "UnityMetaPass.cginc"
 #include "UnityStandardCore.cginc"
+#include "FilamentShadingLit.cginc"
 
 struct v2f_meta
 {
@@ -18,6 +19,9 @@ struct v2f_meta
 #ifdef EDITOR_VISUALIZATION
     float2 vizUV        : TEXCOORD1;
     float4 lightCoord   : TEXCOORD2;
+#endif
+#ifdef HAS_ATTRIBUTE_COLOR
+    float4 color        : COLOR_Centroid;
 #endif
 };
 
@@ -37,6 +41,9 @@ v2f_meta vert_meta (VertexInput v)
         o.lightCoord = mul(unity_EditorViz_WorldToLight, mul(unity_ObjectToWorld, float4(v.vertex.xyz, 1)));
     }
 #endif
+#ifdef HAS_ATTRIBUTE_COLOR
+    o.color = v.color;
+#endif
     return o;
 }
 
@@ -55,20 +62,23 @@ float4 frag_meta (v2f_meta i) : SV_Target
 {
     // we're interested in diffuse & specular colors,
     // and surface roughness to produce final albedo.
-    FragmentCommonData data = UNITY_SETUP_BRDF_INPUT (i.uv);
+    MaterialInputs material = SETUP_BRDF_INPUT (i.uv);
+    
+    PixelParams pixel = (PixelParams)0;
+    getCommonPixelParams(material, pixel);
 
     UnityMetaInput o;
     UNITY_INITIALIZE_OUTPUT(UnityMetaInput, o);
 
 #ifdef EDITOR_VISUALIZATION
-    o.Albedo = data.diffColor;
+    o.Albedo = pixel.diffuseColor;
     o.VizUV = i.vizUV;
     o.LightCoord = i.lightCoord;
 #else
-    o.Albedo = UnityLightmappingAlbedo (data.diffColor, data.specColor, data.smoothness);
+    o.Albedo = UnityLightmappingAlbedo (pixel.diffuseColor, pixel.f0, 1-pixel.perceptualRoughness);
 #endif
-    o.SpecularColor = data.specColor;
-    o.Emission = Emission(i.uv.xy);
+    o.SpecularColor = pixel.f0;
+    o.Emission = material.emissive;
 
     return UnityMetaFragment(o);
 }

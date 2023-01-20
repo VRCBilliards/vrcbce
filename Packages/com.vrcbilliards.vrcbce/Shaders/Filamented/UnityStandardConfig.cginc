@@ -17,7 +17,10 @@
 #define TARGET_MOBILE
 #endif
 
-#define SPECULAR_AMBIENT_OCCLUSION SPECULAR_AO_SIMPLE
+#if !defined(SPECULAR_AMBIENT_OCCLUSION)
+#define SPECULAR_AMBIENT_OCCLUSION SPECULAR_AO_BENT_NORMALS
+#endif
+
 #define MULTI_BOUNCE_AMBIENT_OCCLUSION 1
 
 // Whether to use specular AA by default 
@@ -37,13 +40,13 @@
 
 // Filament cross-compatibility defines
 
-#if DIRECTIONAL
+#if (DIRECTIONAL || DIRECTIONAL_COOKIE)
 #define HAS_DIRECTIONAL_LIGHTING 
 #endif
-#if (POINT || SPOT)
+#if (POINT || SPOT || POINT_COOKIE)
 #define HAS_DYNAMIC_LIGHTING 
 #endif
-#if (SHADOWS_SCREEN || SHADOWS_SHADOWMASK || LIGHTMAP_SHADOW)
+#if (SHADOWS_SCREEN || SHADOWS_SHADOWMASK || LIGHTMAP_SHADOW || DIRECTIONAL_COOKIE)
 #define HAS_SHADOWING 
 #endif
 
@@ -69,6 +72,10 @@
 #endif
 #if _ALPHATEST_ON
 #define BLEND_MODE_MASKED 
+#endif
+
+#ifndef NEEDS_ALPHA_CHANNEL
+#define NEEDS_ALPHA_CHANNEL 0
 #endif
 
 // By default, Standard assumes meshes have normals
@@ -104,6 +111,10 @@ UNITY_DECLARE_TEX2D_FLOAT(_DFG);
 UNITY_DECLARE_TEX2D_HALF(_RNM0);
 UNITY_DECLARE_TEX2D_HALF(_RNM1);
 UNITY_DECLARE_TEX2D_HALF(_RNM2);
+#endif
+
+// For MonoSH, the extra textures aren't used. 
+#if defined(_BAKERY_MONOSH)
 #endif
 
 // Refraction source texture

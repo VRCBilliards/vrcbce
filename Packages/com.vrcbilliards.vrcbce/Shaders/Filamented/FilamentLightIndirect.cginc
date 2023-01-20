@@ -125,8 +125,9 @@ float3 Irradiance_SphericalHarmonics(const float3 n, const bool useL2) {
         #endif
 
         #if (SPHERICAL_HARMONICS == SPHERICAL_HARMONICS_GEOMETRICS)
-            float3 L0 = float3(unity_SHAr.w, unity_SHAg.w, unity_SHAb.w)
-            + float3(unity_SHBr.z, unity_SHBg.z, unity_SHBb.z) / 3.0;
+            float3 L0 = float3(unity_SHAr.w, unity_SHAg.w, unity_SHAb.w);
+            float3 L0L2 = float3(unity_SHBr.z, unity_SHBg.z, unity_SHBb.z) / 3.0;
+            L0 = (useL2) ? L0+L0L2 : L0-L0L2;
             finalSH.r = shEvaluateDiffuseL1Geomerics_local(L0.r, unity_SHAr.xyz, n);
             finalSH.g = shEvaluateDiffuseL1Geomerics_local(L0.g, unity_SHAg.xyz, n);
             finalSH.b = shEvaluateDiffuseL1Geomerics_local(L0.b, unity_SHAb.xyz, n);
@@ -255,7 +256,7 @@ float4 SampleLightmapBicubic(float2 uv)
 
         float4 unity_Lightmap_TexelSize = float4(width, height, 1.0/width, 1.0/height);
 
-        return SampleTexture2DBicubicFilter(TEXTURE2D_PARAM(unity_Lightmap, samplerunity_Lightmap),
+        return SampleTexture2DBicubicFilter(TEXTURE2D_ARGS(unity_Lightmap, samplerunity_Lightmap),
             uv, unity_Lightmap_TexelSize);
     #else
         return SAMPLE_TEXTURE2D(unity_Lightmap, samplerunity_Lightmap, uv);
@@ -270,7 +271,7 @@ float4 SampleLightmapDirBicubic(float2 uv)
 
         float4 unity_LightmapInd_TexelSize = float4(width, height, 1.0/width, 1.0/height);
 
-        return SampleTexture2DBicubicFilter(TEXTURE2D_PARAM(unity_LightmapInd, samplerunity_Lightmap),
+        return SampleTexture2DBicubicFilter(TEXTURE2D_ARGS(unity_LightmapInd, samplerunity_Lightmap),
             uv, unity_LightmapInd_TexelSize);
     #else
         return SAMPLE_TEXTURE2D(unity_LightmapInd, samplerunity_Lightmap, uv);
@@ -285,7 +286,7 @@ float4 SampleDynamicLightmapBicubic(float2 uv)
 
         float4 unity_DynamicLightmap_TexelSize = float4(width, height, 1.0/width, 1.0/height);
 
-        return SampleTexture2DBicubicFilter(TEXTURE2D_PARAM(unity_DynamicLightmap, samplerunity_DynamicLightmap),
+        return SampleTexture2DBicubicFilter(TEXTURE2D_ARGS(unity_DynamicLightmap, samplerunity_DynamicLightmap),
             uv, unity_DynamicLightmap_TexelSize);
     #else
         return SAMPLE_TEXTURE2D(unity_DynamicLightmap, samplerunity_DynamicLightmap, uv);
@@ -300,7 +301,7 @@ float4 SampleDynamicLightmapDirBicubic(float2 uv)
 
         float4 unity_DynamicDirectionality_TexelSize = float4(width, height, 1.0/width, 1.0/height);
 
-        return SampleTexture2DBicubicFilter(TEXTURE2D_PARAM(unity_DynamicDirectionality, samplerunity_DynamicLightmap),
+        return SampleTexture2DBicubicFilter(TEXTURE2D_ARGS(unity_DynamicDirectionality, samplerunity_DynamicLightmap),
             uv, unity_DynamicDirectionality_TexelSize);
     #else
         return SAMPLE_TEXTURE2D(unity_DynamicDirectionality, samplerunity_DynamicLightmap, uv);
@@ -357,9 +358,9 @@ float3 DecodeRNMLightmap(half3 color, half2 lightmapUV, half3 normalTangent, flo
 
         float4 rnm_TexelSize = float4(width, height, 1.0/width, 1.0/height);
         
-        float3 rnm0 = DecodeLightmap(SampleTexture2DBicubicFilter(TEXTURE2D_PARAM(_RNM0, sampler_RNM0), lightmapUV, rnm_TexelSize));
-        float3 rnm1 = DecodeLightmap(SampleTexture2DBicubicFilter(TEXTURE2D_PARAM(_RNM1, sampler_RNM0), lightmapUV, rnm_TexelSize));
-        float3 rnm2 = DecodeLightmap(SampleTexture2DBicubicFilter(TEXTURE2D_PARAM(_RNM2, sampler_RNM0), lightmapUV, rnm_TexelSize));
+        float3 rnm0 = DecodeLightmap(SampleTexture2DBicubicFilter(TEXTURE2D_ARGS(_RNM0, sampler_RNM0), lightmapUV, rnm_TexelSize));
+        float3 rnm1 = DecodeLightmap(SampleTexture2DBicubicFilter(TEXTURE2D_ARGS(_RNM1, sampler_RNM0), lightmapUV, rnm_TexelSize));
+        float3 rnm2 = DecodeLightmap(SampleTexture2DBicubicFilter(TEXTURE2D_ARGS(_RNM2, sampler_RNM0), lightmapUV, rnm_TexelSize));
     #else
         float3 rnm0 = DecodeLightmap(SAMPLE_TEXTURE2D(_RNM0, sampler_RNM0, lightmapUV));
         float3 rnm1 = DecodeLightmap(SAMPLE_TEXTURE2D(_RNM1, sampler_RNM0, lightmapUV));
@@ -406,9 +407,9 @@ float3 DecodeSHLightmap(half3 L0, half2 lightmapUV, half3 normalWorld, out Light
 
         float4 rnm_TexelSize = float4(width, height, 1.0/width, 1.0/height);
         
-        float3 nL1x = SampleTexture2DBicubicFilter(TEXTURE2D_PARAM(_RNM0, sampler_RNM0), lightmapUV, rnm_TexelSize);
-        float3 nL1y = SampleTexture2DBicubicFilter(TEXTURE2D_PARAM(_RNM1, sampler_RNM0), lightmapUV, rnm_TexelSize);
-        float3 nL1z = SampleTexture2DBicubicFilter(TEXTURE2D_PARAM(_RNM2, sampler_RNM0), lightmapUV, rnm_TexelSize);
+        float3 nL1x = SampleTexture2DBicubicFilter(TEXTURE2D_ARGS(_RNM0, sampler_RNM0), lightmapUV, rnm_TexelSize);
+        float3 nL1y = SampleTexture2DBicubicFilter(TEXTURE2D_ARGS(_RNM1, sampler_RNM0), lightmapUV, rnm_TexelSize);
+        float3 nL1z = SampleTexture2DBicubicFilter(TEXTURE2D_ARGS(_RNM2, sampler_RNM0), lightmapUV, rnm_TexelSize);
     #else
         float3 nL1x = SAMPLE_TEXTURE2D(_RNM0, sampler_RNM0, lightmapUV);
         float3 nL1y = SAMPLE_TEXTURE2D(_RNM1, sampler_RNM0, lightmapUV);
@@ -453,6 +454,52 @@ float3 DecodeSHLightmap(half3 L0, half2 lightmapUV, half3 normalWorld, out Light
 }
 #endif
 
+#if defined(_BAKERY_MONOSH)
+float3 DecodeMonoSHLightmap(half3 L0, half2 lightmapUV, half3 normalWorld, out Light o_light)
+{
+    o_light = (Light)0;
+
+    float3 dominantDir = SampleLightmapDirBicubic (lightmapUV);
+
+    float3 nL1 = dominantDir * 2 - 1;
+    float3 L1x = nL1.x * L0 * 2;
+    float3 L1y = nL1.y * L0 * 2;
+    float3 L1z = nL1.z * L0 * 2;
+
+    float3 sh;
+
+#if BAKERY_SHNONLINEAR
+    float lumaL0 = dot(L0, 1);
+    float lumaL1x = dot(L1x, 1);
+    float lumaL1y = dot(L1y, 1);
+    float lumaL1z = dot(L1z, 1);
+    float lumaSH = shEvaluateDiffuseL1Geomerics_local(lumaL0, float3(lumaL1x, lumaL1y, lumaL1z), normalWorld);
+
+    sh = L0 + normalWorld.x * L1x + normalWorld.y * L1y + normalWorld.z * L1z;
+    float regularLumaSH = dot(sh, 1);
+
+    sh *= lerp(1, lumaSH / regularLumaSH, saturate(regularLumaSH*16));
+#else
+    sh = L0 + normalWorld.x * L1x + normalWorld.y * L1y + normalWorld.z * L1z;
+#endif
+
+    #if defined(LIGHTMAP_SPECULAR)
+    dominantDir = nL1;
+
+    o_light.l = dominantDir;
+    half directionality = max(0.001, length(o_light.l));
+    o_light.l /= directionality;
+
+    // Split light into the directional and ambient parts, according to the directionality factor.
+    o_light.colorIntensity = float4(L0 * directionality, 1.0);
+    o_light.attenuation = directionality;
+    o_light.NoL = saturate(dot(normalWorld, o_light.l));
+    #endif
+
+    return sh;
+}
+#endif
+
 float IrradianceToExposureOcclusion(float3 irradiance)
 {
     return saturate(length(irradiance + FLT_EPS) * getExposureOcclusionBias());
@@ -481,16 +528,28 @@ float3 UnityGI_Irradiance(ShadingParams shading, float3 tangentNormal, out float
 
         #ifdef DIRLIGHTMAP_COMBINED
             fixed4 bakedDirTex = SampleLightmapDirBicubic (shading.lightmapUV.xy);
-            irradiance += DecodeDirectionalLightmap (bakedColor, bakedDirTex, shading.normal);
 
-            irradianceForAO = irradiance;
+            // Bakery's MonoSH mode replaces the regular directional lightmap
+            #if defined(_BAKERY_MONOSH)
+                irradiance = DecodeMonoSHLightmap (bakedColor, shading.lightmapUV.xy, shading.normal, derivedLight);
 
-            #if defined(LIGHTMAP_SHADOW_MIXING) && !defined(SHADOWS_SHADOWMASK) && defined(SHADOWS_SCREEN)
-                irradiance = SubtractMainLightWithRealtimeAttenuationFromLightmap (irradiance, shading.attenuation, bakedColorTex, shading.normal);
-            #endif
+                irradianceForAO = irradiance;
 
-            #if defined(LIGHTMAP_SPECULAR) 
-                irradiance = DecodeDirectionalLightmapSpecular(bakedColor, bakedDirTex, shading.normal, false, 0, derivedLight);
+                #if defined(LIGHTMAP_SHADOW_MIXING) && !defined(SHADOWS_SHADOWMASK) && defined(SHADOWS_SCREEN)
+                    irradiance = SubtractMainLightWithRealtimeAttenuationFromLightmap (irradiance, shading.attenuation, bakedColorTex, shading.normal);
+                #endif
+            #else
+                irradiance = DecodeDirectionalLightmap (bakedColor, bakedDirTex, shading.normal);
+
+                irradianceForAO = irradiance;
+
+                #if defined(LIGHTMAP_SHADOW_MIXING) && !defined(SHADOWS_SHADOWMASK) && defined(SHADOWS_SCREEN)
+                    irradiance = SubtractMainLightWithRealtimeAttenuationFromLightmap (irradiance, shading.attenuation, bakedColorTex, shading.normal);
+                #endif
+
+                #if defined(LIGHTMAP_SPECULAR) 
+                    irradiance = DecodeDirectionalLightmapSpecular(bakedColor, bakedDirTex, shading.normal, false, 0, derivedLight);
+                #endif
             #endif
 
         #else // not directional lightmap
@@ -773,7 +832,7 @@ void evaluateSheenIBL(const ShadingParams shading, const PixelParams pixel,
     Fr *= pixel.sheenScaling;
 
     float3 reflectance = pixel.sheenDFG * pixel.sheenColor;
-    reflectance *= computeSpecularAO(shading_NoV, diffuseAO, pixel.sheenRoughness);
+    reflectance *= computeSpecularAO(shading.NoV, diffuseAO, pixel.sheenRoughness);
 
     Fr += reflectance * prefilteredRadiance(shading.reflected, pixel.sheenPerceptualRoughness);
 #endif
@@ -783,7 +842,7 @@ void evaluateSheenIBL(const ShadingParams shading, const PixelParams pixel,
 void evaluateClearCoatIBL(const ShadingParams shading, const PixelParams pixel, 
     float diffuseAO, inout float3 Fd, inout float3 Fr) {
 #if IBL_INTEGRATION == IBL_INTEGRATION_IMPORTANCE_SAMPLING
-    float specularAO = computeSpecularAO(shading_NoV, diffuseAO, pixel.clearCoatRoughness);
+    float specularAO = computeSpecularAO(shading.NoV, diffuseAO, pixel.clearCoatRoughness);
     isEvaluateClearCoatIBL(pixel, specularAO, Fd, Fr);
     return;
 #endif

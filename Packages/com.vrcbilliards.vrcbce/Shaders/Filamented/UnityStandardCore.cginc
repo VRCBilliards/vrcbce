@@ -60,7 +60,7 @@ fixed4 SampleShadowMaskBicubic(float2 uv)
 
         float4 unity_ShadowMask_TexelSize = float4(width, height, 1.0/width, 1.0/height);
 
-        return SampleTexture2DBicubicFilter(TEXTURE2D_PARAM(unity_ShadowMask, samplerunity_ShadowMask),
+        return SampleTexture2DBicubicFilter(TEXTURE2D_ARGS(unity_ShadowMask, samplerunity_ShadowMask),
             uv, unity_ShadowMask_TexelSize);
     #else
         return SAMPLE_TEXTURE2D(unity_ShadowMask, samplerunity_ShadowMask, uv);
@@ -375,14 +375,23 @@ VertexOutputForwardBase vertForwardBase (VertexInput v)
     return o;
 }
 
-void computeShadingParamsForwardBase(inout ShadingParams shading, VertexOutputForwardBase i)
+void computeShadingParamsForwardBase(inout ShadingParams shading, VertexOutputForwardBase i, bool gl_FrontFacing = true)
 {
     float3x3 tangentToWorld;
     tangentToWorld[0] = i.tangentToWorldAndPackedData[0].xyz;
     tangentToWorld[1] = i.tangentToWorldAndPackedData[1].xyz;
     tangentToWorld[2] = i.tangentToWorldAndPackedData[2].xyz;
+
+    if (getIsDoubleSided()) {
+#if defined(_TANGENT_TO_WORLD)
+        tangentToWorld[0] = gl_FrontFacing ? tangentToWorld[0] : -tangentToWorld[0];
+        tangentToWorld[1] = gl_FrontFacing ? tangentToWorld[1] : -tangentToWorld[1];
+#endif
+        tangentToWorld[2] = gl_FrontFacing ? tangentToWorld[2] : -tangentToWorld[2];
+    }
+
+    shading.geometricNormal = normalize(tangentToWorld[2].xyz);
     shading.tangentToWorld = transpose(tangentToWorld);
-    shading.geometricNormal = normalize(i.tangentToWorldAndPackedData[2].xyz);
 
     shading.normalizedViewportCoord = i.pos.xy * (0.5 / i.pos.w) + 0.5;
 
@@ -407,9 +416,11 @@ void computeShadingParamsForwardBase(inout ShadingParams shading, VertexOutputFo
     #endif
 }
 
-half4 fragForwardBaseInternal (VertexOutputForwardBase i)
+half4 fragForwardBaseInternal (VertexOutputForwardBase i, bool gl_FrontFacing = true)
 {
     UNITY_APPLY_DITHER_CROSSFADE(i.pos.xy);
+
+    float4 i_texBase = i.tex;
 
     MATERIAL_SETUP(material)
 
@@ -418,7 +429,7 @@ half4 fragForwardBaseInternal (VertexOutputForwardBase i)
 
     ShadingParams shading = (ShadingParams)0;
     // Initialize shading with expected parameters
-    computeShadingParamsForwardBase(shading, i);
+    computeShadingParamsForwardBase(shading, i, gl_FrontFacing);
 
     prepareMaterial(shading, material);
 
@@ -462,7 +473,7 @@ struct VertexOutputForwardAdd
 #endif
 
 #if defined(HAS_ATTRIBUTE_COLOR)
-    float4 color                        : COLOR;
+    float4 color                        : COLOR_centroid;
 #endif
 
     UNITY_VERTEX_OUTPUT_STEREO
@@ -525,14 +536,23 @@ VertexOutputForwardAdd vertForwardAdd (VertexInput v)
     return o;
 }
 
-void computeShadingParamsForwardAdd(inout ShadingParams shading, VertexOutputForwardAdd i)
+void computeShadingParamsForwardAdd(inout ShadingParams shading, VertexOutputForwardAdd i, bool gl_FrontFacing = true)
 {
     float3x3 tangentToWorld;
     tangentToWorld[0] = i.tangentToWorldAndLightDir[0].xyz;
     tangentToWorld[1] = i.tangentToWorldAndLightDir[1].xyz;
     tangentToWorld[2] = i.tangentToWorldAndLightDir[2].xyz;
+
+    if (getIsDoubleSided()) {
+#if defined(_TANGENT_TO_WORLD)
+        tangentToWorld[0] = gl_FrontFacing ? tangentToWorld[0] : -tangentToWorld[0];
+        tangentToWorld[1] = gl_FrontFacing ? tangentToWorld[1] : -tangentToWorld[1];
+#endif
+        tangentToWorld[2] = gl_FrontFacing ? tangentToWorld[2] : -tangentToWorld[2];
+    }
+
+    shading.geometricNormal = normalize(tangentToWorld[2].xyz);
     shading.tangentToWorld = transpose(tangentToWorld);
-    shading.geometricNormal = normalize(i.tangentToWorldAndLightDir[2].xyz);
 
     shading.normalizedViewportCoord = i.pos.xy * (0.5 / i.pos.w) + 0.5;
     shading.normal = normalize(shading.geometricNormal);
@@ -543,7 +563,7 @@ void computeShadingParamsForwardAdd(inout ShadingParams shading, VertexOutputFor
     shading.attenuation = atten;
 }
 
-half4 fragForwardAddInternal (VertexOutputForwardAdd i)
+half4 fragForwardAddInternal (VertexOutputForwardAdd i, bool gl_FrontFacing = true)
 {
     UNITY_APPLY_DITHER_CROSSFADE(i.pos.xy);
 
@@ -553,7 +573,7 @@ half4 fragForwardAddInternal (VertexOutputForwardAdd i)
 
     ShadingParams shading = (ShadingParams)0;
     // Initialize shading with expected parameters
-    computeShadingParamsForwardAdd(shading, i);
+    computeShadingParamsForwardAdd(shading, i, gl_FrontFacing);
 
     prepareMaterial(shading, material);
 

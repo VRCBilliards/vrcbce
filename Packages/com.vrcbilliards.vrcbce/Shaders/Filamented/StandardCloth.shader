@@ -50,7 +50,7 @@ Shader "Silent/Filamented (Cloth setup)"
         _specularAntiAliasingVariance("Specular AA Variance",  Range(0, 1)) = 0.15
         _specularAntiAliasingThreshold("Specular AA Threshold", Range(0, 1)) = 0.25
 
-        [KeywordEnum(None, SH, RNM)] _Bakery ("Bakery Mode", Int) = 0
+        [KeywordEnum(None, SH, RNM, MonoSH)] _Bakery ("Bakery Mode", Int) = 0
             _RNM0("RNM0", 2D) = "black" {}
             _RNM1("RNM1", 2D) = "black" {}
             _RNM2("RNM2", 2D) = "black" {}
@@ -58,6 +58,7 @@ Shader "Silent/Filamented (Cloth setup)"
         [Toggle(_LTCGI)] _LTCGI ("LTCGI", Int) = 0
 
         [Enum(UnityEngine.Rendering.CullMode)]_CullMode("Cull Mode", Int) = 2
+        [ToggleUI]_AlphaToMaskMode("Alpha to Coverage", Int) = 0
 
         [NonModifiableTextureData][HideInInspector] _DFG("DFG", 2D) = "white" {}
         [HideInInspector] _ShaderType_Cloth("__cloth", Float) = 1.0
@@ -97,6 +98,7 @@ Shader "Silent/Filamented (Cloth setup)"
 
             Blend [_SrcBlend] [_DstBlend]
             ZWrite [_ZWrite]
+            AlphaToMask [_AlphaToMaskMode]
 
             CGPROGRAM
             #pragma target 4.0
@@ -115,7 +117,7 @@ Shader "Silent/Filamented (Cloth setup)"
 
             #pragma shader_feature_local _LIGHTMAPSPECULAR
             #pragma shader_feature_local _NORMALMAP_SHADOW
-            #pragma shader_feature_local _ _BAKERY_RNM _BAKERY_SH
+            #pragma shader_feature_local _ _BAKERY_RNM _BAKERY_SH _BAKERY_MONOSH
             #pragma shader_feature_local _LTCGI
 
             #pragma multi_compile_fwdbase
@@ -140,6 +142,7 @@ Shader "Silent/Filamented (Cloth setup)"
             Fog { Color (0,0,0,0) } // in additive pass fog should be black
             ZWrite Off
             ZTest LEqual
+            AlphaToMask [_AlphaToMaskMode]
 
             CGPROGRAM
             #pragma target 4.0
@@ -159,6 +162,7 @@ Shader "Silent/Filamented (Cloth setup)"
 
             #pragma multi_compile_fwdadd_fullshadows
             #pragma multi_compile_fog
+            #pragma multi_compile_instancing
             // Uncomment the following line to enable dithering LOD crossfade. Note: there are more in the file to uncomment for other passes.
             //#pragma multi_compile _ LOD_FADE_CROSSFADE
 
