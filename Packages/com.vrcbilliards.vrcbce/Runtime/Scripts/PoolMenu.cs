@@ -642,26 +642,32 @@ namespace VRCBilliards
 
         public void _TeamWins(bool isTeam2)
         {
+            var player1 = player1Scores[0].text;
+            var player2 = player2Scores[0].text;
+            var player3 = player3Scores[0].text;
+            var player4 = player4Scores[0].text;
+            var nobody = "Nobody";
+            
             if (isTeams)
             {
                 if (isTeam2)
                 {
-                    winnerText.text = $"{player2Scores[0].text} and {player4Scores[0].text} win!";
+                    winnerText.text = $"{(player2 == "" ? nobody : player2)} and {(player4 == "" ? nobody : player4)} win!";
                 }
                 else
                 {
-                    winnerText.text = $"{player1Scores[0].text} and {player3Scores[0].text} win!";
+                    winnerText.text = $"{(player1 == "" ? nobody : player1)} and {(player3 == "" ? nobody : player3)} win!";
                 }
             }
             else
             {
                 if (isTeam2)
                 {
-                    winnerText.text = $"{player2Scores[0].text} wins!";
+                    winnerText.text = $"{(player2 == "" ? nobody : player2)} wins!";
                 }
                 else
                 {
-                    winnerText.text = $"{player1Scores[0].text} wins!";
+                    winnerText.text = $"{(player1 == "" ? nobody : player1)} wins!";
                 }
             }
         }
