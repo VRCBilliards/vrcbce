@@ -18,24 +18,11 @@ namespace VRCBilliards
 
         public PoolStateManager poolStateManager;
 
-        public GameObject cueTip;
-
-        /// <summary>
-        /// The other pool cue at this table.
-        /// </summary>
-        public PoolCue otherCue;
-
         /// <summary>
         /// Pickup Components
         /// </summary>
         private VRC_Pickup thisPickup;
         private VRC_Pickup targetPickup;
-
-        [HideInInspector]
-        public bool usingDesktop;
-
-        public bool allowAutoSwitch = true;
-        public int playerID;
 
         private Vector3 positionAtStartOfArming;
         private Vector3 normalizedLineOfCueWhenArmed;
@@ -47,7 +34,6 @@ namespace VRCBilliards
         /// </summary>
         private bool isArmed;
         private bool locked;
-        private bool isPickedUp;
 
         private Collider ownCollider;
         private Collider targetCollider;
@@ -55,12 +41,10 @@ namespace VRCBilliards
         [HideInInspector]
         public bool localPlayerIsInDesktopTopDownView;
 
-        private VRCPlayerApi playerApi;
         private Vector3 oldTargetPos;
 
         private Vector3 vectorOne = Vector3.one;
         private Vector3 vectorZero = Vector3.zero;
-        private Vector3 vectorUp = Vector3.up;
         private Quaternion upwardsRotation = Quaternion.Euler(-90, 0, 0);
         private Quaternion startingRotation;
 
@@ -69,26 +53,27 @@ namespace VRCBilliards
         [HideInInspector]
         public bool tableIsActive;
 
-        private VRCPlayerApi lastPlayerHeld;
-
         public void Start()
         {
-            if (Networking.LocalPlayer == null)
+            cueRespawnPosition = transform.localPosition;
+            startingRotation = cueParent.localRotation;
+            otherHandRespawnPosition = otherHand.transform.localPosition;
+            
+            _Respawn(true);
+        }
+
+        public void _Respawn(bool disableCue)
+        {
+            if (!Networking.LocalPlayer.IsValid())
             {
                 gameObject.SetActive(false);
                 return;
             }
 
-            cueRespawnPosition = transform.localPosition;
-            playerApi = Networking.LocalPlayer;
-            usingDesktop = !playerApi.IsUserInVR();
-
             ownCollider = GetComponent<Collider>();
-
             targetTransform = otherHand.transform;
-            otherHandRespawnPosition = targetTransform.localPosition;
-
             targetCollider = targetTransform.GetComponent<Collider>();
+
             if (!targetCollider)
             {
                 Debug.LogError("PoolCue: Start: target is missing a collider. Aborting cue setup.");
@@ -98,7 +83,7 @@ namespace VRCBilliards
 
             ResetTarget();
 
-            thisPickup = (VRC_Pickup)gameObject.GetComponent(typeof(VRC_Pickup));
+            thisPickup = (VRC_Pickup) gameObject.GetComponent(typeof(VRC_Pickup));
             if (!thisPickup)
             {
                 Debug.LogError("PoolCue: Start: this object is missing a VRC_Pickup script. Aborting cue setup.");
@@ -106,7 +91,7 @@ namespace VRCBilliards
                 return;
             }
 
-            targetPickup = (VRC_Pickup)targetTransform.GetComponent(typeof(VRC_Pickup));
+            targetPickup = (VRC_Pickup) targetTransform.GetComponent(typeof(VRC_Pickup));
             if (!targetPickup)
             {
                 Debug.LogError("PoolCue: Start: target object is missing a VRC_Pickup script. Aborting cue setup.");
@@ -114,9 +99,16 @@ namespace VRCBilliards
                 return;
             }
 
-            startingRotation = cueParent.localRotation;
+            if (disableCue)
+            {
+                _DenyAccess();
+            }
 
-            _DenyAccess();
+            transform.localPosition = cueRespawnPosition;
+            cueParent.localPosition = transform.localPosition;
+            transform.localRotation = startingRotation;
+            targetTransform.localPosition = otherHandRespawnPosition;
+            cueParent.LookAt(targetTransform.position);
 
             startupCompleted = true;
         }
@@ -169,13 +161,15 @@ namespace VRCBilliards
 
         public override void OnPickupUseDown()
         {
-            if (!usingDesktop)
+            if (Networking.LocalPlayer.IsUserInVR())
             {
-                isArmed = true;
-                positionAtStartOfArming = transform.position;
-                normalizedLineOfCueWhenArmed = (targetTransform.position - positionAtStartOfArming).normalized;
-                poolStateManager._StartHit();
+                return;
             }
+            
+            isArmed = true;
+            positionAtStartOfArming = transform.position;
+            normalizedLineOfCueWhenArmed = (targetTransform.position - positionAtStartOfArming).normalized;
+            poolStateManager._StartHit();
         }
 
         public override void OnPickupUseUp()
@@ -186,8 +180,6 @@ namespace VRCBilliards
 
         public override void OnPickup()
         {
-            lastPlayerHeld = thisPickup.currentPlayer;
-
             if (thisPickup.currentPlayer.playerId == Networking.LocalPlayer.playerId)
             {
                 // Not sure if this is necessary to do both since we pickup this one, but just to be safe
@@ -211,13 +203,9 @@ namespace VRCBilliards
             }
 
             targetTransform.localScale = vectorOne; //TODO: This code is defective.
-            otherHand.isOtherBeingHeld = true;
             targetCollider.enabled = true;
 
             poolStateManager._LocalPlayerPickedUpCue();
-
-            isPickedUp = true;
-
             targetPickup.pickupable = true;
         }
 
@@ -231,22 +219,15 @@ namespace VRCBilliards
             ResetTarget();
             targetPickup.Drop();
 
-            if (usingDesktop)
+            if (!Networking.LocalPlayer.IsUserInVR())
             {
                 GetComponent<MeshRenderer>().enabled = true;
                 otherHand.GetComponent<MeshRenderer>().enabled = true;
                 poolStateManager._OnPutDownCueLocally();
-            }
-
-            // We rotate the cue rather than make it track the offhand pickup when in Desktop. 
-            if (!lastPlayerHeld.IsUserInVR())
-            {
-                _Respawn();
+                _Respawn(false);
             }
 
             poolStateManager._LocalPlayerDroppedCue();
-            isPickedUp = false;
-
             targetPickup.pickupable = false;
         }
 
@@ -272,27 +253,9 @@ namespace VRCBilliards
             targetPickup.Drop();
         }
 
-        /// <summary>
-        /// Returns the cue back to the table
-        /// </summary>
-        public void _Respawn()
-        {
-            Respawn();
-        }
-
-        private void Respawn()
-        {
-            transform.localPosition = cueRespawnPosition;
-            cueParent.localPosition = transform.localPosition;
-            transform.localRotation = startingRotation;
-            targetTransform.localPosition = otherHandRespawnPosition;
-            cueParent.LookAt(targetTransform.position);
-        }
-
         private void ResetTarget()
         {
             targetTransform.localScale = vectorZero;
-            otherHand.isOtherBeingHeld = false;
             targetCollider.enabled = false;
         }
     }

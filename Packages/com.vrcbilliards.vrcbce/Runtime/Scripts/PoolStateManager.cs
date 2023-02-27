@@ -1,6 +1,5 @@
 using System;
 using UdonSharp;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.Rendering;
@@ -1643,32 +1642,33 @@ namespace VRCBilliards
                 logger._Log(name, "ForceReset");
             }
 
-            if (
-                // If you are a player
-                networkingLocalPlayerID == player1ID ||
-                networkingLocalPlayerID == player2ID ||
-                networkingLocalPlayerID == player3ID ||
-                networkingLocalPlayerID == player4ID ||
-                // The game is in the menu so resetting doesn't matter much
-                isGameInMenus ||
-                // The game is in a running state, someone has left, and the table has entered an invalid state
-                (player1ID > 0 && VRCPlayerApi.GetPlayerById(player1ID) == null) ||
-                (player2ID > 0 && VRCPlayerApi.GetPlayerById(player2ID) == null) ||
-                (player3ID > 0 && VRCPlayerApi.GetPlayerById(player3ID) == null) ||
-                (player4ID > 0 && VRCPlayerApi.GetPlayerById(player4ID) == null)
+            if (Networking.IsInstanceOwner)
+            {
+                Networking.SetOwner(localPlayer, gameObject);
+                _Reset("The instance owner has reset the table");
+            } else if (
+                networkingLocalPlayerID == player1ID || networkingLocalPlayerID == player2ID ||
+                networkingLocalPlayerID == player3ID || networkingLocalPlayerID == player4ID
             )
             {
                 Networking.SetOwner(localPlayer, gameObject);
-
-                _Reset();
-            }
-            else if (logger)
+                _Reset("A player has reset the table");
+            } else if (
+                (player1ID > 0 && !VRCPlayerApi.GetPlayerById(player1ID).IsValid()) ||
+                (player2ID > 0 && !VRCPlayerApi.GetPlayerById(player2ID).IsValid()) ||
+                (player3ID > 0 && !VRCPlayerApi.GetPlayerById(player3ID).IsValid()) ||
+                (player4ID > 0 && !VRCPlayerApi.GetPlayerById(player4ID).IsValid())
+            )
             {
-                logger._Log(name, "Cannot reset table: You must be a player, or the table must be in an invalid state.");
+                Networking.SetOwner(localPlayer, gameObject);
+                _Reset("The table was in an invalid state and has been reset.");
+            } else if (logger)
+            {
+                logger._Error(name, "Cannot reset table: you do not have permission");
             }
         }
 
-        private void _Reset()
+        private void _Reset(string reason)
         {
             isGameInMenus = true;
             poolCues[0].tableIsActive = false;
@@ -1677,11 +1677,11 @@ namespace VRCBilliards
             gameIsSimulating = false;
             isTeam2Turn = false;
 
-            RefreshNetworkData(isTeam2Turn);
+            RefreshNetworkData(false);
 
             if (logger)
             {
-                logger._Log(name, "Forcing a reset was successful.");
+                logger._Log(name, reason);
             }
         }
 
@@ -2723,12 +2723,7 @@ namespace VRCBilliards
             {
                 marker9ball.SetActive(false);
             }
-
-            // if (tableCollisionParent)
-            // {
-            //     tableCollisionParent.SetActive(false);
-            // }
-
+            
             if (!tableModelHasRails || !hasRunSyncOnce)
             {
                 PlaceSunkBallsIntoRestingPlace();
@@ -2772,8 +2767,11 @@ namespace VRCBilliards
 
             poolMenu._EnableMainMenu();
 
-            poolCues[0]._Respawn();
-            poolCues[1]._Respawn();
+            foreach (var cue in poolCues)
+            {
+                cue._Respawn(true);
+            }
+
             //akalink added, make the color panel unable to be interacted with.
             EnableCustomBallColorSlider(false);
             // end
@@ -3132,17 +3130,6 @@ namespace VRCBilliards
 
             poolCues[0].localPlayerIsInDesktopTopDownView = false;
             poolCues[1].localPlayerIsInDesktopTopDownView = false;
-
-            if (!localPlayer.IsUserInVR())
-            {
-                poolCues[0].usingDesktop = true;
-                poolCues[1].usingDesktop = true;
-            }
-            else
-            {
-                poolCues[0].usingDesktop = false;
-                poolCues[1].usingDesktop = false;
-            }
 
             if (IsSinglePlayer)
             {
@@ -3719,8 +3706,10 @@ namespace VRCBilliards
 
             if (isGameModePractice)
             {
-                poolCues[0]._Respawn();
-                poolCues[1]._Respawn();
+                foreach (var cue in poolCues)
+                {
+                    cue._Respawn(false);
+                }
             }
         }
 
@@ -3756,7 +3745,7 @@ namespace VRCBilliards
 
                 if (isGameModePractice && newDesktopCue != oldDesktopCue)
                 {
-                    poolCues[oldDesktopCue]._Respawn();
+                    poolCues[oldDesktopCue]._Respawn(false);
                     oldDesktopCue = newDesktopCue;
                 }
 
@@ -3998,23 +3987,27 @@ namespace VRCBilliards
 
         public override void OnPlayerLeft(VRCPlayerApi player)
         {
-            if (!Networking.IsOwner(localPlayer, gameObject) || !VRC.SDKBase.Utilities.IsValid(player))
+            if (!Networking.IsOwner(localPlayer, gameObject) || !player.IsValid())
             {
                 return;
             }
 
             int playerID = player.playerId;
-            if (playerID == player1ID || playerID == player2ID || playerID == player3ID || playerID == player4ID)
+
+            if (playerID != player1ID && playerID != player2ID && playerID != player3ID &&
+                playerID != player4ID)
             {
-                if (isGameInMenus)
-                {
-                    RemovePlayerFromGame(playerID);
-                }
-                else
-                {
-                    gameWasReset = true;
-                    _Reset();
-                }
+                return;
+            }
+            
+            if (isGameInMenus)
+            {
+                RemovePlayerFromGame(playerID);
+            }
+            else
+            {
+                gameWasReset = true;
+                _Reset("A player left, so the table was reset.");
             }
         }
 

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f11136daadff0b44ac2278a314682ab, type: 3}
   m_Name: ObjectTriggerResetPickup
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: b9e152d8e3933a74b8719c34d5e5b66a,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: d5f331f84cbbcea4f917f6275fefd59a,
     type: 2}
   udonAssembly: ".data_start\r\n\r\n    .export ResetTarget\r\n    .export Handle\r\n   
     \r\n    __Boolean_0: %SystemBoolean, null\r\n    __Object_0: %SystemObject, null\r\n   

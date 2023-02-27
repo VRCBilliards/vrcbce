@@ -7,14 +7,8 @@ namespace VRCBilliards
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class PoolOtherHand : UdonSharpBehaviour
     {
-        public GameObject objPrimary;
-        private PoolCue cue;
-
         private bool isHolding;
-        public bool isOtherBeingHeld;
-        
         private Transform originalParent;
-
         private bool isLocked;
         private Vector3 lockLocation;
 
@@ -28,7 +22,6 @@ namespace VRCBilliards
             
             originalParent = transform.parent;
 
-            cue = objPrimary.GetComponent<PoolCue>();
             OnDrop();
         }
 
