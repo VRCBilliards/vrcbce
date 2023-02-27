@@ -633,11 +633,9 @@ namespace VRCBilliards
             }
         }
 
-        public void _GameWasReset()
+        public void _GameWasReset(ResetReason reason)
         {
-            //akalink edited, original code is commented out
-            winnerText.text = gameResetText; //"The game was ended!";
-            //end
+            winnerText.text = manager.ToReasonString(reason);
         }
 
         public void _TeamWins(bool isTeam2)

@@ -9,6 +9,17 @@ using VRC.Udon;
 namespace VRCBilliards
 {
     /// <summary>
+    /// The reasons why the table can be reset
+    /// </summary>
+    public enum ResetReason
+    {
+        InstanceOwnerReset,
+        PlayerReset,
+        InvalidState,
+        PlayerLeft
+    }
+
+    /// <summary>
     /// Main Behaviour for VRCBilliards: Community Edition. This is a giant class. Here be dragons.
     /// </summary>
     [RequireComponent(typeof(AudioSource))]
@@ -162,8 +173,6 @@ namespace VRCBilliards
         public bool fakeBallShadows = true;
         [Tooltip("Does the table model for this table have rails that guide the ball when the ball sinks?")]
         public bool tableModelHasRails;
-
-        [Header("------")]
 
         [Header("Important Objects")]
         public Transform sunkBallsPositionRoot;
@@ -557,6 +566,8 @@ namespace VRCBilliards
         /// Have we run a network sync once? Used for situations where we need to specifically catch up a late-joiner.
         /// </summary>
         private bool hasRunSyncOnce;
+
+        [UdonSynced] private ResetReason latestResetReason;
 
         #region UdonChipsVariables
         // We are breaking our normal Java-like ordering rules here. UdonChips is a layer on top of regular VRCBCE code,
@@ -1645,14 +1656,14 @@ namespace VRCBilliards
             if (Networking.IsInstanceOwner)
             {
                 Networking.SetOwner(localPlayer, gameObject);
-                _Reset("The instance owner has reset the table");
+                _Reset(ResetReason.InstanceOwnerReset);
             } else if (
                 networkingLocalPlayerID == player1ID || networkingLocalPlayerID == player2ID ||
                 networkingLocalPlayerID == player3ID || networkingLocalPlayerID == player4ID
             )
             {
                 Networking.SetOwner(localPlayer, gameObject);
-                _Reset("A player has reset the table");
+                _Reset(ResetReason.PlayerReset);
             } else if (
                 (player1ID > 0 && !VRCPlayerApi.GetPlayerById(player1ID).IsValid()) ||
                 (player2ID > 0 && !VRCPlayerApi.GetPlayerById(player2ID).IsValid()) ||
@@ -1661,14 +1672,14 @@ namespace VRCBilliards
             )
             {
                 Networking.SetOwner(localPlayer, gameObject);
-                _Reset("The table was in an invalid state and has been reset.");
+                _Reset(ResetReason.InvalidState);
             } else if (logger)
             {
                 logger._Error(name, "Cannot reset table: you do not have permission");
             }
         }
 
-        private void _Reset(string reason)
+        private void _Reset(ResetReason reason)
         {
             isGameInMenus = true;
             poolCues[0].tableIsActive = false;
@@ -1676,12 +1687,14 @@ namespace VRCBilliards
             isPlayerAllowedToPlay = false;
             gameIsSimulating = false;
             isTeam2Turn = false;
+            gameWasReset = true;
+            latestResetReason = reason;
 
             RefreshNetworkData(false);
 
             if (logger)
             {
-                logger._Log(name, reason);
+                logger._Log(name, ToReasonString(reason));
             }
         }
 
@@ -2246,6 +2259,7 @@ namespace VRCBilliards
 
             // Events ==========================================================================================================
 
+            // If a new game has started...
             if (gameID > oldGameID && !isGameInMenus)
             {
                 OnRemoteNewGame();
@@ -2285,6 +2299,7 @@ namespace VRCBilliards
                 }
             }
 
+            // If the turn has changed...
             if (isTeam2Turn != oldIsTeam2Turn)
             {
                 OnRemoteTurnChange();
@@ -2297,6 +2312,7 @@ namespace VRCBilliards
                 ApplyTableColour(isTeam2Turn);
             }
 
+            // If the game has ended...
             if (!oldIsGameInMenus && isGameInMenus)
             {
                 OnRemoteGameOver();
@@ -2507,8 +2523,6 @@ namespace VRCBilliards
 
         }
         
-        
-        
         /// <summary>
         /// Updates table colour target to appropriate player colour
         /// </summary>
@@ -2712,7 +2726,12 @@ namespace VRCBilliards
 
             if (gameWasReset)
             {
-                poolMenu._GameWasReset();
+                poolMenu._GameWasReset(latestResetReason);
+
+                foreach (var cue in poolCues)
+                {
+                    cue._Respawn(true);
+                }
             }
             else
             {
@@ -4006,8 +4025,7 @@ namespace VRCBilliards
             }
             else
             {
-                gameWasReset = true;
-                _Reset("A player left, so the table was reset.");
+                _Reset(ResetReason.PlayerLeft);
             }
         }
 
@@ -4074,6 +4092,23 @@ namespace VRCBilliards
             if (pressE)
             {
                 pressE.SetActive(false);
+            }
+        }
+
+        public string ToReasonString(ResetReason reason)
+        {
+            switch (reason)
+            {
+                case ResetReason.InvalidState:
+                    return "The table was in an invalid state and has been reset";
+                case ResetReason.PlayerLeft:
+                    return "A player left, so the table was reset.";
+                case ResetReason.InstanceOwnerReset:
+                    return "The instance owner reset the table.";
+                case ResetReason.PlayerReset:
+                    return "A player has reset the table";
+                default:
+                    return "No reason";
             }
         }
 
