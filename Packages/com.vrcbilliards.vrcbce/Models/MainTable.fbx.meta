@@ -106,7 +106,7 @@ ModelImporter:
     extraUserProperties:
     - '#BAKERY{"meshName":["table"],"padding":[256],"unwrapper":[0]}'
     clipAnimations: []
-    isReadable: 1
+    isReadable: 0
   meshes:
     lODScreenPercentages: []
     globalScale: 1
@@ -138,9 +138,9 @@ ModelImporter:
   tangentSpace:
     normalSmoothAngle: 113
     normalImportMode: 0
-    tangentImportMode: 2
+    tangentImportMode: 3
     normalCalculationMode: 4
-    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 1
     blendShapeNormalImportMode: 2
     normalSmoothingSource: 0
   referencedClips: []

@@ -4244,7 +4244,7 @@ GameObject:
   - component: {fileID: -3103297493737359535}
   - component: {fileID: 8466249863445125162}
   m_Layer: 0
-  m_Name: End Game Button
+  m_Name: Reset Table Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4303,7 +4303,7 @@ MonoBehaviour:
   networked: 0
   networkedAll: 0
   behaviour: {fileID: 2274518542247171438}
-  eventName: _EndGame
+  eventName: _ForceReset
   animator: {fileID: 0}
   isTriggeredViaBool: 0
   stateName: 
@@ -4323,7 +4323,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   interactTextPlacement: {fileID: 0}
-  interactText: End Game
+  interactText: Reset Table
   interactTextGO: {fileID: 0}
   proximity: 2
   SynchronizePosition: 0
@@ -7030,7 +7030,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: b167503a205dc5e4186980257443e45f, type: 3}
+  m_Sprite: {fileID: 21300000, guid: bc6021ea2cd529041a5d174bd681d64f, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

@@ -1,48 +1,14 @@
 fileFormatVersion: 2
-guid: 57a0dd9be2515f84c89eddcf65516404
+guid: 17fd93b1e28e64646aa847e4aed40d5b
 ModelImporter:
   serializedVersion: 19301
-  internalIDToNameTable:
+  internalIDToNameTable: []
+  externalObjects:
   - first:
-      1: 100000
-    second: //RootNode
-  - first:
-      1: 100002
-    second: Add 1
-  - first:
-      1: 100004
-    second: Sub 1
-  - first:
-      4: 400000
-    second: //RootNode
-  - first:
-      4: 400002
-    second: Add 1
-  - first:
-      4: 400004
-    second: Sub 1
-  - first:
-      21: 2100000
-    second: newm
-  - first:
-      23: 2300000
-    second: Add 1
-  - first:
-      23: 2300002
-    second: Sub 1
-  - first:
-      33: 3300000
-    second: Add 1
-  - first:
-      33: 3300002
-    second: Sub 1
-  - first:
-      43: 4300000
-    second: Add 1
-  - first:
-      43: 4300002
-    second: Sub 1
-  externalObjects: {}
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: table
+    second: {fileID: 2100000, guid: 7cfe7a6c83d4e1b42a7fa9deb9e8d5e3, type: 2}
   materials:
     materialImportMode: 1
     materialName: 0
@@ -80,9 +46,9 @@ ModelImporter:
     sortHierarchyByName: 1
     importVisibility: 1
     importBlendShapes: 1
-    importCameras: 0
-    importLights: 0
-    fileIdsGeneration: 1
+    importCameras: 1
+    importLights: 1
+    fileIdsGeneration: 2
     swapUVChannels: 0
     generateSecondaryUV: 0
     useFileUnits: 1
@@ -108,7 +74,7 @@ ModelImporter:
     blendShapeNormalImportMode: 1
     normalSmoothingSource: 0
   referencedClips: []
-  importAnimation: 0
+  importAnimation: 1
   humanDescription:
     serializedVersion: 3
     human: []
