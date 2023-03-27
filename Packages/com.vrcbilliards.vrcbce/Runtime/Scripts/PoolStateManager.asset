@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: PoolStateManager
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 8fd8455133691274abc9330a3d9d05e0,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 5fd4fff007d87584fa68f7c29c083439,
     type: 2}
   udonAssembly: 
   assemblyError: 
@@ -9858,7 +9858,13 @@ MonoBehaviour:
       Entry: 1
       Data: latestResetReason
     - Name: <UserType>k__BackingField
-      Entry: 6
+      Entry: 7
+      Data: 469|System.RuntimeType, mscorlib
+    - Name: 
+      Entry: 1
+      Data: VRCBilliards.ResetReason, VRCBilliards.VRCBCE.Runtime
+    - Name: 
+      Entry: 8
       Data: 
     - Name: <SystemType>k__BackingField
       Entry: 9
@@ -9877,14 +9883,14 @@ MonoBehaviour:
       Data: false
     - Name: _fieldAttributes
       Entry: 7
-      Data: 469|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
+      Data: 470|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 470|UdonSharp.UdonSyncedAttribute, UdonSharp.Runtime
+      Data: 471|UdonSharp.UdonSyncedAttribute, UdonSharp.Runtime
     - Name: 
       Entry: 8
       Data: 
@@ -9908,7 +9914,7 @@ MonoBehaviour:
       Data: enableUdonChips
     - Name: $v
       Entry: 7
-      Data: 471|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+      Data: 472|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: <Name>k__BackingField
       Entry: 1
       Data: enableUdonChips
@@ -9932,14 +9938,14 @@ MonoBehaviour:
       Data: true
     - Name: _fieldAttributes
       Entry: 7
-      Data: 472|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
+      Data: 473|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 2
     - Name: 
       Entry: 7
-      Data: 473|UnityEngine.HeaderAttribute, UnityEngine.CoreModule
+      Data: 474|UnityEngine.HeaderAttribute, UnityEngine.CoreModule
     - Name: header
       Entry: 1
       Data: UdonChips
@@ -9948,7 +9954,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 474|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
+      Data: 475|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
     - Name: tooltip
       Entry: 1
       Data: Enable this to integrate with UdonChips.
@@ -9975,7 +9981,7 @@ MonoBehaviour:
       Data: price
     - Name: $v
       Entry: 7
-      Data: 475|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+      Data: 476|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: <Name>k__BackingField
       Entry: 1
       Data: price
@@ -9999,14 +10005,14 @@ MonoBehaviour:
       Data: true
     - Name: _fieldAttributes
       Entry: 7
-      Data: 476|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
+      Data: 477|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 477|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
+      Data: 478|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
     - Name: tooltip
       Entry: 1
       Data: The base cost of a game in UC.
@@ -10033,7 +10039,7 @@ MonoBehaviour:
       Data: allowRaising
     - Name: $v
       Entry: 7
-      Data: 478|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+      Data: 479|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: <Name>k__BackingField
       Entry: 1
       Data: allowRaising
@@ -10057,14 +10063,14 @@ MonoBehaviour:
       Data: true
     - Name: _fieldAttributes
       Entry: 7
-      Data: 479|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
+      Data: 480|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 480|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
+      Data: 481|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
     - Name: tooltip
       Entry: 1
       Data: Allow for a player to add more UC to their total entry cost. If the player
@@ -10092,7 +10098,7 @@ MonoBehaviour:
       Data: prize
     - Name: $v
       Entry: 7
-      Data: 481|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+      Data: 482|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: <Name>k__BackingField
       Entry: 1
       Data: prize
@@ -10116,14 +10122,14 @@ MonoBehaviour:
       Data: true
     - Name: _fieldAttributes
       Entry: 7
-      Data: 482|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
+      Data: 483|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 483|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
+      Data: 484|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
     - Name: tooltip
       Entry: 1
       Data: The basic prize a player gets for winning versus an opponent.
@@ -10150,7 +10156,7 @@ MonoBehaviour:
       Data: singlePlayPrize
     - Name: $v
       Entry: 7
-      Data: 484|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+      Data: 485|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: <Name>k__BackingField
       Entry: 1
       Data: singlePlayPrize
@@ -10174,14 +10180,14 @@ MonoBehaviour:
       Data: true
     - Name: _fieldAttributes
       Entry: 7
-      Data: 485|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
+      Data: 486|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 486|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
+      Data: 487|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
     - Name: tooltip
       Entry: 1
       Data: The reward a player gets for beating themselves at pool.
@@ -10208,7 +10214,7 @@ MonoBehaviour:
       Data: paySound
     - Name: $v
       Entry: 7
-      Data: 487|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+      Data: 488|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: <Name>k__BackingField
       Entry: 1
       Data: paySound
@@ -10232,14 +10238,14 @@ MonoBehaviour:
       Data: true
     - Name: _fieldAttributes
       Entry: 7
-      Data: 488|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
+      Data: 489|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 489|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
+      Data: 490|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
     - Name: tooltip
       Entry: 1
       Data: An optional sound clip to play when someone pays to play.
@@ -10266,7 +10272,7 @@ MonoBehaviour:
       Data: insufficientFundsSound
     - Name: $v
       Entry: 7
-      Data: 490|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+      Data: 491|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: <Name>k__BackingField
       Entry: 1
       Data: insufficientFundsSound
@@ -10290,14 +10296,14 @@ MonoBehaviour:
       Data: true
     - Name: _fieldAttributes
       Entry: 7
-      Data: 491|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
+      Data: 492|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 492|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
+      Data: 493|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
     - Name: tooltip
       Entry: 1
       Data: An optional sound clip to play when someone cannot afford to play.
@@ -10324,7 +10330,7 @@ MonoBehaviour:
       Data: raiseCount
     - Name: $v
       Entry: 7
-      Data: 493|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+      Data: 494|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: <Name>k__BackingField
       Entry: 1
       Data: raiseCount
@@ -10348,20 +10354,20 @@ MonoBehaviour:
       Data: true
     - Name: _fieldAttributes
       Entry: 7
-      Data: 494|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
+      Data: 495|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 2
     - Name: 
       Entry: 7
-      Data: 495|UdonSharp.UdonSyncedAttribute, UdonSharp.Runtime
+      Data: 496|UdonSharp.UdonSyncedAttribute, UdonSharp.Runtime
     - Name: 
       Entry: 8
       Data: 
     - Name: 
       Entry: 7
-      Data: 496|UnityEngine.HideInInspector, UnityEngine.CoreModule
+      Data: 497|UnityEngine.HideInInspector, UnityEngine.CoreModule
     - Name: 
       Entry: 8
       Data: 
@@ -10385,7 +10391,7 @@ MonoBehaviour:
       Data: hasPaidToSignUp
     - Name: $v
       Entry: 7
-      Data: 497|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+      Data: 498|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: <Name>k__BackingField
       Entry: 1
       Data: hasPaidToSignUp
@@ -10409,7 +10415,7 @@ MonoBehaviour:
       Data: false
     - Name: _fieldAttributes
       Entry: 7
-      Data: 498|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
+      Data: 499|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
         mscorlib
     - Name: 
       Entry: 12
@@ -10434,7 +10440,7 @@ MonoBehaviour:
       Data: pressE
     - Name: $v
       Entry: 7
-      Data: 499|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+      Data: 500|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: <Name>k__BackingField
       Entry: 1
       Data: pressE
@@ -10458,14 +10464,14 @@ MonoBehaviour:
       Data: true
     - Name: _fieldAttributes
       Entry: 7
-      Data: 500|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
+      Data: 501|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 501|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
+      Data: 502|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
     - Name: tooltip
       Entry: 1
       Data: The object that contains the UI that appears when you can press E to
@@ -10493,7 +10499,7 @@ MonoBehaviour:
       Data: isNearTable
     - Name: $v
       Entry: 7
-      Data: 502|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+      Data: 503|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: <Name>k__BackingField
       Entry: 1
       Data: isNearTable
@@ -10517,7 +10523,7 @@ MonoBehaviour:
       Data: false
     - Name: _fieldAttributes
       Entry: 7
-      Data: 503|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
+      Data: 504|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
         mscorlib
     - Name: 
       Entry: 12
@@ -10542,7 +10548,7 @@ MonoBehaviour:
       Data: canEnterDesktopTopDownView
     - Name: $v
       Entry: 7
-      Data: 504|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+      Data: 505|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: <Name>k__BackingField
       Entry: 1
       Data: canEnterDesktopTopDownView
@@ -10566,7 +10572,7 @@ MonoBehaviour:
       Data: false
     - Name: _fieldAttributes
       Entry: 7
-      Data: 505|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
+      Data: 506|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
         mscorlib
     - Name: 
       Entry: 12
@@ -10591,13 +10597,13 @@ MonoBehaviour:
       Data: numberOfCuesHeldByLocalPlayer
     - Name: $v
       Entry: 7
-      Data: 506|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+      Data: 507|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: <Name>k__BackingField
       Entry: 1
       Data: numberOfCuesHeldByLocalPlayer
     - Name: <UserType>k__BackingField
       Entry: 7
-      Data: 507|System.RuntimeType, mscorlib
+      Data: 508|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
       Data: System.UInt16, mscorlib
@@ -10606,7 +10612,7 @@ MonoBehaviour:
       Data: 
     - Name: <SystemType>k__BackingField
       Entry: 9
-      Data: 507
+      Data: 508
     - Name: <SyncMode>k__BackingField
       Entry: 7
       Data: System.Nullable`1[[UdonSharp.UdonSyncMode, UdonSharp.Runtime]], mscorlib
@@ -10621,14 +10627,14 @@ MonoBehaviour:
       Data: true
     - Name: _fieldAttributes
       Entry: 7
-      Data: 508|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
+      Data: 509|System.Collections.Generic.List`1[[System.Attribute, mscorlib]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 509|UnityEngine.HideInInspector, UnityEngine.CoreModule
+      Data: 510|UnityEngine.HideInInspector, UnityEngine.CoreModule
     - Name: 
       Entry: 8
       Data: 
