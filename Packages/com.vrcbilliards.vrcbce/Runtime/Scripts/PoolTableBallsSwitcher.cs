@@ -1,5 +1,6 @@
 ﻿using UdonSharp;
 using UnityEngine;
+using UnityEngine.Serialization;
 using VRC.SDKBase;
 using VRC.Udon;
 
@@ -11,28 +12,28 @@ public class PoolTableBallsSwitcher : UdonSharpBehaviour
     [Space]
     [SerializeField] private Mesh[] ballHQ;
     [SerializeField] private Mesh[] ballLQ;
+    [FormerlySerializedAs("keepQuestOnLowQuality")]
+    [FormerlySerializedAs("kepQuestOnLowQuality")]
     [Header("Defaults")]
-    [SerializeField] private bool kepQuestOnLowQuality = false;
+    [SerializeField, Tooltip("Should Quest only use low quality balls? This will save draw calls.")] private bool questLowQualityOnly;
     [SerializeField] private bool defaultsHighQualityOnPC = true;
     [SerializeField] private bool defaultsLowQualityOnQuest = true;
-    private bool isQuest = false;
-    private bool currentQuality = true;
+    private bool isHighQuality = true;
     
     void Start()
     {
 #if UNITY_ANDROID
-isQuest = true;
-#endif
-        if (!isQuest && defaultsHighQualityOnPC)
+        if (!defaultsLowQualityOnQuest) {
+            return;
+        }
+#else
+        if (defaultsHighQualityOnPC)
         {
             return;
         }
-        if (!defaultsLowQualityOnQuest && defaultsHighQualityOnPC)
-            return;
-        else
-        {
-            _enableLQ();
-        }
+#endif        
+        
+        _enableLQ();
     }
     public override void OnPlayerTriggerEnter(VRCPlayerApi player)
     {
@@ -52,8 +53,12 @@ isQuest = true;
 
     public void _switchQuality()
     {
-        if (isQuest && kepQuestOnLowQuality) return;
-        if (currentQuality)
+#if UNITY_ANDROID
+        if (questLowQualityOnly) {
+            return;
+        }
+#endif
+        if (isHighQuality)
         {
             _enableLQ();
         }
@@ -75,12 +80,19 @@ isQuest = true;
                 }
             }
         }
-        currentQuality = false;
+        
+        isHighQuality = false;
     }
 
     public void _enableHQ()
     {
-        if (isQuest && kepQuestOnLowQuality) return;
+        #if UNITY_ANDROID
+        if (questLowQualityOnly)
+        {
+            return;
+        }
+        #endif
+        
         for (int i = 0; i < 16; i++)
         {
             if (balls[i] != null)
@@ -91,6 +103,7 @@ isQuest = true;
                 }
             }
         }
-        currentQuality = true;
+        
+        isHighQuality = true;
     }
 }
