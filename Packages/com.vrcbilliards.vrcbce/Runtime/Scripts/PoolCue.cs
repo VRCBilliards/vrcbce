@@ -161,7 +161,7 @@ namespace VRCBilliards
 
         public override void OnPickupUseDown()
         {
-            if (Networking.LocalPlayer.IsUserInVR())
+            if (!Networking.LocalPlayer.IsUserInVR())
             {
                 return;
             }
