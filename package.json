@@ -1,0 +1,27 @@
+{
+  "name": "com.vrcbilliards.vrcbce",
+  "version": "1.6.0",
+  "displayName": "VRCBilliards",
+  "description": "The definitive edition of VRChat's most popular game prefab! Reliable, extensible, *and* heavily performant (even on Quest!)",
+  "author": {
+    "name": "VRCBilliards",
+    "url": "https://github.com/VRCBilliards"
+  },
+  "gitDependencies": {},
+  "vpmDependencies": {
+    "com.vrchat.worlds": "^3.2.0",
+    "s-ilent.filamented": "^1.2.0"
+  },
+  "legacyFolders": {
+    "Assets\\VRCBilliardsCE": "4ecec77f61aac024abedcb795dd6cce1"
+  },
+  "legacyFiles": {},
+  "legacyPackages": [],
+  "samples": [
+    {
+      "displayName": "Demo Scene - All Tables",
+      "description": "Demo scene with all of the table variants",
+      "path": "Samples/Demo Scene"
+    }
+  ]
+}
