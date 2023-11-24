@@ -4,10 +4,10 @@ using UnityEngine;
 
 // ReSharper disable CheckNamespace
 
-namespace VRCBilliards
+namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 {
     /// <summary>
-    /// Main Behaviour for VRCBilliards: Community Edition. This is a giant class. Here be dragons.
+    /// The OLD Main Behaviour for VRCBilliards: Community Edition. Kept here for posterity.
     /// </summary>
     [RequireComponent(typeof(AudioSource))]
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]

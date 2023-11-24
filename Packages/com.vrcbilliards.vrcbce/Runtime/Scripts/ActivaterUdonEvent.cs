@@ -1,14 +1,21 @@
 using UdonSharp;
 using UnityEngine;
+using UnityEngine.Serialization;
 using VRC.Udon;
 
-namespace FairlySadPanda.UsefulThings
+namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 {
-    [AddComponentMenu("FSP/Utilities/Activate Udon Event")]
+    /// <summary>
+    /// A utility script to help with activating things when Interacting with some button or somesuch in worlds.
+    /// Includes handling if the activation should be networked. Easy networking! Joy.
+    /// </summary>
+    [AddComponentMenu("VRCBCE/Utilities/Activate Udon Event")]
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
     public class ActivaterUdonEvent : UdonSharpBehaviour
     {
+        [Tooltip("Do we want to trigger the UdonBehaviour we're triggering for other people in the instance?")]
         public bool networked;
+        [Tooltip("Do we want to trigger the UdonBehaviour we're triggering for everyone in the instance, or just the owner of the behaviour we're triggering?")]
         public bool networkedAll;
 
         [Header("Trigger a Udon behaviour doing something")]
@@ -17,19 +24,17 @@ namespace FairlySadPanda.UsefulThings
 
         [Header("Trigger an animator doing something")]
         public Animator animator;
-
+        
+        [Tooltip("Do we trigger this animation via a bool or a trigger?")]
         public bool isTriggeredViaBool;
+        [Tooltip("What's the name of the bool or trigger?")]
         public string stateName;
+        [Tooltip("Should we set the value to true or false? This isn't synced if you change it locally!")]
         public bool boolStateValue;
         
-        //akalink added
-        [Header("Trigger a sound when interacted with, uses clip from AudioSource")]
-        public bool DebugUseAudio = false;
+        [Header("Trigger a sound when interacted with, potentially for everyone if networked is set to TRUE")]
         public AudioSource audioSource;
-        //end
-
-
-
+        
         public override void Interact()
         {
             if (behaviour != null)
@@ -65,8 +70,7 @@ namespace FairlySadPanda.UsefulThings
                 }
             }
             
-            //akalink added
-            if ( audioSource != null)
+            if (audioSource != null)
             {
                 if (networked)
                 {
@@ -77,7 +81,6 @@ namespace FairlySadPanda.UsefulThings
                     audioSource.Play();
                 }
             }
-            //end
         }
 
         public void ActivateAnimation()
@@ -102,8 +105,7 @@ namespace FairlySadPanda.UsefulThings
                 animator.SetBool(stateName, false);
             }
         }
-            
-        //akalink added
+        
         public void PlayAudio()
         {
             if (audioSource.clip != null)
@@ -111,7 +113,6 @@ namespace FairlySadPanda.UsefulThings
                 audioSource.Play();
             }
         }
-        //end
     }
 
 }

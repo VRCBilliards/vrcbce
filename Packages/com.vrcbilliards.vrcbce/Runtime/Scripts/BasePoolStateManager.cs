@@ -11,7 +11,7 @@ using VRC.Udon;
 // ReSharper disable CheckNamespace
 // ReSharper disable InconsistentNaming
 
-namespace VRCBilliards
+namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 {
     /// <summary>
     /// The reasons why the table can be reset
@@ -23,6 +23,12 @@ namespace VRCBilliards
         InvalidState,
         PlayerLeft
     }
+    
+    /// <summary>
+    /// This is the base logic that governs the pool table, devoid of almost all physics code. This code is quite
+    /// messy; it includes all setup, teardown, game state and replication logic, and works with all other components
+    /// to allow the player to play pool.
+    /// </summary>
 
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
     public abstract class BasePoolStateManager : DebuggableUdon
@@ -399,7 +405,7 @@ namespace VRCBilliards
         [UdonSynced] private int player3ID;
         [UdonSynced] private int player4ID;
 
-        public FairlySadPanda.UsefulThings.Logger logger;
+        public Logger logger;
 
         [UdonSynced] private bool gameWasReset;
 

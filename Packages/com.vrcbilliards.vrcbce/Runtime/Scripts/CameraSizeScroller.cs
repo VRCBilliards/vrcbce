@@ -1,8 +1,12 @@
 using UdonSharp;
 using UnityEngine;
 
-namespace VRCBilliards
+namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 {
+    /// <summary>
+    /// Handles how scrolling works in the top-down desktop view.
+    /// </summary>
+    [AddComponentMenu("VRCBCE/Utilities/Camera Scroller")]
     [RequireComponent(typeof(Camera))]
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class CameraSizeScroller : UdonSharpBehaviour

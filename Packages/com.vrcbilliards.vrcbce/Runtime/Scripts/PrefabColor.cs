@@ -2,17 +2,22 @@
 using System;
 using UdonSharp;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 using VRC.SDKBase;
 using VRC.Udon;
 
-namespace VRCBilliards
+namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 {
+    /// <summary>
+    /// Handles some logic in the colour picker.
+    /// </summary>
+    
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class PrefabColor : UdonSharpBehaviour
     {
-        private ColorPicker PlayerPanel;
-        public Color PrefabedColor = new Color(1.00f, 1.00f, 1.00f, 1.00f);
+        private ColorPicker playerPanel;
+        [FormerlySerializedAs("PrefabedColor")] public Color prefabColour = new Color(1.00f, 1.00f, 1.00f, 1.00f);
 
         // Capped at 3 as it gets blinding depending shaders and world post processing setup
         [Range(0, 3)] public float intensity = 1;
@@ -20,35 +25,31 @@ namespace VRCBilliards
         public string materialName = "_Color";
 
         //public Renderer ButtonColor;
-        private Image Button;
+        private Image button;
 
         private void Start()
         {
-            //ButtonColor.material.SetColor(materialName, PrefabedColor);
-            PlayerPanel = GetComponentInParent<ColorPicker>();
-            Button = GetComponent<Image>();
+            playerPanel = GetComponentInParent<ColorPicker>();
+            button = GetComponent<Image>();
             _ButtonColors(false);
         }
 
         public void _ButtonPress()
         {
-            float H, S, V;
-            Color.RGBToHSV(PrefabedColor, out H, out S, out V);
-            Debug.Log("button works");
-            PlayerPanel._PrefabPicker(H, S, V, intensity);
+            float hue, sat, brightness;
+            Color.RGBToHSV(prefabColour, out hue, out sat, out brightness);
+            playerPanel._PrefabPicker(hue, sat, brightness, intensity);
         }
 
         public void _ButtonColors(bool IO)
         {
             if (IO)
             {
-                Button.color = PrefabedColor;
-                Debug.Log("Button turned on");
+                button.color = prefabColour;
             }
             else
             {
-                Button.color = PrefabedColor * Color.black;
-                Debug.Log("button turned off");
+                button.color = prefabColour * Color.black;
             }
         }
     }

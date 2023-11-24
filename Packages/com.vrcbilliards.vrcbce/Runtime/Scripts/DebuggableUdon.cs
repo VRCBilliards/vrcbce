@@ -3,8 +3,11 @@ using UnityEngine;
 
 // ReSharper disable CheckNamespace
 
-namespace VRCBilliards
+namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 {
+    /// <summary>
+    /// Overarching script for UdonSharpBehaviours that need nicer debug tools than Unity normally allows.
+    /// </summary>
     public abstract class DebuggableUdon : UdonSharpBehaviour
     {
         /**

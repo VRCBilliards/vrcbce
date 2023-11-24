@@ -21,7 +21,7 @@ MonoBehaviour:
   compiledVersion: 2
   behaviourSyncMode: 4
   hasInteractEvent: 0
-  scriptID: 4040276624205933307
+  scriptID: -1359859446010476278
   serializationData:
     SerializedFormat: 2
     SerializedBytes: 
@@ -2123,7 +2123,8 @@ MonoBehaviour:
       Data: 101|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: VRCBilliards.ColorPicker, VRCBilliards.VRCBCE.Runtime
+      Data: VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts.ColorPicker,
+        VRCBilliards.VRCBCE.Runtime
     - Name: 
       Entry: 8
       Data: 
@@ -2294,7 +2295,8 @@ MonoBehaviour:
       Data: 110|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: VRCBilliards.PoolCue[], VRCBilliards.VRCBCE.Runtime
+      Data: VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts.PoolCue[],
+        VRCBilliards.VRCBCE.Runtime
     - Name: 
       Entry: 8
       Data: 
@@ -2710,7 +2712,8 @@ MonoBehaviour:
       Data: 133|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: VRCBilliards.ShotGuideController, VRCBilliards.VRCBCE.Runtime
+      Data: VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts.ShotGuideController,
+        VRCBilliards.VRCBCE.Runtime
     - Name: 
       Entry: 8
       Data: 
@@ -4294,7 +4297,8 @@ MonoBehaviour:
       Data: 210|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: VRCBilliards.PoolMenu, VRCBilliards.VRCBCE.Runtime
+      Data: VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts.PoolMenu,
+        VRCBilliards.VRCBCE.Runtime
     - Name: 
       Entry: 8
       Data: 
@@ -8816,7 +8820,8 @@ MonoBehaviour:
       Data: 420|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: FairlySadPanda.UsefulThings.Logger, VRCBilliards.VRCBCE.Runtime
+      Data: VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts.Logger,
+        VRCBilliards.VRCBCE.Runtime
     - Name: 
       Entry: 8
       Data: 
@@ -9734,7 +9739,8 @@ MonoBehaviour:
       Data: 462|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: VRCBilliards.ResetReason, VRCBilliards.VRCBCE.Runtime
+      Data: VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts.ResetReason,
+        VRCBilliards.VRCBCE.Runtime
     - Name: 
       Entry: 8
       Data: 

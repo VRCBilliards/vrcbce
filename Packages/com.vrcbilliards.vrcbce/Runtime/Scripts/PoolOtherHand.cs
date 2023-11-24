@@ -2,8 +2,12 @@ using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 
-namespace VRCBilliards
+namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 {
+    /// <summary>
+    /// This script handles behaviour of the "other hand" - the secondary grip that VR players use to control a cue.
+    /// </summary>
+    
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class PoolOtherHand : UdonSharpBehaviour
     {

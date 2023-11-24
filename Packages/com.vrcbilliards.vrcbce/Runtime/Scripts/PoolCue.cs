@@ -3,11 +3,18 @@ using UnityEngine;
 using UnityEngine.Animations;
 using VRC.SDKBase;
 
-namespace VRCBilliards
+namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 {
+    /// <summary>
+    /// The code that handles the pool cue. This script is contained on the pickup that is on the lower end of the
+    /// shaft.
+    /// </summary>
+    
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class PoolCue : UdonSharpBehaviour
     {
+        public Logger logger;
+        
         public PoolOtherHand otherHand;
         private Transform targetTransform;
 
@@ -76,7 +83,11 @@ namespace VRCBilliards
 
             if (!targetCollider)
             {
-                Debug.LogError("PoolCue: Start: target is missing a collider. Aborting cue setup.");
+                if (logger)
+                {
+                    logger._Error(gameObject.name, "PoolCue: Start: target is missing a collider. Aborting cue setup.");
+                }
+                
                 gameObject.SetActive(false);
                 return;
             }
@@ -86,7 +97,11 @@ namespace VRCBilliards
             thisPickup = (VRC_Pickup) gameObject.GetComponent(typeof(VRC_Pickup));
             if (!thisPickup)
             {
-                Debug.LogError("PoolCue: Start: this object is missing a VRC_Pickup script. Aborting cue setup.");
+                if (logger)
+                {
+                    logger._Error(gameObject.name, "PoolCue: Start: this object is missing a VRC_Pickup script. Aborting cue setup.");
+                }
+                
                 gameObject.SetActive(false);
                 return;
             }
@@ -94,7 +109,11 @@ namespace VRCBilliards
             targetPickup = (VRC_Pickup) targetTransform.GetComponent(typeof(VRC_Pickup));
             if (!targetPickup)
             {
-                Debug.LogError("PoolCue: Start: target object is missing a VRC_Pickup script. Aborting cue setup.");
+                if (logger)
+                {
+                    logger._Error(gameObject.name, "PoolCue: Start: target object is missing a VRC_Pickup script. Aborting cue setup.");
+                }
+
                 gameObject.SetActive(false);
                 return;
             }
@@ -130,7 +149,7 @@ namespace VRCBilliards
             {
                 if (isArmed)
                 {
-                    offsetBetweenArmedPositions = transform.position - positionAtStartOfArming; //cueMainGripOriginalPosition - positionAtStartOfArming;
+                    offsetBetweenArmedPositions = transform.position - positionAtStartOfArming;
 
                     // Pull the cue backwards or forwards on the locked cue's line based on how far away the locking cue handle has been moved since locking.
                     cueParent.position = positionAtStartOfArming + (normalizedLineOfCueWhenArmed * Vector3.Dot(offsetBetweenArmedPositions, normalizedLineOfCueWhenArmed));

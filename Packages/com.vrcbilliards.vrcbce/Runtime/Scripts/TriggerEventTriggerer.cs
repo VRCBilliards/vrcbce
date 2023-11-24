@@ -2,8 +2,11 @@ using UdonSharp;
 using VRC.SDKBase;
 using VRC.Udon;
 
-namespace VRCBilliards
+namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 {
+    /// <summary>
+    /// A utility script that can trigger things when players enter or leave a trigger volume.
+    /// </summary>
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class TriggerEventTriggerer : UdonSharpBehaviour
     {

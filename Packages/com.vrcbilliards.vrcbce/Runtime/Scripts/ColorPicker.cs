@@ -9,18 +9,22 @@ using UnityEngine.UI;
 using VRC.Udon.Common.Interfaces;
 using VRCBilliards;
 
-namespace VRCBilliards
+namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 {
+    /// <summary>
+    /// Handles colour picking for Akalink's menu.
+    /// </summary>
+    
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
     public class ColorPicker : UdonSharpBehaviour
     {
-        [Header("Interface with the core code")]
-        public PoolStateManager PoolTable;
+        [FormerlySerializedAs("PoolTable")] [Header("Interface with the core code")]
+        public PoolStateManager poolTable;
         public bool solidsBlue = true;
         private bool isPanelEnabled = false;
 
-        [Header("Shader property name and the display material that will be colored")]
-        public string ColorMaterialName = "_Color";
+        [FormerlySerializedAs("ColorMaterialName")] [Header("Shader property name and the display material that will be colored")]
+        public string colourMaterialName = "_Color";
         private Renderer displayOutput;
 
         [Header("HSV values from the Slider and the synced float variables")]
@@ -41,21 +45,20 @@ namespace VRCBilliards
             displayOutput = GetComponentInChildren<Renderer>();
             colorButtons = GetComponentsInChildren<PrefabColor>();
             audioSource = GetComponentInChildren<AudioSource>();
+            
+#if UNITY_EDITOR
             if (slidersAll.Length != 4)
             {
                 Debug.Log("sliders did not equal 4");
             }
-            Color Temp = new Color(floatHue, floatSaturation, floatBrightness, 1);
-            displayOutput.material.SetColor(ColorMaterialName, Temp * floatIntensity);
+#endif
+            displayOutput.material.SetColor(colourMaterialName, new Color(floatHue, floatSaturation, floatBrightness, 1) * floatIntensity);
+            
             SetColor();
         }
-
-
-
-
+        
         public void _SetHue()
         {
-
             if (isPanelEnabled)
             {
                 Networking.SetOwner(Networking.LocalPlayer, gameObject);
@@ -67,50 +70,63 @@ namespace VRCBilliards
 
         public void _SetIntensity()
         {
-
-            if (isPanelEnabled)
+            if (!isPanelEnabled)
             {
-                Networking.SetOwner(Networking.LocalPlayer, gameObject);
-                floatIntensity = slidersAll[3].value;
-                RequestSerialization();
-                SetColor();
+                return;
             }
+            
+            Networking.SetOwner(Networking.LocalPlayer, gameObject);
+            
+            floatIntensity = slidersAll[3].value;
+            
+            RequestSerialization();
+            SetColor();
         }
 
         public void _SetSaturation()
         {
-            if (isPanelEnabled)
+            if (!isPanelEnabled)
             {
-                Networking.SetOwner(Networking.LocalPlayer, gameObject);
-                floatSaturation = slidersAll[1].value;
-                RequestSerialization();
-                SetColor();
+                return;
             }
+            
+            Networking.SetOwner(Networking.LocalPlayer, gameObject);
+            
+            floatSaturation = slidersAll[1].value;
+            
+            RequestSerialization();
+            SetColor();
         }
 
         public void _SetBrightness()
         {
-            if (isPanelEnabled)
+            if (!isPanelEnabled)
             {
-                Networking.SetOwner(Networking.LocalPlayer, gameObject);
-                floatBrightness = slidersAll[2].value;
-                RequestSerialization();
-                SetColor();
+                return;
             }
+            
+            Networking.SetOwner(Networking.LocalPlayer, gameObject);
+            
+            floatBrightness = slidersAll[2].value;
+            
+            RequestSerialization();
+            SetColor();
         }
 
         private void SetColor()
         {
-            Color Temp = Color.HSVToRGB(floatHue, floatSaturation, floatBrightness, true);
-            displayOutput.material.SetColor(ColorMaterialName, Temp * floatIntensity);
+            Color temp = Color.HSVToRGB(floatHue, floatSaturation, floatBrightness, true);
+            
+            displayOutput.material.SetColor(colourMaterialName, temp * floatIntensity);
+            
             if (solidsBlue)
             {
-                PoolTable.tableBlue = Temp * floatIntensity;
+                poolTable.tableBlue = temp * floatIntensity;
+
+                return;
             }
-            else
-            {
-                PoolTable.tableOrange = Temp * floatIntensity;
-            }
+
+            poolTable.tableOrange = temp * floatIntensity;
         }
 
         public override void OnDeserialization()
@@ -118,19 +134,21 @@ namespace VRCBilliards
             SetColor();
         }
 
-        public void _PrefabPicker(float Hue, float Saturation, float Brightness, float Intensity)
+        public void _PrefabPicker(float hue, float sat, float brightness, float intensity)
         {
             if (isPanelEnabled)
             {
                 Networking.SetOwner(Networking.LocalPlayer, gameObject);
-                floatHue = Hue;
-                floatSaturation = Saturation;
-                floatBrightness = Brightness;
-                floatIntensity = Intensity;
+                
+                floatHue = hue;
+                floatSaturation = sat;
+                floatBrightness = brightness;
+                floatIntensity = intensity;
+                
                 RequestSerialization();
                 SetColor();
-                _PlayAudio(); //not sure if should be networked or not
-
+                
+                _PlayAudio();
             }
 
         }
@@ -142,7 +160,6 @@ namespace VRCBilliards
             {
                 colorButtons[i]._ButtonColors(IO);
             }
-
         }
 
         public void _PlayAudio()

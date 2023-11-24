@@ -5,11 +5,17 @@ using UnityEngine.UI;
 using VRC.SDKBase;
 using VRC.Udon;
 
-namespace VRCBilliards
+namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 {
+    /// <summary>
+    /// The script that handles most pool menus. Menus sometimes have their own scripts, however.
+    /// </summary>
+    
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class PoolMenu : UdonSharpBehaviour
     {
+        public Logger logger;
+        
         private PoolStateManager manager;
 
         [Header("Style")]
@@ -32,24 +38,19 @@ namespace VRCBilliards
         [Header("Game Mode")]
         public TextMeshProUGUI gameModeTxt;
         public Image[] gameModeButtons = { };
-        //akalink added, allows you to override the name given when their respecive button is clicked.
         public string uSA8BallString = "American 8-Ball";
         public string uSA9BallString = "American 9-Ball";
         public string jP4BallString = "Japanese 4-Ball";
         public string kN4BallString = "Korean 4-Ball";
-        //end
-
-
+        
         [Header("Guide Line")]
         public bool toggleGuideLineButtonsActive = true;
         public GameObject guideLineEnableButton;
         public GameObject guideLineDisableButton;
         public TextMeshProUGUI guidelineStatus;
         public Image[] guideLineButtons = { };
-        //akalink added
         public string guidelineEnabledString = "Guideline On";
         public string guidelineDisabledString = "Guideline Off";
-        //end
 
         [Header("Timer")]
         public TextMeshProUGUI timer;
@@ -63,10 +64,8 @@ namespace VRCBilliards
         [Header("Teams")]
         public TextMeshProUGUI teamsTxt;
         public Image[] teamsButtons = { };
-        //akalink added
         public string oneVOneString = "Teams: NO";
         public string twoVTwoString = "Teams: YES";
-        //end
 
         [Header("Players")]
         public GameObject player1Button;
@@ -103,9 +102,7 @@ namespace VRCBilliards
         private TextMeshProUGUI[] teamBScores;
 
         public TextMeshProUGUI winnerText;
-        //akalink added
         public string gameResetText = "The game was ended!";
-        //
 
         [Header("UdonChips Integration")]
         public string defaultEmptyplayerSlotTextWithUdonChips = "{}uc to play";
@@ -119,7 +116,11 @@ namespace VRCBilliards
             manager = transform.parent.GetComponentInChildren<PoolStateManager>();
             if (!manager)
             {
-                Debug.LogError($"A VRCBCE menu, {name}, cannot start because it cannot find a PoolStateManager in the children of its parent!");
+                if (logger)
+                {
+                    logger._Error(gameObject.name, $"A VRCBCE menu, {name}, cannot start because it cannot find a PoolStateManager in the children of its parent!");
+                }
+                
                 gameObject.SetActive(false);
                 return;
             }
@@ -141,8 +142,7 @@ namespace VRCBilliards
                 teamBScores[i] = scores[i].transform.Find(teamBScore.name).GetComponent<TextMeshProUGUI>();
             }
         }
-
-        // TODO: This all needs to be secured.
+        
         public void _UnlockTable()
         {
             manager._UnlockTable();
@@ -310,22 +310,26 @@ namespace VRCBilliards
         {
             if (buttons == null) return;
 
-            for (int i = 0; i < buttons.Length; i++)
+            for (var i = 0; i < buttons.Length; i++)
             {
-                if (buttons[i] == null) continue;
+                Image but = buttons[i];
 
-                buttons[i].color = i == selectedIndex ? selectedColor : unselectedColor;
+                if (!but)
+                {
+                    continue;
+                }
+                
+                but.color = i == selectedIndex ? selectedColor : unselectedColor;
             }
         }
 
         /// <summary>
-        /// Recieve a new set of data from the manager that can be displayed to viewers.
+        /// Receive a new set of data from the manager that can be displayed to viewers.
         /// </summary>
         public void _UpdateMainMenuView(
             bool newIsTeams,
             bool isTeam2Playing,
             int gameMode,
-            //bool colorBalls,
             bool isKorean4Ball,
             int timerMode,
             int player1ID,
@@ -335,52 +339,45 @@ namespace VRCBilliards
             bool guideline
         )
         {
-            //akalink edited, original code is commented out
             if (newIsTeams)
             {
-                if (VRC.SDKBase.Utilities.IsValid(teamsTxt)) teamsTxt.text = twoVTwoString; //"Teams: YES";
+                if (VRC.SDKBase.Utilities.IsValid(teamsTxt)) teamsTxt.text = twoVTwoString;
                 isTeams = true;
             }
             else
             {
-                if (VRC.SDKBase.Utilities.IsValid(teamsTxt)) teamsTxt.text = oneVOneString; //"Teams: NO";
+                if (VRC.SDKBase.Utilities.IsValid(teamsTxt)) teamsTxt.text = oneVOneString;
                 isTeams = false;
             }
-            //end
+
             UpdateButtonColors(teamsButtons, newIsTeams ? 0 : 1);
             
-            //akalink added
-            //UpdateButtonColors(ballColorButtons, colorBalls ? 0 : 1);
-            //end
-            
-            //akalink edited, original code is commented out
             switch (gameMode)
             {
                 case 0:
-                    if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = uSA8BallString; //"American 8-Ball";
+                    if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = uSA8BallString;
                     UpdateButtonColors(gameModeButtons, 0);
 
                     break;
                 case 1:
-                    if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = uSA9BallString; //"American 9-Ball";
+                    if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = uSA9BallString; 
                     UpdateButtonColors(gameModeButtons, 1);
 
                     break;
                 case 2:
                     if (isKorean4Ball)
                     {
-                        if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = kN4BallString;//"Korean 4-Ball";
+                        if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = kN4BallString;
                         UpdateButtonColors(gameModeButtons, 3);
                     }
                     else
                     {
-                        if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = jP4BallString;//"Japanese 4-Ball";
+                        if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = jP4BallString;
                         UpdateButtonColors(gameModeButtons, 2);
                     }
 
                     break;
             }
-            //end
 
             switch (timerMode)
             {
@@ -533,7 +530,7 @@ namespace VRCBilliards
                     }
                 }
             }
-            //akalink edited, original code is commented out
+            
             if (guideline)
             {
                 if (toggleGuideLineButtonsActive && !useUnityUI)
@@ -544,7 +541,7 @@ namespace VRCBilliards
 
                 UpdateButtonColors(guideLineButtons, 0);
                 if (VRC.SDKBase.Utilities.IsValid(guidelineStatus))
-                    guidelineStatus.text = guidelineEnabledString;  //"Guideline On";
+                    guidelineStatus.text = guidelineEnabledString;
             }
             else
             {
@@ -556,9 +553,8 @@ namespace VRCBilliards
 
                 UpdateButtonColors(guideLineButtons, 1);
                 if (VRC.SDKBase.Utilities.IsValid(guidelineStatus))
-                    guidelineStatus.text = guidelineDisabledString; //"Guideline Off";
+                    guidelineStatus.text = guidelineDisabledString;
             }
-            //end
         }
 
         private bool HandlePlayerState(TextMeshProUGUI menuText, TextMeshProUGUI[] scores, VRCPlayerApi player)
@@ -657,7 +653,6 @@ namespace VRCBilliards
                     {
                         winnerText.text = $"{(player2)} and {player4} win!";
                     }
-                    
                 }
                 else
                 {
@@ -670,69 +665,53 @@ namespace VRCBilliards
                         winnerText.text = $"{(player1)} and {player3} win!";
                     }
                 }
+
+                return;
             }
-            else
+
+            if (isTeam2)
             {
-                if (isTeam2)
-                {
-                    if (player2 == "")
-                    {
-                        winnerText.text = "Player 1 wins!";
-                    }
-                    else
-                    {
-                        winnerText.text = $"{player2} wins!";
-                    }
-                }
-                else
-                {
-                    if (player1 == "")
-                    {
-                        winnerText.text = "Player 1 wins!";
-                    }
-                    else
-                    {
-                        winnerText.text = $"{player1} wins!";
-                    }
-                }
+                winnerText.text = player2 == "" ? "Player 1 wins!" : $"{player2} wins!";
+
+                return;
             }
+            
+            winnerText.text = player1 == "" ? "Player 1 wins!" : $"{player1} wins!";
         }
 
         private void ResetScoreScreen()
         {
-            foreach (var score in player1Scores)
+            foreach (TextMeshProUGUI score in player1Scores)
             {
                 score.text = "";
             }
             
-            foreach (var score in player2Scores)
+            foreach (TextMeshProUGUI score in player2Scores)
             {
                 score.text = "";
             }
             
-            foreach (var score in player3Scores)
+            foreach (TextMeshProUGUI score in player3Scores)
             {
                 score.text = "";
             }
             
-            foreach (var score in player4Scores)
+            foreach (TextMeshProUGUI score in player4Scores)
             {
                 score.text = "";
             }
             
-            foreach (var score in teamAScores)
+            foreach (TextMeshProUGUI score in teamAScores)
             {
                 score.text = "";
             }
             
-            foreach (var score in teamBScores)
+            foreach (TextMeshProUGUI score in teamBScores)
             {
                 score.text = "";
             }
 
             winnerText.text = "";
-            
-            
         }
     }
 }
