@@ -635,7 +635,7 @@ namespace VRCBilliards
 
         public void _GameWasReset(ResetReason reason)
         {
-            winnerText.text = manager.ToReasonString(reason);
+            winnerText.text = BasePoolStateManager.ToReasonString(reason);
         }
 
         public void _TeamWins(bool isTeam2)
@@ -644,28 +644,56 @@ namespace VRCBilliards
             var player2 = player2Scores[0].text;
             var player3 = player3Scores[0].text;
             var player4 = player4Scores[0].text;
-            var nobody = "Nobody";
-            
+
             if (isTeams)
             {
                 if (isTeam2)
                 {
-                    winnerText.text = $"{(player2 == "" ? nobody : player2)} and {(player4 == "" ? nobody : player4)} win!";
+                    if (player2 == "" || player4 == "")
+                    {
+                        winnerText.text = "Team 2 wins!";
+                    }
+                    else
+                    {
+                        winnerText.text = $"{(player2)} and {player4} win!";
+                    }
+                    
                 }
                 else
                 {
-                    winnerText.text = $"{(player1 == "" ? nobody : player1)} and {(player3 == "" ? nobody : player3)} win!";
+                    if (player1 == "" || player3 == "")
+                    {
+                        winnerText.text = "Team 1 wins!";
+                    }
+                    else
+                    {
+                        winnerText.text = $"{(player1)} and {player3} win!";
+                    }
                 }
             }
             else
             {
                 if (isTeam2)
                 {
-                    winnerText.text = $"{(player2 == "" ? nobody : player2)} wins!";
+                    if (player2 == "")
+                    {
+                        winnerText.text = "Player 1 wins!";
+                    }
+                    else
+                    {
+                        winnerText.text = $"{player2} wins!";
+                    }
                 }
                 else
                 {
-                    winnerText.text = $"{(player1 == "" ? nobody : player1)} wins!";
+                    if (player1 == "")
+                    {
+                        winnerText.text = "Player 1 wins!";
+                    }
+                    else
+                    {
+                        winnerText.text = $"{player1} wins!";
+                    }
                 }
             }
         }

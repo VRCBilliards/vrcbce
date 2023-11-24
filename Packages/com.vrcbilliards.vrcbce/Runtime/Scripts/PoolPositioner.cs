@@ -5,7 +5,7 @@ namespace VRCBilliards
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class PoolPositioner : UdonSharpBehaviour
     {
-        public PoolStateManager gameStateManager;
+        public BasePoolStateManager gameStateManager;
 
         public override void OnDrop()
         {
