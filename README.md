@@ -2,7 +2,7 @@
 
 ![Header](https://user-images.githubusercontent.com/6299186/173490378-0b81c2a0-b523-4893-96f3-4ac36935066c.png)
 
-#### Like this table? [Buy us a coffee on Ko-fi](https://ko-fi.com/fairlysadproductions)
+<a href='https://ko-fi.com/fairlysadproductions' target='_blank'><img height='35' style='border:0px;height:46px;' src='https://az743702.vo.msecnd.net/cdn/kofi3.png?v=0' border='0' alt='Buy Us a Coffee at ko-fi.com' />
 
 ## The Essential VRChat game prefab - by the community, for the community
 
