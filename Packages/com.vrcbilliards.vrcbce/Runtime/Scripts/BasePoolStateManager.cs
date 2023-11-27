@@ -458,41 +458,6 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
         private int turnCount;
 
-        #region UdonChipsVariables
-        // We are breaking our normal Java-like ordering rules here. UdonChips is a layer on top of regular VRCBCE code,
-        // and we want the ability to contain it easily. A region is the best way of handling this.
-
-        [Header("UdonChips")]
-        [Tooltip("Enable this to integrate with UdonChips.")]
-        public bool enableUdonChips;
-
-        [Tooltip("The base cost of a game in UC.")]
-        public float price = 100.0f;
-
-        [Tooltip(
-            "Allow for a player to add more UC to their total entry cost. If the player wins, they get a bigger reward.")]
-        public bool allowRaising = true;
-
-        [Tooltip("The basic prize a player gets for winning versus an opponent.")]
-        public float prize = 200.0f;
-
-        [Tooltip("The reward a player gets for beating themselves at pool.")]
-        public float singlePlayPrize = 150.0f;
-
-        [Tooltip("An optional sound clip to play when someone pays to play.")]
-        public AudioClip paySound;
-
-        [Tooltip("An optional sound clip to play when someone cannot afford to play.")]
-        public AudioClip insufficientFundsSound;
-
-        [UdonSynced][HideInInspector] public int raiseCount = 1;
-
-        private float Money
-        {
-            get => (float)udonChips.GetProgramVariable("money");
-            set => udonChips.SetProgramVariable("money", value);
-        }
-
         private int PlayerCount
         {
             get
@@ -505,15 +470,6 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 return count;
             }
         }
-
-        private bool IsSinglePlayer => !playerIsTeam2 && PlayerCount == 0;
-
-        private float TotalPrice => price * raiseCount;
-
-        private bool hasPaidToSignUp;
-
-        #endregion
-
         public virtual void Start()
         {
             repoMaxX = TABLE_WIDTH;
@@ -611,11 +567,6 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             ballShadowOffset = ballTransforms[0].position.y - ballShadowPosConstraintTransforms[0].position.y;
 
             shadowRenders = shadows.GetComponentsInChildren<MeshRenderer>();
-
-            if (enableUdonChips)
-            {
-                udonChips = (UdonBehaviour)GameObject.Find("UdonChips").GetComponent(typeof(UdonBehaviour));
-            }
 
             timerText = poolMenu.visibleTimerDuringGame;
             timerOutputFormat = poolMenu.timerOutputFormat;
@@ -808,15 +759,6 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             if (logger)
             {
                 logger._Log(name, $"JoinGame: {playerNumber}");
-            }
-
-            if (!Pay(TotalPrice))
-            {
-                return;
-            }
-            else
-            {
-                hasPaidToSignUp = true;
             }
 
             Networking.SetOwner(localPlayer, gameObject);
@@ -1917,14 +1859,6 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
                 isGameModePractice = localPlayerID == 0 && numberOfPlayers == 1;
 
-                int playerID = Networking.LocalPlayer.playerId;
-                if (hasPaidToSignUp && player1ID != playerID && player2ID != playerID && player3ID != playerID &&
-                    player4ID != playerID)
-                {
-                    hasPaidToSignUp = false;
-                    PayBack(TotalPrice);
-                }
-
                 hasRunSyncOnce = true;
 
                 return;
@@ -2255,9 +2189,6 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
             ApplyTableColour(isTeam2Winner);
 
-            hasPaidToSignUp = false;
-            GiveRewards();
-
             if (gameWasReset)
             {
                 poolMenu._GameWasReset(latestResetReason);
@@ -2307,8 +2238,6 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             player2ID = 0;
             player3ID = 0;
             player4ID = 0;
-
-            raiseCount = 1;
 
             poolMenu._UpdateMainMenuView(
                 isTeams,
@@ -2705,11 +2634,6 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
             poolCues[0].localPlayerIsInDesktopTopDownView = false;
             poolCues[1].localPlayerIsInDesktopTopDownView = false;
-
-            if (IsSinglePlayer)
-            {
-                PayBack(price * (raiseCount - 1));
-            }
 
             // Make sure that we run a pass on rigidbodies to ensure they are off.
             PlaceSunkBallsIntoRestingPlace();
@@ -3373,31 +3297,6 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 firstHitBallThisTurn = otherBallID;
             }
         }
-
-        #region UdonChipsMethods
-
-        public void _Raise()
-        {
-            if (!enableUdonChips || PlayerCount != 1)
-            {
-                return;
-            }
-
-            if (logger)
-            {
-                logger._Log(name, $"Raise to {price * (raiseCount + 1)}");
-            }
-
-            if (!Pay(price))
-            {
-                return;
-            }
-
-            Networking.SetOwner(localPlayer, gameObject);
-            raiseCount++;
-            RefreshNetworkData(false);
-        }
-
         private void PlayAudioClip(AudioClip clip)
         {
             if (clip == null)
@@ -3407,75 +3306,6 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
             mainSrc.PlayOneShot(clip);
         }
-
-        private void PayBack(float value)
-        {
-            if (!enableUdonChips)
-            {
-                return;
-            }
-
-            if (logger)
-            {
-                logger._Log(name, $"Payback {value}");
-            }
-
-            PlayAudioClip(paySound);
-            Money += value;
-
-            if (localPlayerID == 0)
-            {
-                raiseCount = 1;
-            }
-        }
-
-        private bool Pay(float value)
-        {
-            if (!enableUdonChips)
-            {
-                return true;
-            }
-
-            if (Money < value)
-            {
-                if (logger) logger._Log(name, "Insufficient funds");
-                PlayAudioClip(insufficientFundsSound);
-                return false;
-            }
-
-            if (logger) logger._Log(name, $"Pay {value}");
-
-            PlayAudioClip(paySound);
-            Money -= value;
-
-            return true;
-        }
-
-        private void GiveRewards()
-        {
-            if (!enableUdonChips)
-            {
-                return;
-            }
-
-            var isSinglePlayer = PlayerCount == 1;
-            var isWinner = playerIsTeam2 && isTeam2Winner || !playerIsTeam2 && !isTeam2Winner;
-            if (!isSinglePlayer && !isWinner)
-            {
-                return;
-            }
-
-            var total = isSinglePlayer ? singlePlayPrize : prize * raiseCount;
-            if (logger)
-            {
-                logger._Log(name, $"Give rewards {total}");
-            }
-
-            PlayAudioClip(paySound);
-            Money += total;
-        }
-
-        #endregion
         
         #region OSC
 

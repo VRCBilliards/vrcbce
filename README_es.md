@@ -49,23 +49,6 @@ Pasos de instalación:
 3. Dentro de la carpeta VRCBilliardsCE, seleccione cualquiera de los prefabs de mesas, arrástrelo y suéltelo en la escena.
 4. ¡Y listo!
 
-# Integración de UdonChips
-
-¡Con 1.2.1, VRCBCE admite [UdonChips](https://lura.booth.pm/items/3060394)!
-
-Para habilitar la compatibilidad con UdonChips, debe hacer dos cosas:
-
-  1. Tenga un UdonChips UdonBehaviour en el proyecto, con un objeto al que se llama "UdonChips".
-  2. Marque la opción "Habilitar UdonChips" en el objeto VRCBilliards de su mesa de billar.
-
-El objeto VRCBilliards, que contiene el script principal PoolStateManager, contiene varias opciones. Por el momento, se admite lo siguiente:
-
-  1. Pagar UC para unirse a un juego de billar.
-  2. Si Permitir incrementos está habilitado, puede pagar para unirse varias veces: ¡cuanto más pague, más podrá pagar la mesa!
-  3. También puedes ganar UC por ganar contra ti mismo.
-  4. Todos los costos y recompensas se pueden modificar a través del script PoolStateManager.
-  5. El mensaje exacto que se muestra en cada botón para unirse se puede personalizar en el script PoolMenu.
-
 # Obtener soporte
 
 A menos que sea urgente, ¡no envíe mensajes directos a los colaboradores de VRCBCE para pedir ayuda!

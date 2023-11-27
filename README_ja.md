@@ -88,20 +88,3 @@ Unityドキュメント、Unity Example Scripts、[Microsoftのベストプラ�
 # 原作者
 
 このprefabの原作者はHarry_Tです。Harry_TはこのリポジトリをDCMAしようとしましたが（そして失敗しました）、自分のGitHubでパブリックドメインとして公開していることに気づいていませんでした。現在はGitHubやTwitterアカウントを削除して行方不明です。しかし、原作者として引用し、敬意を払うのは当然のことです。また、直接このプロジェクトにも少し貢献してくれました。
-
-# UdonChips 連携
-
-バージョン1.2.1から [UdonChips](https://lura.booth.pm/items/3060394) に対応しました！
-
-UdonChip連携を有効にするには:
-
-  1. プロジェクトに一つの「UdonChips」オブジェクトを設置します。
-  2. シーンのVRCBilliardsオブジェクトの「Enable UdonChips」オプションを有効にします。
-
-VRCBilliardsのコアとなるPoolStateManagerスクリプトにオプションがあります。
-
-  1. UCを支払ってゲームに参加します。
-  2. Raisingを有効にすると、複数回支払うことができます。
-  3. 自分一人のゲームでもUCを獲得できます。
-  4. 支払いと報酬の金額はPoolStateManagerスクリプトで変更できます。
-  5. 参加ボタンの表示メッセージはPoolMenuスクリプトで変更できます。
