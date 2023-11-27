@@ -13146,6 +13146,7 @@ MonoBehaviour:
     PrefabModifications: []
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 3017291208440647368}
+  logger: {fileID: 0}
   otherHand: {fileID: 4971348924928341151}
   cueParent: {fileID: 3017291209468469948}
   poolStateManager: {fileID: 2961212642828808483}
@@ -16020,6 +16021,9 @@ GameObject:
   - component: {fileID: 3017291209001962053}
   - component: {fileID: 3017291209001962055}
   - component: {fileID: 3017291209001962054}
+  - component: {fileID: 2857457714921926644}
+  - component: {fileID: 7294866885891923814}
+  - component: {fileID: 8336702091839756972}
   m_Layer: 17
   m_Name: Cue Ball
   m_TagString: Untagged
@@ -16117,6 +16121,154 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 3
+--- !u!82 &2857457714921926644
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3017291209001962040}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 8300000, guid: a76df0a3589f2ca46a5bbe9e135c9a74, type: 3}
+  m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 1
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 0
+  MaxDistance: 8
+  Pan2D: 0
+  rolloffMode: 2
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0.24951172
+      value: 1
+      inSlope: -2.565685
+      outSlope: -2.565685
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.07602339
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0.014549813
+      outSlope: 0.014549813
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.19688112
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+--- !u!114 &7294866885891923814
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3017291209001962040}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96a734e6e6524278b20673ba9474c72f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects: []
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes: []
+  _udonSharpBackingUdonBehaviour: {fileID: 8336702091839756972}
+  source: {fileID: 2857457714921926644}
+  body: {fileID: 3017291209001962054}
+  requiredVelocity: 0.1
+  layerToCollideWithWhenOffTable: 0
+--- !u!114 &8336702091839756972
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3017291209001962040}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45115577ef41a5b4ca741ed302693907, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interactTextPlacement: {fileID: 0}
+  interactText: Use
+  interactTextGO: {fileID: 0}
+  proximity: 2
+  SynchronizePosition: 0
+  AllowCollisionOwnershipTransfer: 0
+  Reliable: 0
+  _syncMethod: 1
+  serializedProgramAsset: {fileID: 11400000, guid: fe43298f3c251d343bc2d918fd76d06f,
+    type: 2}
+  programSource: {fileID: 11400000, guid: eac306919a4867b4d8da2a8ddc2fba5c, type: 2}
+  serializedPublicVariablesBytesString: Ai8AAAAAATIAAABWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgAuAFUAZABvAG4AVgBhAHIAaQBhAGIAbABlAFQAYQBiAGwAZQAsACAAVgBSAEMALgBVAGQAbwBuAC4AQwBvAG0AbQBvAG4AAAAAAAYBAAAAAAAAACcBBAAAAHQAeQBwAGUAAWgAAABTAHkAcwB0AGUAbQAuAEMAbwBsAGwAZQBjAHQAaQBvAG4AcwAuAEcAZQBuAGUAcgBpAGMALgBMAGkAcwB0AGAAMQBbAFsAVgBSAEMALgBVAGQAbwBuAC4AQwBvAG0AbQBvAG4ALgBJAG4AdABlAHIAZgBhAGMAZQBzAC4ASQBVAGQAbwBuAFYAYQByAGkAYQBiAGwAZQAsACAAVgBSAEMALgBVAGQAbwBuAC4AQwBvAG0AbQBvAG4AXQBdACwAIABtAHMAYwBvAHIAbABpAGIAAQEJAAAAVgBhAHIAaQBhAGIAbABlAHMALwEAAAABaAAAAFMAeQBzAHQAZQBtAC4AQwBvAGwAbABlAGMAdABpAG8AbgBzAC4ARwBlAG4AZQByAGkAYwAuAEwAaQBzAHQAYAAxAFsAWwBWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgAuAEkAbgB0AGUAcgBmAGEAYwBlAHMALgBJAFUAZABvAG4AVgBhAHIAaQBhAGIAbABlACwAIABWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgBdAF0ALAAgAG0AcwBjAG8AcgBsAGkAYgABAAAABgEAAAAAAAAAAi8CAAAAAUkAAABWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgAuAFUAZABvAG4AVgBhAHIAaQBhAGIAbABlAGAAMQBbAFsAUwB5AHMAdABlAG0ALgBJAG4AdAAzADIALAAgAG0AcwBjAG8AcgBsAGkAYgBdAF0ALAAgAFYAUgBDAC4AVQBkAG8AbgAuAEMAbwBtAG0AbwBuAAIAAAAGAgAAAAAAAAAnAQQAAAB0AHkAcABlAAEXAAAAUwB5AHMAdABlAG0ALgBTAHQAcgBpAG4AZwAsACAAbQBzAGMAbwByAGwAaQBiACcBCgAAAFMAeQBtAGIAbwBsAE4AYQBtAGUAAR8AAABfAF8AXwBVAGQAbwBuAFMAaABhAHIAcABCAGUAaABhAHYAaQBvAHUAcgBWAGUAcgBzAGkAbwBuAF8AXwBfACcBBAAAAHQAeQBwAGUAARYAAABTAHkAcwB0AGUAbQAuAEkAbgB0ADMAMgAsACAAbQBzAGMAbwByAGwAaQBiABcBBQAAAFYAYQBsAHUAZQACAAAABwUHBQcF
+  publicVariablesUnityEngineObjects: []
+  publicVariablesSerializationDataFormat: 0
 --- !u!1 &3017291209042118584
 GameObject:
   m_ObjectHideFlags: 0
@@ -16949,6 +17101,7 @@ MonoBehaviour:
     PrefabModifications: []
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 3017291209099542447}
+  logger: {fileID: 0}
   otherHand: {fileID: 2799244346807532383}
   cueParent: {fileID: 3017291208981436775}
   poolStateManager: {fileID: 2961212642828808483}
@@ -17144,6 +17297,10 @@ MonoBehaviour:
   POCKET_RADIUS: 0.11
   POCKET_INNER_RADIUS: 0.078
   BALL_DIAMETER: 0.06
+  SPOT_POSITION_X: 0.5334
+  SPOT_CAROM_X: 0.8001
+  BALL_PL_X: 0.03
+  BALL_PL_Y: 0.051961523
   fakeBallShadows: 1
   tableModelHasRails: 0
   sunkBallsPositionRoot: {fileID: 2508488145499718030}
@@ -17256,6 +17413,9 @@ MonoBehaviour:
   cueTipSrc: {fileID: 3017291208594223786}
   introSfx: {fileID: 8300000, guid: f36f285a62b99d8449cf1685083885b8, type: 3}
   sinkSfx: {fileID: 8300000, guid: 58d4d3f70b3918e43af5bf6701874286, type: 3}
+  successSfx: {fileID: 8300000, guid: 22e0b772b4b1938478c0a84bd8b2912f, type: 3}
+  foulSfx: {fileID: 8300000, guid: 6b137b28bdb5f4745aa01e40b63e5a89, type: 3}
+  winnerSfx: {fileID: 8300000, guid: 22e0b772b4b1938478c0a84bd8b2912f, type: 3}
   hitsSfx:
   - {fileID: 8300000, guid: c5c3277a589929d49be99bc2f100aae1, type: 3}
   - {fileID: 8300000, guid: e55c033e7d8b29e409baf5343b67bead, type: 3}
@@ -17282,6 +17442,7 @@ MonoBehaviour:
   desktopOverlayPower: {fileID: 3017291209478009563}
   desktopAngleIncrement: 15
   logger: {fileID: 0}
+  cueBallController: {fileID: 7294866885891923814}
   enableUdonChips: 0
   price: 100
   allowRaising: 1
@@ -17297,6 +17458,10 @@ MonoBehaviour:
   EARTH_GRAVITY: 9.80665
   MASS_OF_BALL: 0.165
   CONTACT_POINT: {x: 0, y: -0.03, z: 0}
+  showEditorDebugBoundaries: 0
+  showEditorDebugCarom: 0
+  showEditorDebug8ball: 0
+  showEditorDebug9Ball: 0
   tableSurface: {fileID: 4662400957099006318}
 --- !u!114 &3017291209104205455
 MonoBehaviour:

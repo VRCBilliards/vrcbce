@@ -1156,11 +1156,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3749554870590742590, guid: d33826510185c7141b6eeba4cfeb451e,
         type: 3}
-      propertyPath: tableSurface
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 3749554870590742590, guid: d33826510185c7141b6eeba4cfeb451e,
-        type: 3}
       propertyPath: tableWhite.b
       value: 1
       objectReference: {fileID: 0}
@@ -1461,6 +1456,12 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8659821424305262203, guid: d33826510185c7141b6eeba4cfeb451e,
+        type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 8659821424305262203, guid: d33826510185c7141b6eeba4cfeb451e,
+        type: 3}
     - target: {fileID: 8861464818198912001, guid: d33826510185c7141b6eeba4cfeb451e,
         type: 3}
       propertyPath: serializationData.Prefab

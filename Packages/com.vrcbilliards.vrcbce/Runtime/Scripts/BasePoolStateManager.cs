@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.Remoting.Messaging;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.Animations;
@@ -56,11 +57,11 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         // less deterministic (i.e. less "perfect breaks" etc)
         protected const float RANDOMIZE_F = 0.0001f;
         
-        // These four consts dictate some placement of balls when placed. These are a bit arcane.
-        public const float SPOT_POSITION_X = 0.5334f;
-        public const float SPOT_CAROM_X = 0.8001f;
-        public const float BALL_PL_X = 0.03f;
-        public const float BALL_PL_Y = 0.05196152422f;
+        // These four consts dictate some placement of balls when placed.
+        public float SPOT_POSITION_X = 0.5334f;
+        public float SPOT_CAROM_X = 0.8001f;
+        public float BALL_PL_X = 0.03f;
+        public float BALL_PL_Y = 0.05196152422f;
         
 #region Desktop        
         private const float DEFAULT_DESKTOP_CUE_ANGLE = 10.0f;
@@ -160,6 +161,18 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         public AudioSource cueTipSrc;
         public AudioClip introSfx;
         public AudioClip sinkSfx;
+        /// <summary>
+        /// The SFX that plays when a good thing happens (sinking a ball correctly, etc)
+        /// </summary>
+        public AudioClip successSfx;
+        /// <summary>
+        /// The SFX that plays when a foul occurs
+        /// </summary>
+        public AudioClip foulSfx;
+        /// <summary>
+        /// The SFX that plays when someone wins
+        /// </summary>
+        public AudioClip winnerSfx;
         public AudioClip[] hitsSfx;
         public AudioClip newTurnSfx;
         public AudioClip pointMadeSfx;
@@ -389,9 +402,9 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         protected Vector3 raySphereOutput;
         private uint lastTimerType;
         private float shootAmt;
-        private int[] rackOrder8Ball = { 9, 2, 10, 11, 1, 3, 4, 12, 5, 13, 14, 6, 15, 7, 8 };
-        private int[] rackOrder9Ball = { 2, 3, 4, 5, 9, 6, 7, 8, 1 };
-        private int[] breakRows9ball = { 0, 1, 2, 1, 0 };
+        protected int[] rackOrder8Ball = { 9, 2, 10, 11, 1, 3, 4, 12, 5, 13, 14, 6, 15, 7, 8 };
+        protected int[] rackOrder9Ball = { 2, 3, 4, 5, 9, 6, 7, 8, 1 };
+        protected int[] breakRows9ball = { 0, 1, 2, 1, 0 };
 
         /// <summary>
         /// 19:8 (0x700)	Gamemode ID 3 bit	{ 0: 8 ball, 1: 9 ball, 2+: undefined }
@@ -440,6 +453,10 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         private float desktopClampY;
 
         [UdonSynced] private ResetReason latestResetReason;
+
+        public CueBallOffTableController cueBallController;
+
+        private int turnCount;
 
         #region UdonChipsVariables
         // We are breaking our normal Java-like ordering rules here. UdonChips is a layer on top of regular VRCBCE code,
@@ -786,7 +803,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             RefreshNetworkData(false);
         }
 
-                public void _JoinGame(int playerNumber)
+        public void _JoinGame(int playerNumber)
         {
             if (logger)
             {
@@ -828,6 +845,8 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             }
 
             RefreshNetworkData(false);
+
+            OscReportJoinedTeam(playerNumber < 2 ? 0 : 1);
         }
 
         public void _LeaveGame()
@@ -1168,9 +1187,8 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             {
                 logger._Log(name, "StartNewGame");
             }
-            //akalink added to avoid timer sound bug while still making prefab work.
+
             mainSrc.enabled = true;
-            //end
 
             if (!isGameInMenus)
             {
@@ -2248,12 +2266,17 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 {
                     cue._Respawn(true);
                 }
+                
+                OscReportGameReset(latestResetReason);
             }
             else
             {
                 poolMenu._TeamWins(isTeam2Winner);
+                PlayAudioClip(winnerSfx);
+                
+                OscReportGameOver(isTeam2Winner ? 1 : 0, isFoul);
             }
-
+            
             if (marker9ball)
             {
                 marker9ball.SetActive(false);
@@ -2306,10 +2329,8 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             {
                 cue._Respawn(true);
             }
-
-            //akalink added, make the color panel unable to be interacted with.
+            
             EnableCustomBallColorSlider(false);
-            // end
         }
 
         private void OnRemoteTurnChange()
@@ -2396,8 +2417,6 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             {
                 ResetTimer();
             }
-
-            Debug.Log("On remote turn change! Saving undo history!");
         }
 
         /// <summary>
@@ -2696,6 +2715,10 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             PlaceSunkBallsIntoRestingPlace();
 
             OnRemoteTurnChange();
+            
+            OscReportGameStarted(localPlayerID >= 0);
+
+            turnCount = 0;
         }
 
         /// <summary>
@@ -3056,11 +3079,15 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             {
                 poolMenu._SetScore(false, scores[0]);
                 poolMenu._SetScore(true, scores[1]);
+                
+                OscReportEndOfTurn(turnCount, scores[0], isFoul, scores[1]);
             }
             else if (isNineBall)
             {
                 poolMenu._SetScore(false, -1);
                 poolMenu._SetScore(true, -1);
+                
+                OscReportEndOfTurn(turnCount, -1, isFoul, -1);
             }
             else
             {
@@ -3098,8 +3125,13 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                     }
                 }
 
-                poolMenu._SetScore(false, isTeam2Blue ? sunkOranges : sunkBlues);
-                poolMenu._SetScore(true, isTeam2Blue ? sunkBlues : sunkOranges);
+                int teamAScore = isTeam2Blue ? sunkOranges : sunkBlues;
+                int teamBScore = isTeam2Blue ? sunkBlues : sunkOranges;
+
+                poolMenu._SetScore(false, teamAScore);
+                poolMenu._SetScore(true, teamBScore);
+
+                OscReportEndOfTurn(turnCount++, teamAScore, isFoul, teamBScore);
             }
         }
 
@@ -3234,18 +3266,25 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             // If good pocket
             if (isSuccess)
             {
-                // Make a bright flash
-                tableCurrentColour *= 1.9f;
+                HandleSuccessEffects();
             }
             else
             {
-                SetTableColorToError();
+                HandleFoulEffects();
             }
         }
 
-        protected void SetTableColorToError()
+        protected void HandleSuccessEffects()
+        {
+            // Make a bright flash
+            tableCurrentColour *= 1.9f;
+            PlayAudioClip(successSfx);
+        }
+
+        protected void HandleFoulEffects()
         {
             tableCurrentColour = pointerColourErr;
+            PlayAudioClip(foulSfx);
         }
 
         protected void HandleBallCollision(int ballID, int otherBallID, Vector3 reflection)
@@ -3434,6 +3473,50 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
             PlayAudioClip(paySound);
             Money += total;
+        }
+
+        #endregion
+        
+        #region OSC
+
+        [Header("OSC Tools")]
+        
+        public string oscPrefix = "[VRCBCE] {0}";
+        public string oscJoinedTeam = "Joined Team {0}";
+        public string oscGameStartedPlayer = "Game Started, you are a Player";
+        public string oscGameStartedSpectator = "Game Started, you are a Spectator";
+        public string oscEndOfTurn = "Turn {0}, teamAScore={1}, fouled={2}, teamBScore={3}";
+        public string oscGameOver = "Game Over, Winning Team {0}, fouled={1}";
+        public string oscGameReset = "Game Reset, reason={0]";
+
+        private void OscBuildOutput(string input)
+        {
+            Debug.Log(string.Format(oscPrefix, input));
+        }
+
+        private void OscReportJoinedTeam(int teamID)
+        {
+            OscBuildOutput(string.Format(oscJoinedTeam, teamID));
+        }
+
+        private void OscReportGameStarted(bool isPlaying)
+        {
+            OscBuildOutput(isPlaying ? oscGameStartedPlayer : oscGameStartedSpectator);
+        }
+
+        private void OscReportEndOfTurn(int turnID, int teamAScore, bool fouled, int teamBScore)
+        {
+            OscBuildOutput(string.Format(oscEndOfTurn, turnID, teamAScore, fouled, teamBScore));
+        }
+
+        private void OscReportGameReset(ResetReason reason)
+        {
+            OscBuildOutput(string.Format(oscGameReset, ToReasonString(reason)));
+    }
+
+        private void OscReportGameOver(int winningTeam, bool wonByFoul)
+        {
+            OscBuildOutput(string.Format(oscGameOver, winningTeam, wonByFoul));
         }
 
         #endregion

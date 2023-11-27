@@ -62,6 +62,11 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         private Vector3 vAvBNormal = new Vector3(0.0f, 0.0f, -1.0f);
         private Vector3 vCvWNormal = new Vector3(-1.0f, 0.0f, 0.0f);
         private Vector3 signPos = new Vector3(0.0f, 1.0f, 0.0f);
+
+        [SerializeField] private bool showEditorDebugBoundaries;
+        [SerializeField] private bool showEditorDebugCarom;
+        [SerializeField] private bool showEditorDebug8ball;
+        [SerializeField] private bool showEditorDebug9Ball;
         
         public void OnDrawGizmos()
         {
@@ -72,39 +77,105 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
             Gizmos.matrix = transform.localToWorldMatrix;
             
-            // The bounds of table collision, minus any further geometry Keep in mind that collision is calculated from the centre of balls.
-            Gizmos.color = Color.cyan;
-            Gizmos.DrawWireCube(Vector3.zero, new Vector3(TABLE_WIDTH*2, 0, TABLE_HEIGHT*2));
-            Gizmos.color = Color.blue;
-            Gizmos.DrawWireCube(Vector3.zero, new Vector3(TABLE_WIDTH*2 - margin, 0, TABLE_HEIGHT*2 - margin));
-            
-            Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(CORNER_POCKET, POCKET_INNER_RADIUS);
-            Gizmos.DrawWireSphere(MIDDLE_POCKET, POCKET_INNER_RADIUS);
-            
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(CORNER_POCKET, POCKET_RADIUS);
-            Gizmos.DrawWireSphere(MIDDLE_POCKET, POCKET_RADIUS);
-            
-            Gizmos.color = Color.magenta;
-            Gizmos.DrawWireCube(vA, Vector3.one * 0.01f);
-            Gizmos.DrawWireCube(vB, Vector3.one * 0.01f);
-            Gizmos.DrawWireCube(vC, Vector3.one * 0.01f);
-            Gizmos.DrawWireCube(vD, Vector3.one * 0.01f);
-            Gizmos.DrawWireCube(vX, Vector3.one * 0.01f);
-            Gizmos.DrawWireCube(vY, Vector3.one * 0.01f);
-            Gizmos.DrawWireCube(vZ, Vector3.one * 0.01f);
-            
-            Gizmos.color = Color.white;
-            Gizmos.DrawWireCube(pK,  Vector3.one * 0.01f);
-            Gizmos.DrawWireCube(pL,  Vector3.one * 0.01f);
-            Gizmos.DrawWireCube(pN,  Vector3.one * 0.01f);
-            Gizmos.DrawWireCube(pO,  Vector3.one * 0.01f);
-            Gizmos.DrawWireCube(pP,  Vector3.one * 0.01f);
-            Gizmos.DrawWireCube(pQ,  Vector3.one * 0.01f);
-            Gizmos.DrawWireCube(pR,  Vector3.one * 0.01f);
-            Gizmos.DrawWireCube(pS,  Vector3.one * 0.01f);
-            Gizmos.DrawWireCube(pT,  Vector3.one * 0.01f);
+            if (showEditorDebugBoundaries)
+            {
+                // The bounds of table collision, minus any further geometry.
+                // Keep in mind that collision is calculated from the centre of balls.
+                Gizmos.color = Color.cyan;
+                Gizmos.DrawWireCube(Vector3.zero, new Vector3(TABLE_WIDTH*2, 0, TABLE_HEIGHT*2));
+                Gizmos.color = Color.blue;
+                Gizmos.DrawWireCube(Vector3.zero, new Vector3(TABLE_WIDTH*2 - margin, 0, TABLE_HEIGHT*2 - margin));
+                
+                Gizmos.color = Color.red;
+                Gizmos.DrawWireSphere(CORNER_POCKET, POCKET_INNER_RADIUS);
+                Gizmos.DrawWireSphere(MIDDLE_POCKET, POCKET_INNER_RADIUS);
+                Gizmos.DrawWireSphere(-CORNER_POCKET, POCKET_INNER_RADIUS);
+                Gizmos.DrawWireSphere(-MIDDLE_POCKET, POCKET_INNER_RADIUS);
+                Gizmos.DrawWireSphere(new Vector3(-CORNER_POCKET.x, 0, CORNER_POCKET.z), POCKET_INNER_RADIUS);
+                Gizmos.DrawWireSphere(new Vector3(CORNER_POCKET.x, 0, -CORNER_POCKET.z), POCKET_INNER_RADIUS);
+                
+                Gizmos.color = Color.yellow;
+                Gizmos.DrawWireSphere(CORNER_POCKET, POCKET_RADIUS);
+                Gizmos.DrawWireSphere(MIDDLE_POCKET, POCKET_RADIUS);
+                Gizmos.DrawWireSphere(-CORNER_POCKET, POCKET_RADIUS);
+                Gizmos.DrawWireSphere(-MIDDLE_POCKET, POCKET_RADIUS);
+                Gizmos.DrawWireSphere(new Vector3(-CORNER_POCKET.x, 0, CORNER_POCKET.z), POCKET_RADIUS);
+                Gizmos.DrawWireSphere(new Vector3(CORNER_POCKET.x, 0, -CORNER_POCKET.z), POCKET_RADIUS);
+                
+                Gizmos.color = Color.magenta;
+                Gizmos.DrawWireCube(vA, Vector3.one * 0.01f);
+                Gizmos.DrawWireCube(vB, Vector3.one * 0.01f);
+                Gizmos.DrawWireCube(vC, Vector3.one * 0.01f);
+                Gizmos.DrawWireCube(vD, Vector3.one * 0.01f);
+                Gizmos.DrawWireCube(vX, Vector3.one * 0.01f);
+                Gizmos.DrawWireCube(vY, Vector3.one * 0.01f);
+                Gizmos.DrawWireCube(vZ, Vector3.one * 0.01f);
+                
+                Gizmos.color = Color.white;
+                Gizmos.DrawWireCube(pK,  Vector3.one * 0.01f);
+                Gizmos.DrawWireCube(pL,  Vector3.one * 0.01f);
+                Gizmos.DrawWireCube(pN,  Vector3.one * 0.01f);
+                Gizmos.DrawWireCube(pO,  Vector3.one * 0.01f);
+                Gizmos.DrawWireCube(pP,  Vector3.one * 0.01f);
+                Gizmos.DrawWireCube(pQ,  Vector3.one * 0.01f);
+                Gizmos.DrawWireCube(pR,  Vector3.one * 0.01f);
+                Gizmos.DrawWireCube(pS,  Vector3.one * 0.01f);
+                Gizmos.DrawWireCube(pT,  Vector3.one * 0.01f);   
+            }
+
+            if (showEditorDebugCarom)
+            {
+                Gizmos.color = Color.green;
+                Gizmos.DrawWireSphere(new Vector3(SPOT_POSITION_X, 0, 0), BALL_PL_X);
+                Gizmos.DrawWireSphere(new Vector3(SPOT_CAROM_X, 0, 0), BALL_PL_X);
+                Gizmos.DrawWireSphere(new Vector3(-SPOT_POSITION_X, 0, 0), BALL_PL_X);
+                Gizmos.DrawWireSphere(new Vector3(-SPOT_CAROM_X, 0, 0), BALL_PL_X);
+            }
+
+            if (showEditorDebug8ball)
+            {
+                // break position
+                Gizmos.color = Color.white;
+                Gizmos.DrawWireSphere(new Vector3(-SPOT_POSITION_X, 0, 0), BALL_PL_X);
+                
+                // ball positions
+                Gizmos.color = Color.green;
+                for (int i = 0, k = 0; i < 5; i++)
+                {
+                    for (int j = 0; j <= i; j++)
+                    {
+                        Gizmos.DrawWireSphere(new Vector3
+                        (
+                            SPOT_POSITION_X + (i * BALL_PL_Y) + UnityEngine.Random.Range(-RANDOMIZE_F, RANDOMIZE_F),
+                            0.0f,
+                            ((-i + (j * 2)) * BALL_PL_X) + UnityEngine.Random.Range(-RANDOMIZE_F, RANDOMIZE_F)
+                        ), BALL_PL_X);
+                    }
+                }
+            }
+
+            if (showEditorDebug9Ball)
+            {
+                // break position
+                Gizmos.color = Color.white;
+                Gizmos.DrawWireSphere(new Vector3(-SPOT_POSITION_X, 0, 0), BALL_PL_X);
+                
+                // ball positions
+                Gizmos.color = Color.green;
+                for (int i = 0, k = 0; i < 5; i++)
+                {
+                    int rown = breakRows9ball[i];
+                    for (int j = 0; j <= rown; j++)
+                    {
+                        Gizmos.DrawWireSphere(new Vector3
+                        (
+                            SPOT_POSITION_X + (i * BALL_PL_Y) + UnityEngine.Random.Range(-RANDOMIZE_F, RANDOMIZE_F),
+                            0.0f,
+                            ((-rown + (j * 2)) * BALL_PL_X) + UnityEngine.Random.Range(-RANDOMIZE_F, RANDOMIZE_F)
+                        ), BALL_PL_X);
+                    }
+                }
+            }
 #endif
         }
         
@@ -257,8 +328,6 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             Debug.DrawLine(o, o + i, Color.red, 15f);
 
             Vector3 Q = raySphereOutput; // point of impact in surface space
-            
-            Debug.DrawLine(cueTip.transform.position, cueTip.transform.position + shotDirection, Color.red, 15f);
 
             float a = jkPlane.GetDistanceToPoint(Q);
             float b = Q.y - o.y;
@@ -530,8 +599,6 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             {
                 if (Mathf.Abs(currentBallPositions[0].x) > TABLE_WIDTH + ballRadius + 0.0001f || Mathf.Abs(currentBallPositions[0].z) > TABLE_HEIGHT + ballRadius+ 0.0001f)
                 {
-                    Debug.LogWarning("CUE BALL OUT OF BOUNDS!!");
-                    
                     HandleCueBallOffTable();
                     outOfBounds = true;
                 }
@@ -1061,50 +1128,17 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             Vector3 A = currentBallPositions[id];
             Vector3 absA = new Vector3(Mathf.Abs(A.x), A.y, Mathf.Abs(A.z));
 
-            if ((absA - CORNER_POCKET).sqrMagnitude < POCKET_INNER_RADIUS_SQUARED)
+            if (
+                (absA - CORNER_POCKET).sqrMagnitude < POCKET_INNER_RADIUS_SQUARED ||
+                (absA - MIDDLE_POCKET).sqrMagnitude < POCKET_INNER_RADIUS_SQUARED ||
+                absA.z > MIDDLE_POCKET.z ||
+                absA.z > -absA.x + CORNER_POCKET.x + CORNER_POCKET.z
+            )
             {
                 TriggerPocketBall(id);
                 
                 currentBallVelocities[id] = Vector3.zero;
                 currentAngularVelocities[id] = Vector3.zero;
-                
-                Debug.Log("JUMPING BALL DEBUG: TriggerPocketBall A");
-                
-                return;
-            }
-
-            if ((absA - MIDDLE_POCKET).sqrMagnitude < POCKET_INNER_RADIUS_SQUARED)
-            {
-                TriggerPocketBall(id);
-                
-                currentBallVelocities[id] = Vector3.zero;
-                currentAngularVelocities[id] = Vector3.zero;
-                
-                Debug.Log("JUMPING BALL DEBUG: TriggerPocketBall B");
-                
-                return;
-            }
-
-            if (absA.z > MIDDLE_POCKET.z)
-            {
-                TriggerPocketBall(id);
-                
-                currentBallVelocities[id] = Vector3.zero;
-                currentAngularVelocities[id] = Vector3.zero;
-                
-                Debug.Log("JUMPING BALL DEBUG: TriggerPocketBall C");
-                
-                return;
-            }
-
-            if (absA.z > -absA.x + CORNER_POCKET.x + CORNER_POCKET.z)
-            {
-                TriggerPocketBall(id);
-                
-                currentBallVelocities[id] = Vector3.zero;
-                currentAngularVelocities[id] = Vector3.zero;
-                
-                Debug.Log("JUMPING BALL DEBUG: TriggerPocketBall D");
             }
         }
         
@@ -1135,6 +1169,11 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         public void _ReleaseWhiteBall()
         {
             lockoutEndTurnToAllowCueBallToMove = false;
+
+            if (cueBallController)
+            {
+                cueBallController._DisableDonking();
+            }
         }
 
         private void HandleCueBallOffTable()
@@ -1148,7 +1187,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 ballsArePocketed[0] = true;
             }
             
-            SetTableColorToError();
+            HandleFoulEffects();
 
             lockoutEndTurnToAllowCueBallToMove = true;
             SendCustomEventDelayedSeconds(nameof(_ReleaseWhiteBall), 5f);
@@ -1161,6 +1200,11 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 currentBallVelocities[0].y,
                 currentBallVelocities[0].z
             ));
+
+            if (cueBallController)
+            {
+                cueBallController._EnableDonking();
+            }
         }
 
         private void TriggerPocketBall(int id)
@@ -1184,11 +1228,10 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
             bool success = false;
 
-            if (id == 0)
-            {
-                // do nothing
-            }
-            else if (isOpen && id > 1)
+            // isOpen is only ever false in blackball - so this covers any ball sunk in 9 ball, which is correct (in
+            // our simplified 9-ball, the only way to trigger a foul is to foul the cue ball or not hit the lowest-count
+            // ball first when shooting.
+            if (isOpen && id > 1)
             {
                 success = true;
             } // it is blue's turn
@@ -1209,8 +1252,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 lockoutEndTurnToAllowCueBallToMove = true;
                 SendCustomEventDelayedSeconds(nameof(_ReleaseWhiteBall), 5f);
             }
-
-            Debug.Log($"Sinking ball; setting velocity to {currentBallVelocities[id].x},{currentBallVelocities[id].y},{currentBallVelocities[id].z}");
+            
             // VFX ( make ball move )
             Rigidbody body = ballTransforms[id].gameObject.GetComponent<Rigidbody>();
             body.isKinematic = false;
