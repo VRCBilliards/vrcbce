@@ -204,11 +204,8 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         /// True whilst balls are rolling
         /// </summary>
         [UdonSynced] protected bool gameIsSimulating;
-
-        /// <summary>
-        /// Timer ID 2 bit	{ 0: inf, 1: 10s, 2: 15s, 3: 30s, 4: 60s, 5: undefined }
-        /// </summary>
-        [UdonSynced] private uint timerType;
+        
+        [UdonSynced] private int timerSecondsPerShot = 0;
 
         /// <summary>
         /// Permission for player to play
@@ -332,7 +329,6 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         [UdonSynced] private bool isRepositioningCueBall;
 
         private float remainingTime;
-        private float originalRemainingTime;
         private bool isTimerRunning;
         private bool isMadePoint;
         private bool isMadeFoul;
@@ -412,7 +408,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
         private float cueFDir;
         protected Vector3 raySphereOutput;
-        private uint lastTimerType;
+        private int lastTimerSeconds;
         private float shootAmt;
         protected int[] rackOrder8Ball = { 9, 2, 10, 11, 1, 3, 4, 12, 5, 13, 14, 6, 15, 7, 8 };
         protected int[] rackOrder9Ball = { 2, 3, 4, 5, 9, 6, 7, 8, 1 };
@@ -934,7 +930,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
                 if (timerCountdown)
                 {
-                    timerCountdown.fillAmount = remainingTime / originalRemainingTime;
+                    timerCountdown.fillAmount = remainingTime / timerSecondsPerShot;
                 }
             }
         }
@@ -1042,15 +1038,12 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             }
 
             Networking.SetOwner(localPlayer, gameObject);
+            timerSecondsPerShot += 5;
+            RefreshNetworkData(false);
 
-            if (timerType < 4)
+            if (timerSecondsPerShot >= 60)
             {
-                //akalink found a bug, mainSRC plays audio when the timerType variable changes its value in both the increase and decrease functions.
-                // this makes it so the sound doesn't play, the audio source is turned back on when the game starts
-                mainSrc.enabled = false;
-                //end
-                timerType++;
-                RefreshNetworkData(false);
+                timerSecondsPerShot = 60;
             }
         }
 
@@ -1062,16 +1055,14 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             }
 
             Networking.SetOwner(localPlayer, gameObject);
+            timerSecondsPerShot -=5;
 
-            if (timerType > 0)
+            if (timerSecondsPerShot <= 0)
             {
-                //akalink found a bug, mainSRC plays audio when the timerType variable changes its value in both the increase and decrease functions.
-                // this makes it so the sound doesn't play, the audio source is turned back on when the game starts
-                mainSrc.enabled = false;
-                //end
-                timerType--;
-                RefreshNetworkData(false);
+                timerSecondsPerShot = 0;
             }
+                
+            RefreshNetworkData(false);
         }
 
         public void _SelectTeams()
@@ -1824,7 +1815,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 isTeam2Turn,
                 (int)gameMode,
                 isKorean,
-                (int)timerType,
+                (int)timerSecondsPerShot,
                 player1ID,
                 player2ID,
                 player3ID,
@@ -1834,11 +1825,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
             if (isGameInMenus)
             {
-                if (lastTimerType != timerType)
-                {
-                    mainSrc.PlayOneShot(spinSfx);
-                    lastTimerType = timerType;
-                }
+                lastTimerSeconds = timerSecondsPerShot;
 
                 int numberOfPlayers = 0;
 
@@ -1911,7 +1898,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                     PlaceSunkBallsIntoRestingPlace();
                 }
 
-                if (timerType > 0 && !isTimerRunning)
+                if (timerSecondsPerShot > 0 && !isTimerRunning)
                 {
                     ResetTimer();
                 }
@@ -2140,28 +2127,9 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 logger._Log(name, "ResetTimer");
             }
 
-            if (timerType != 0)
+            if (timerSecondsPerShot > 0)
             {
-                switch (timerType)
-                {
-                    case 1:
-                        remainingTime = 10f;
-                        originalRemainingTime = 10f;
-                        break;
-                    case 2:
-                        remainingTime = 15f;
-                        originalRemainingTime = 15f;
-                        break;
-                    case 3:
-                        remainingTime = 30f;
-                        originalRemainingTime = 30f;
-                        break;
-                    case 4:
-                        remainingTime = 60f;
-                        originalRemainingTime = 60f;
-                        break;
-                }
-
+                remainingTime = timerSecondsPerShot;
                 isTimerRunning = true;
             }
             else
@@ -2252,7 +2220,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 isTeam2Turn,
                 (int)gameMode,
                 isKorean,
-                (int)timerType,
+                timerSecondsPerShot,
                 player1ID,
                 player2ID,
                 player3ID,
@@ -2350,7 +2318,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             }
 
             // Force timer reset
-            if (timerType > 0)
+            if (timerSecondsPerShot > 0)
             {
                 ResetTimer();
             }

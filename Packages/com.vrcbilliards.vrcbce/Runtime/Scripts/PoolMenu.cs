@@ -318,7 +318,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             bool isTeam2Playing,
             int gameMode,
             bool isKorean4Ball,
-            int timerMode,
+            int timeSeconds,
             int player1ID,
             int player2ID,
             int player3ID,
@@ -366,29 +366,32 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                     break;
             }
 
-            switch (timerMode)
+            if (Utilities.IsValid(timer))
             {
-                case 0:
-                    if (VRC.SDKBase.Utilities.IsValid(timer)) timer.text = noTimerText;
-                    break;
-                case 1:
-                    if (VRC.SDKBase.Utilities.IsValid(timer)) timer.text = timerValueText.Replace("{}", "10");
-                    break;
-                case 2:
-                    if (VRC.SDKBase.Utilities.IsValid(timer)) timer.text = timerValueText.Replace("{}", "15");
-                    break;
-                case 3:
-                    if (VRC.SDKBase.Utilities.IsValid(timer)) timer.text = timerValueText.Replace("{}", "30");
-                    break;
-                case 4:
-                    if (VRC.SDKBase.Utilities.IsValid(timer)) timer.text = timerValueText.Replace("{}", "60");
-                    break;
+                if (timeSeconds == 0)
+                {
+                    timer.text = noTimerText;
+                } else
+                {
+                    timer.text = timerValueText.Replace("{}", timeSeconds.ToString());
+                }
             }
-            if (VRC.SDKBase.Utilities.IsValid(timerButton)) timerButton.color = timerMode != 0 ? selectedColor : unselectedColor;
-            if (VRC.SDKBase.Utilities.IsValid(noTimerButton)) noTimerButton.color = timerMode == 0 ? selectedColor : unselectedColor;
 
-            leaveButton.SetActive(false);
+            if (Utilities.IsValid(timerButton))
+            {
+                timerButton.color = timeSeconds > 0 ? selectedColor : unselectedColor;
+            }
+            
+            if (Utilities.IsValid(noTimerButton)) 
+            {
+                noTimerButton.color = timeSeconds <= 0 ? selectedColor : unselectedColor;
+            }
 
+            if (Utilities.IsValid(leaveButton))
+            {
+                leaveButton.SetActive(false);
+            }
+            
             if (useUnityUI)
             {
                 player1UIButton.interactable = false;
