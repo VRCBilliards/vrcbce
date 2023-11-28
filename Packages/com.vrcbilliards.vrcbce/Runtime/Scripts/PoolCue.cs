@@ -44,9 +44,8 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
         private Collider ownCollider;
         private Collider targetCollider;
-
-        [HideInInspector]
-        public bool localPlayerIsInDesktopTopDownView;
+        
+        private bool localPlayerIsInDesktopTopDownView;
 
         private Vector3 oldTargetPos;
 
@@ -60,6 +59,8 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         [HideInInspector]
         public bool tableIsActive;
 
+        private bool isInVR;
+
         public void Start()
         {
             cueRespawnPosition = transform.localPosition;
@@ -67,6 +68,8 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             otherHandRespawnPosition = otherHand.transform.localPosition;
             
             _Respawn(true);
+
+            isInVR = Networking.LocalPlayer.IsUserInVR();
         }
 
         public void _Respawn(bool disableCue)
@@ -145,42 +148,44 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             }
 
             // Put cue in hand
-            if (!localPlayerIsInDesktopTopDownView)
+            if (localPlayerIsInDesktopTopDownView)
             {
-                if (isArmed)
-                {
-                    offsetBetweenArmedPositions = transform.position - positionAtStartOfArming;
+                return;
+            }
+            
+            if (isArmed)
+            {
+                offsetBetweenArmedPositions = transform.position - positionAtStartOfArming;
 
-                    // Pull the cue backwards or forwards on the locked cue's line based on how far away the locking cue handle has been moved since locking.
-                    cueParent.position = positionAtStartOfArming + (normalizedLineOfCueWhenArmed * Vector3.Dot(offsetBetweenArmedPositions, normalizedLineOfCueWhenArmed));
-                }
-                else if(thisPickup.currentPlayer != null)
-                {
-                    var lerpPercent = Time.deltaTime * 16.0f;
-                    cueParent.position = Vector3.Lerp(cueParent.position, transform.position, lerpPercent);
+                // Pull the cue backwards or forwards on the locked cue's line based on how far away the locking cue handle has been moved since locking.
+                cueParent.position = positionAtStartOfArming + (normalizedLineOfCueWhenArmed * Vector3.Dot(offsetBetweenArmedPositions, normalizedLineOfCueWhenArmed));
+            }
+            else if(thisPickup.currentPlayer != null)
+            {
+                var lerpPercent = Time.deltaTime * 16.0f;
+                cueParent.position = Vector3.Lerp(cueParent.position, transform.position, lerpPercent);
 
-                    if (thisPickup.currentPlayer.IsUserInVR())
-                    {
-                        cueParent.LookAt(Vector3.Lerp(oldTargetPos, targetTransform.position, lerpPercent));
-                    }
-                    else
-                    {
-                        cueParent.rotation = upwardsRotation;
-                    }
+                if (thisPickup.currentPlayer.IsUserInVR())
+                {
+                    cueParent.LookAt(Vector3.Lerp(oldTargetPos, targetTransform.position, lerpPercent));
                 }
                 else
                 {
-                    cueParent.position = transform.position;
-                    cueParent.LookAt(targetTransform.position);
+                    cueParent.rotation = upwardsRotation;
                 }
-
-                oldTargetPos = targetTransform.position;
             }
+            else
+            {
+                cueParent.position = transform.position;
+                cueParent.LookAt(targetTransform.position);
+            }
+
+            oldTargetPos = targetTransform.position;
         }
 
         public override void OnPickupUseDown()
         {
-            if (!Networking.LocalPlayer.IsUserInVR())
+            if (!isInVR)
             {
                 return;
             }
@@ -238,7 +243,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             ResetTarget();
             targetPickup.Drop();
 
-            if (!Networking.LocalPlayer.IsUserInVR())
+            if (!isInVR)
             {
                 GetComponent<MeshRenderer>().enabled = true;
                 otherHand.GetComponent<MeshRenderer>().enabled = true;
@@ -276,6 +281,16 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         {
             targetTransform.localScale = vectorZero;
             targetCollider.enabled = false;
+        }
+        
+        public void _EnteredFlatscreenPlayerCamera()
+        {
+            localPlayerIsInDesktopTopDownView = true;
+        }
+
+        public void _LeftFlatscreenPlayerCamera()
+        {
+            localPlayerIsInDesktopTopDownView = false;
         }
     }
 }

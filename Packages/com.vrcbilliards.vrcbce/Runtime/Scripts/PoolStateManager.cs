@@ -308,9 +308,6 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             return copyOfLocalSpacePositionOfCueTip;
         }
 
-        // For jumping
-        public Transform tableSurface;
-
         protected override void HitBallWithCue(Vector3 shotDirection, float velocity)
         {
             //shotDirection = tableSurface.rotation * shotDirection;

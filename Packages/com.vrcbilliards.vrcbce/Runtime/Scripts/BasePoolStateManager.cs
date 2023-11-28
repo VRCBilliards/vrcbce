@@ -7,6 +7,7 @@ using UnityEngine.Rendering;
 using VRC.SDK3.Data;
 using VRC.SDKBase;
 using VRC.Udon;
+using VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts.Components;
 
 // ReSharper disable SpecifyACultureInStringConversionExplicitly
 // ReSharper disable CheckNamespace
@@ -34,6 +35,12 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
     public abstract class BasePoolStateManager : DebuggableUdon
     {
+#region Dependencies        
+        public PoolMenu poolMenu;
+        public PoolCue[] poolCues;
+        public ScreenspaceUI pancakeUI;
+#endregion
+
 #region Table Dimensions
 
         /// <summary>
@@ -41,7 +48,9 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         /// guidance lines you can see in the editor. Theoretically, as long as your table is a cuboid and has six
         /// pockets, we support it.
         /// </summary>
-
+        
+        // Note the WIDTH and HEIGHT are halved from their real values - this is due to the reliance of the physics code
+        // working in four quadrants to detect collisions.
         public float TABLE_WIDTH = 1.1f;
         public float TABLE_HEIGHT = 0.64f; 
         public Vector3 CORNER_POCKET = new Vector3(1.135f, 0.0f, 0.685f);
@@ -50,7 +59,6 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         public float POCKET_INNER_RADIUS = 0.078f;
         public float BALL_DIAMETER = 0.06f;
 #endregion
-
         // The number of balls we simulate - this const allows us to increase the number we support in the future.
         protected const int NUMBER_OF_SIMULATED_BALLS = 16;
         // A small fraction designed to slightly move balls around when placed, which helps with making the table
@@ -71,7 +79,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 #endregion
         [Header("Options")]
 
-        [Tooltip("Use fake shadows? Fake shadows are high-performance, but they may clash with your world's lighting.")]
+        [Tooltip("Use fake shadows? They may clash with your world's lighting.")]
         public bool fakeBallShadows = true;
         [Tooltip("Does the table model for this table have rails that guide the ball when the ball sinks?")]
         public bool tableModelHasRails;
@@ -81,6 +89,8 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         public GameObject shadows;
         public ParticleSystem plusOneParticleSystem;
         public ParticleSystem minusOneParticleSystem;
+        // Where's the surface of the table?
+        public Transform tableSurface;
 
         [Header("Shader Information")]
         public string uniformTableColour = "_EmissionColor";
@@ -112,14 +122,20 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
         [ColorUsage(true, true)]
         private Color[] ballColors = new Color[NUMBER_OF_SIMULATED_BALLS];
+        
         [Header("Colour Options")]
         public bool ballCustomColours;
         public ColorPicker blueTeamSliders;
         public ColorPicker orangeTeamSliders;
 
-        [Range(-1, 0)] private float shaderToggleFloat = 0;
+        private float shaderToggleFloat = 0;
 
-        [Header("Cues")] public PoolCue[] poolCues;
+        [Header("Cues")]
+        public GameObject cueTip;
+        public GameObject[] cueTips;
+        private Transform cueTipTransform;
+        public MeshRenderer[] cueRenderObjs;
+        private Material[] cueMaterials = new Material[2];
 
         /// <summary>
         /// The balls that are used by the table.
@@ -128,25 +144,22 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         /// </summary>
         [Header("Table Objects")]
         [Tooltip(
-            "The balls that are used by the table.\nThe order of the balls is as follows: cue, black, all blue in ascending order, then all orange in ascending order.\nIf the order of the balls is incorrect, gameplay will not proceed correctly.")]
+            "The balls that are used by the table."+
+            "\nThe order of the balls is as follows: cue, black, all blue in ascending order, then all orange in ascending order."+
+            "\nIf the order of the balls is incorrect, gameplay will not proceed correctly."
+        )]
         public Transform[] ballTransforms;
         private Rigidbody[] ballRigidbodies;
-
         [Tooltip("The shadow object for each ball")]
-        public PositionConstraint[] ballShadowPosConstraints; // TODO: Remove these; constraints are bugged in Unity and too many in a scene causes horrendous performance issues
+        public PositionConstraint[] ballShadowPosConstraints;
         private Transform[] ballShadowPosConstraintTransforms;
-        public GameObject cueTip;
-        private Transform cueTipTransform;
         public ShotGuideController guideline;
         public GameObject devhit;
         public GameObject[] playerTotems;
-        public GameObject[] cueTips;
         public GameObject marker;
         private Material markerMaterial;
         public GameObject marker9ball;
         public GameObject pocketBlockers;
-        public MeshRenderer[] cueRenderObjs;
-        private Material[] cueMaterials = new Material[2];
 
         [Header("Materials")] public MeshRenderer[] ballRenderers;
 
@@ -157,7 +170,8 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
         public Material[] cueGrips;
 
-        [Header("Audio")] public GameObject audioSourcePoolContainer;
+        [Header("Audio")]
+        public GameObject audioSourcePoolContainer;
         public AudioSource cueTipSrc;
         public AudioClip introSfx;
         public AudioClip sinkSfx;
@@ -176,18 +190,15 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         public AudioClip[] hitsSfx;
         public AudioClip newTurnSfx;
         public AudioClip pointMadeSfx;
-        public AudioClip buttonSfx;
         public AudioClip spinSfx;
-        public AudioClip spinStopSfx;
         public AudioClip hitBallSfx;
 
-        [Header("Reflection Probes")] public ReflectionProbe tableReflection;
+        [Header("Reflection Probes")]
+        public ReflectionProbe tableReflection;
 
-        [Header("Meshes")] public Mesh[] cueballMeshes;
+        [Header("Meshes")]
+        public Mesh[] cueballMeshes;
         public Mesh nineBall;
-
-        protected GameObject baseObject;
-        private PoolMenu poolMenu;
 
         /// <summary>
         /// True whilst balls are rolling
@@ -221,6 +232,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         //public GameObject desktopQuad;
         public GameObject[] desktopCueParents;
         public GameObject desktopOverlayPower;
+        public UnityEngine.UI.Image tiltAmount;
 
         [Header("UI Stuff")]
         //public Text[] lobbyNames;
@@ -476,12 +488,6 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             desktopClampX = TABLE_WIDTH;
             desktopClampY = TABLE_HEIGHT;
             
-            if (transform.parent && transform.parent.parent)
-            {
-                baseObject = transform.parent.parent.gameObject;
-            }
-
-            poolMenu = baseObject.GetComponentInChildren<PoolMenu>(true);
             localPlayer = Networking.LocalPlayer;
             networkingLocalPlayerID = localPlayer.playerId;
             isPlayerInVR = localPlayer.IsUserInVR();
@@ -575,12 +581,11 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
         public virtual void Update()
         {
-        
             if (isInDesktopTopDownView)
             {
                 HandleUpdatingDesktopViewUI();
 
-                if (Input.GetKeyDown(KeyCode.E))
+                if (Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.Escape))
                 {
                     OnDesktopTopDownViewExit();
                 }
@@ -589,7 +594,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             {
                 if (Input.GetKeyDown(KeyCode.E))
                 {
-                    _OnDesktopTopDownViewStart();
+                    OnDesktopTopDownViewStart();
                 }
             }
 
@@ -608,7 +613,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 }
             }
 
-            localSpacePositionOfCueTip = transform.InverseTransformPoint(cueTip.transform.position);
+            localSpacePositionOfCueTip = tableSurface.transform.InverseTransformPoint(cueTip.transform.position);
             Vector3 copyOfLocalSpacePositionOfCueTip = localSpacePositionOfCueTip;
 
             // if shot is prepared for next hit
@@ -939,7 +944,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         // Update loop-scoped handler for guidelines and aim markers. Non-pure.
         private void HandleGuidelinesAndAimMarkers(Vector3 copyOfLocalSpacePositionOfCueTip, Vector3 cueballPosition)
         {
-            cueLocalForwardDirection = transform.InverseTransformVector(cueTip.transform.forward);
+            cueLocalForwardDirection = tableSurface.transform.InverseTransformVector(cueTip.transform.forward);
 
             // Get where the cue will strike the ball
             if (IsIntersectingWithSphere(copyOfLocalSpacePositionOfCueTip, cueLocalForwardDirection,
@@ -1404,7 +1409,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             }
         }
 
-        public void _OnDesktopTopDownViewStart()
+        private void OnDesktopTopDownViewStart()
         {
             if (logger)
             {
@@ -1423,8 +1428,11 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             // Lock player in place
             localPlayer.Immobilize(true);
 
-            poolCues[0].localPlayerIsInDesktopTopDownView = true;
-            poolCues[1].localPlayerIsInDesktopTopDownView = true;
+            poolCues[0]._EnteredFlatscreenPlayerCamera();
+            poolCues[1]._EnteredFlatscreenPlayerCamera();
+            
+            poolMenu._EnteredFlatscreenPlayerCamera(desktopCamera.transform);
+            pancakeUI._EnterDesktopTopDownView(desktopCamera);
         }
 
         public void _OnPutDownCueLocally()
@@ -2632,8 +2640,8 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
             isTimerRunning = false;
 
-            poolCues[0].localPlayerIsInDesktopTopDownView = false;
-            poolCues[1].localPlayerIsInDesktopTopDownView = false;
+            poolCues[0]._LeftFlatscreenPlayerCamera();
+            poolCues[1]._LeftFlatscreenPlayerCamera();
 
             // Make sure that we run a pass on rigidbodies to ensure they are off.
             PlaceSunkBallsIntoRestingPlace();
@@ -2742,16 +2750,20 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 oldBallsArePocketed[i] = ballsArePocketed[i];
             }
         }
-        
-        // To support a simple undo command:
-        /*
-         * Cache isTeam2Turn at the start of the turn; copy it to the undo cache at the start of the next turn
-         * repeat for
-         * pocketed state
-         * pos
-         * vel
-         * a_vel
-         */
+
+        public void _ToggleDesktopUITopDownView()
+        {
+            if (isInDesktopTopDownView)
+            {
+                OnDesktopTopDownViewExit();
+            }
+            else if (canEnterDesktopTopDownView)
+            {
+                OnDesktopTopDownViewStart();
+            }
+            
+            Debug.Log("amogus");
+        }
 
         private void OnDesktopTopDownViewExit()
         {
@@ -2774,8 +2786,8 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 desktopCamera.enabled = false;
             }
 
-            poolCues[0].localPlayerIsInDesktopTopDownView = false;
-            poolCues[1].localPlayerIsInDesktopTopDownView = false;
+            poolCues[0]._LeftFlatscreenPlayerCamera();
+            poolCues[1]._LeftFlatscreenPlayerCamera();
 
             Networking.LocalPlayer.Immobilize(false);
 
@@ -2786,6 +2798,9 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                     cue._Respawn(false);
                 }
             }
+            
+            poolMenu._LeftFlatscreenPlayerCamera();
+            pancakeUI._ExitDesktopTopDownView();
         }
 
         protected abstract void HitBallWithCue(Vector3 shotDirection, float velocity);
@@ -2859,7 +2874,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             if (isDesktopLocalTurn)
             {
                 Vector3 ncursor = deskTopCursor;
-                //ncursor.y = 0.0f;
+                ncursor.y = 0.0f;
                 Vector3 delta = ncursor - currentBallPositions[0];
                 newDesktopCue = Convert.ToUInt32(isTeam2Turn);
                 GameObject cue = desktopCueParents[newDesktopCue];
@@ -2968,6 +2983,11 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 
                 desktopAngle = Mathf.Clamp(desktopAngle, MIN_DESKTOP_CUE_ANGLE, MAX_DESKTOP_CUE_ANGLE);
 
+                if (tiltAmount)
+                {
+                    tiltAmount.fillAmount = Mathf.InverseLerp(MIN_DESKTOP_CUE_ANGLE, MAX_DESKTOP_CUE_ANGLE, desktopAngle);
+                }
+
                 // Clamp in circle
                 if (desktopHitCursor.magnitude > 0.90f)
                 {
@@ -2985,7 +3005,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
                 cue.transform.localRotation = r * xr;
                 cue.transform.position =
-                    gameObject.transform.TransformPoint(currentBallPositions[0] + (r * xr * worldHit));
+                    tableSurface.transform.TransformPoint(currentBallPositions[0] + (r * xr * worldHit));
             }
 
             desktopCursorObject.transform.localPosition = deskTopCursor;
@@ -3311,42 +3331,41 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
         [Header("OSC Tools")]
         
-        public string oscPrefix = "[VRCBCE] {0}";
-        public string oscJoinedTeam = "Joined Team {0}";
-        public string oscGameStartedPlayer = "Game Started, you are a Player";
-        public string oscGameStartedSpectator = "Game Started, you are a Spectator";
-        public string oscEndOfTurn = "Turn {0}, teamAScore={1}, fouled={2}, teamBScore={3}";
-        public string oscGameOver = "Game Over, Winning Team {0}, fouled={1}";
-        public string oscGameReset = "Game Reset, reason={0]";
+        public string oscPrefix = "[VRCBCE OSC]event={0}";
+        public string oscJoinedTeam = "joinedTeam,teamID={0}";
+        public string oscGameStartedPlayer = "gameStarted,isPlayer=true";
+        public string oscGameStartedSpectator = "gameStarted,isPlayer=false";
+        public string oscEndOfTurn = "endOfTurn,gameOver={0},teamAScore={1},fouled={2},teamBScore={3}";
+        public string oscGameReset = "gameReset,reason={0}";
 
         private void OscBuildOutput(string input)
         {
-            Debug.Log(string.Format(oscPrefix, input));
+            //Debug.Log(string.Format(oscPrefix, input));
         }
 
         private void OscReportJoinedTeam(int teamID)
         {
-            OscBuildOutput(string.Format(oscJoinedTeam, teamID));
+           // OscBuildOutput(string.Format(oscJoinedTeam, teamID));
         }
 
         private void OscReportGameStarted(bool isPlaying)
         {
-            OscBuildOutput(isPlaying ? oscGameStartedPlayer : oscGameStartedSpectator);
+           // OscBuildOutput(isPlaying ? oscGameStartedPlayer : oscGameStartedSpectator);
         }
 
         private void OscReportEndOfTurn(int turnID, int teamAScore, bool fouled, int teamBScore)
         {
-            OscBuildOutput(string.Format(oscEndOfTurn, turnID, teamAScore, fouled, teamBScore));
+           // OscBuildOutput(string.Format(oscEndOfTurn, turnID, teamAScore, fouled, teamBScore));
         }
 
         private void OscReportGameReset(ResetReason reason)
         {
-            OscBuildOutput(string.Format(oscGameReset, ToReasonString(reason)));
+           //OscBuildOutput(string.Format(oscGameReset, ToReasonString(reason)));
     }
 
         private void OscReportGameOver(int winningTeam, bool wonByFoul)
         {
-            OscBuildOutput(string.Format(oscGameOver, winningTeam, wonByFoul));
+            //OscBuildOutput(string.Format(oscGameOver, winningTeam, wonByFoul));
         }
 
         #endregion

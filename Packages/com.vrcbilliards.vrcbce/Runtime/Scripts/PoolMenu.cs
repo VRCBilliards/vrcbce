@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using VRC.SDKBase;
 using VRC.Udon;
+using VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts.Components;
 
 namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 {
@@ -14,8 +15,6 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class PoolMenu : UdonSharpBehaviour
     {
-        public Logger logger;
-        
         private PoolStateManager manager;
 
         [Header("Style")]
@@ -59,7 +58,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         public Image timerButton, noTimerButton;
         public TextMeshProUGUI visibleTimerDuringGame;
         public Image timerCountdown;
-        public string timerOutputFormat = "{} seconds remaining";
+        public string timerOutputFormat = "{}";
 
         [Header("Teams")]
         public TextMeshProUGUI teamsTxt;
@@ -111,19 +110,11 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         private bool isSignedUpToPlay;
         private bool canStartGame;
 
+        [SerializeField] private LookAtHead tableUI;
+
         public void Start()
         {
-            manager = transform.parent.GetComponentInChildren<PoolStateManager>();
-            if (!manager)
-            {
-                if (logger)
-                {
-                    logger._Error(gameObject.name, $"A VRCBCE menu, {name}, cannot start because it cannot find a PoolStateManager in the children of its parent!");
-                }
-                
-                gameObject.SetActive(false);
-                return;
-            }
+            manager = GetComponentInParent<PoolStateManager>();
 
             player1Scores = new TextMeshProUGUI[scores.Length];
             player2Scores = new TextMeshProUGUI[scores.Length];
@@ -208,10 +199,6 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             if (!isSignedUpToPlay)
             {
                 manager._JoinGame(0);
-            }
-            else
-            {
-                manager._Raise();
             }
         }
 
@@ -419,9 +406,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
             bool found = false;
 
-            var defaultText = manager.enableUdonChips
-                ? defaultEmptyplayerSlotTextWithUdonChips.Replace("{}", (manager.price * manager.raiseCount).ToString())
-                : defaultEmptyPlayerSlotText;
+            var defaultText = defaultEmptyPlayerSlotText;
 
             if (player1ID > 0)
             {
@@ -583,11 +568,10 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 }
                 else
                 {
-                    player1Button.SetActive(manager.enableUdonChips && manager.allowRaising);
+                    player1Button.SetActive(false);
                     player2Button.SetActive(false);
                     player3Button.SetActive(false);
                     player4Button.SetActive(false);
-
                 }
 
                 return true;
@@ -712,6 +696,16 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             }
 
             winnerText.text = "";
+        }
+        
+        public void _EnteredFlatscreenPlayerCamera(UnityEngine.Transform camera)
+        {
+            tableUI._StopLookingAtHead(camera);
+        }
+
+        public void _LeftFlatscreenPlayerCamera()
+        {
+            tableUI._StartLookingAtHead();
         }
     }
 }
