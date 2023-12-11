@@ -3000,58 +3000,61 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 poolMenu._SetScore(true, scores[1]);
                 
                 ReportFourBallScore(false);
+
+                return;
             }
-            else if (isNineBall)
+            
+            if (isNineBall)
             {
                 poolMenu._SetScore(false, -1);
                 poolMenu._SetScore(true, -1);
                 
                 ReportNineBallScore(false);
-            }
-            else
-            {
-                int sunkBlues = 0;
-                int sunkOranges = 0;
 
-                for (int i = 2; i < 9; i++)
+                return;
+            }
+            
+            int sunkBlues = 0;
+            int sunkOranges = 0;
+
+            for (int i = 2; i < 9; i++)
+            {
+                if (ballsArePocketed[i])
                 {
-                    if (ballsArePocketed[i])
+                    sunkBlues++;
+                }
+            }
+
+            for (int i = 9; i < 16; i++)
+            {
+                if (ballsArePocketed[i])
+                {
+                    sunkOranges++;
+                }
+            }
+
+            if (isGameInMenus)
+            {
+                if (isTeam2Winner && ballsArePocketed[1])
+                {
+                    if (isTeam2Blue)
                     {
                         sunkBlues++;
                     }
-                }
-
-                for (int i = 9; i < 16; i++)
-                {
-                    if (ballsArePocketed[i])
+                    else
                     {
                         sunkOranges++;
                     }
                 }
-
-                if (isGameInMenus)
-                {
-                    if (isTeam2Winner && ballsArePocketed[1])
-                    {
-                        if (isTeam2Blue)
-                        {
-                            sunkBlues++;
-                        }
-                        else
-                        {
-                            sunkOranges++;
-                        }
-                    }
-                }
-
-                var teamAScore = isTeam2Blue ? sunkOranges : sunkBlues;
-                var teamBScore = isTeam2Blue ? sunkBlues : sunkOranges;
-
-                poolMenu._SetScore(false, teamAScore);
-                poolMenu._SetScore(true, teamBScore);
-                
-                ReportEightBallScore(false, teamAScore, teamBScore);
             }
+
+            var teamAScore = isTeam2Blue ? sunkOranges : sunkBlues;
+            var teamBScore = isTeam2Blue ? sunkBlues : sunkOranges;
+
+            poolMenu._SetScore(false, teamAScore);
+            poolMenu._SetScore(true, teamBScore);
+                
+            ReportEightBallScore(false, teamAScore, teamBScore);
         }
 
         private void ReportEightBallScore(bool gameOver, int teamAScore, int teamBScore)

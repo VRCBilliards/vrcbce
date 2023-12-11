@@ -6,6 +6,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts.Compon
     /// <summary>
     /// A class that dumps VRCBCE things that happen to a structured log stream.
     /// </summary>
+    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class OscSlogger : UdonSharpBehaviour
     {
         public string oscPrefix = "[VRCBCE OSC]event={0}";
