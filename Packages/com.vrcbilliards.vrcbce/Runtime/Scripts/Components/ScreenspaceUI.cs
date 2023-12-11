@@ -71,8 +71,12 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts.Compon
 
             animTime += Time.deltaTime;
             var iLerp = Mathf.InverseLerp(0, animationLen, animTime);
-            cam.transform.SetPositionAndRotation(Vector3.Lerp(headPos, camPos, iLerp), Quaternion.Lerp(headRot, camRot, iLerp));
 
+            if (cam)
+            {
+                cam.transform.SetPositionAndRotation(Vector3.Lerp(headPos, camPos, iLerp), Quaternion.Lerp(headRot, camRot, iLerp));
+            }
+            
             if (iLerp >= 1)
             {
                 EndAnimation();
@@ -82,7 +86,12 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts.Compon
         private void EndAnimation()
         {
             isAnimating = false;
-            cam.transform.SetPositionAndRotation(camPos, camRot);
+
+            if (cam)
+            {
+                cam.transform.SetPositionAndRotation(camPos, camRot);
+            }
+            
             animTime = 0;
             cam.orthographic = true;
         }

@@ -1,5 +1,24 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1818360608 &3589744893000012063
+PositionConstraint:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100121030750706355}
+  m_Enabled: 1
+  m_Weight: 1
+  m_TranslationAtRest: {x: 0, y: -0.8, z: 0}
+  m_TranslationOffset: {x: 0, y: 0, z: 0}
+  m_AffectTranslationX: 0
+  m_AffectTranslationY: 1
+  m_AffectTranslationZ: 0
+  m_IsContraintActive: 0
+  m_IsLocked: 0
+  m_Sources:
+  - sourceTransform: {fileID: 3589744892389605265}
+    weight: 1
 --- !u!1 &348236432573596098
 GameObject:
   m_ObjectHideFlags: 0
@@ -3174,25 +3193,6 @@ Transform:
   m_Father: {fileID: 7574990831370844491}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1818360608 &3589744893000012063
-PositionConstraint:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 100121030750706355}
-  m_Enabled: 1
-  m_Weight: 1
-  m_TranslationAtRest: {x: 0, y: -0.8, z: 0}
-  m_TranslationOffset: {x: 0, y: 0, z: 0}
-  m_AffectTranslationX: 0
-  m_AffectTranslationY: 1
-  m_AffectTranslationZ: 0
-  m_IsContraintActive: 0
-  m_IsLocked: 0
-  m_Sources:
-  - sourceTransform: {fileID: 3589744892389605265}
-    weight: 1
 --- !u!1 &4018384331102423494
 GameObject:
   m_ObjectHideFlags: 0
@@ -25739,6 +25739,11 @@ PrefabInstance:
         type: 3}
       propertyPath: animationLen
       value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7375518166583353975, guid: 10054966988c6da4f98426aae4877cf4,
+        type: 3}
+      propertyPath: animateCamera
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7375518166583353975, guid: 10054966988c6da4f98426aae4877cf4,
         type: 3}

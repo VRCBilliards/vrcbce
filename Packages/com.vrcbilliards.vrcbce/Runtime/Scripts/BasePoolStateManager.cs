@@ -39,6 +39,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         public PoolMenu poolMenu;
         public PoolCue[] poolCues;
         public ScreenspaceUI pancakeUI;
+        public OscSlogger slogger;
 #endregion
 
 #region Table Dimensions
@@ -161,7 +162,8 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         public GameObject marker9ball;
         public GameObject pocketBlockers;
 
-        [Header("Materials")] public MeshRenderer[] ballRenderers;
+        [Header("Materials")]
+        public MeshRenderer[] ballRenderers;
 
         public MeshRenderer tableRenderer;
         private Material[] tableMaterials;
@@ -292,6 +294,8 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         /// 21:0 (0xffff)	Game number
         /// </summary>
         [UdonSynced] private uint gameID;
+
+        [UdonSynced] private uint turnID;
 
         // Cached data to use when checking for update.
         private bool[] oldBallsArePocketed;
@@ -463,8 +467,6 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         [UdonSynced] private ResetReason latestResetReason;
 
         public CueBallOffTableController cueBallController;
-
-        private int turnCount;
 
         private int PlayerCount
         {
@@ -769,19 +771,19 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             {
                 case 0:
                     player1ID = networkingLocalPlayerID;
-                    EnableCustomBallColorSlider(true); //akalink added, makes color panel able to be interacted with.
+                    EnableCustomBallColorSlider(true);
                     break;
                 case 1:
                     player2ID = networkingLocalPlayerID;
-                    EnableCustomBallColorSlider(true); //akalink added
+                    EnableCustomBallColorSlider(true);
                     break;
                 case 2:
                     player3ID = networkingLocalPlayerID;
-                    EnableCustomBallColorSlider(true); //akalink added
+                    EnableCustomBallColorSlider(true);
                     break;
                 case 3:
                     player4ID = networkingLocalPlayerID;
-                    EnableCustomBallColorSlider(true); //akalink added
+                    EnableCustomBallColorSlider(true);
                     break;
                 default:
                     return;
@@ -789,7 +791,10 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
             RefreshNetworkData(false);
 
-            OscReportJoinedTeam(playerNumber < 2 ? 0 : 1);
+            if (slogger)
+            {
+                slogger.OscReportJoinedTeam(playerNumber);
+            }
         }
 
         public void _LeaveGame()
@@ -1135,6 +1140,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
             gameWasReset = false;
             gameID++;
+            turnID = 0;
             isPlayerAllowedToPlay = true;
 
             isTeam2Turn = false;
@@ -1700,6 +1706,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                     currentBallPositions[9] = temp;
                 }
 
+                turnID++;
                 RefreshNetworkData(!isTeam2Turn);
             }
         }
@@ -1732,10 +1739,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             {
                 marker.SetActive(false);
             }
-
-            // Events ==========================================================================================================
-
-            // If a new game has started...
+            
             if (gameID > oldGameID && !isGameInMenus)
             {
                 OnRemoteNewGame();
@@ -2174,14 +2178,15 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                     cue._Respawn(true);
                 }
                 
-                OscReportGameReset(latestResetReason);
+                if (slogger)
+                {
+                    slogger.OscReportGameReset(latestResetReason);
+                }
             }
             else
             {
                 poolMenu._TeamWins(isTeam2Winner);
                 PlayAudioClip(winnerSfx);
-                
-                OscReportGameOver(isTeam2Winner ? 1 : 0, isFoul);
             }
             
             if (marker9ball)
@@ -2615,10 +2620,11 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             PlaceSunkBallsIntoRestingPlace();
 
             OnRemoteTurnChange();
-            
-            OscReportGameStarted(localPlayerID >= 0);
 
-            turnCount = 0;
+            if (slogger)
+            {
+                slogger.OscReportGameStarted(localPlayerID >= 0);
+            }
         }
 
         /// <summary>
@@ -2699,6 +2705,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
             isFoul = true;
             isPlayerAllowedToPlay = true;
+            turnID++;
 
             RefreshNetworkData(!isTeam2Turn);
         }
@@ -2992,14 +2999,14 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 poolMenu._SetScore(false, scores[0]);
                 poolMenu._SetScore(true, scores[1]);
                 
-                OscReportEndOfTurn(turnCount, scores[0], isFoul, scores[1]);
+                ReportFourBallScore(false);
             }
             else if (isNineBall)
             {
                 poolMenu._SetScore(false, -1);
                 poolMenu._SetScore(true, -1);
                 
-                OscReportEndOfTurn(turnCount, -1, isFoul, -1);
+                ReportNineBallScore(false);
             }
             else
             {
@@ -3037,13 +3044,37 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                     }
                 }
 
-                int teamAScore = isTeam2Blue ? sunkOranges : sunkBlues;
-                int teamBScore = isTeam2Blue ? sunkBlues : sunkOranges;
+                var teamAScore = isTeam2Blue ? sunkOranges : sunkBlues;
+                var teamBScore = isTeam2Blue ? sunkBlues : sunkOranges;
 
                 poolMenu._SetScore(false, teamAScore);
                 poolMenu._SetScore(true, teamBScore);
+                
+                ReportEightBallScore(false, teamAScore, teamBScore);
+            }
+        }
 
-                OscReportEndOfTurn(turnCount++, teamAScore, isFoul, teamBScore);
+        private void ReportEightBallScore(bool gameOver, int teamAScore, int teamBScore)
+        {
+            if (slogger)
+            {
+                slogger.OscReportEndOfTurn(gameOver, turnID, teamAScore, isFoul, teamBScore);
+            }
+        }
+
+        private void ReportNineBallScore(bool gameOver)
+        {
+            if (slogger)
+            {
+                slogger.OscReportEndOfTurn(gameOver, turnID, -1, isFoul, -1);
+            }
+        }
+
+        private void ReportFourBallScore(bool gameOver)
+        {
+            if (slogger)
+            {
+                slogger.OscReportEndOfTurn(gameOver, turnID, scores[0], isFoul, scores[1]);
             }
         }
 
@@ -3294,48 +3325,5 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
             mainSrc.PlayOneShot(clip);
         }
-        
-        #region OSC
-
-        [Header("OSC Tools")]
-        
-        public string oscPrefix = "[VRCBCE OSC]event={0}";
-        public string oscJoinedTeam = "joinedTeam,teamID={0}";
-        public string oscGameStartedPlayer = "gameStarted,isPlayer=true";
-        public string oscGameStartedSpectator = "gameStarted,isPlayer=false";
-        public string oscEndOfTurn = "endOfTurn,gameOver={0},teamAScore={1},fouled={2},teamBScore={3}";
-        public string oscGameReset = "gameReset,reason={0}";
-
-        private void OscBuildOutput(string input)
-        {
-            //Debug.Log(string.Format(oscPrefix, input));
-        }
-
-        private void OscReportJoinedTeam(int teamID)
-        {
-           // OscBuildOutput(string.Format(oscJoinedTeam, teamID));
-        }
-
-        private void OscReportGameStarted(bool isPlaying)
-        {
-           // OscBuildOutput(isPlaying ? oscGameStartedPlayer : oscGameStartedSpectator);
-        }
-
-        private void OscReportEndOfTurn(int turnID, int teamAScore, bool fouled, int teamBScore)
-        {
-           // OscBuildOutput(string.Format(oscEndOfTurn, turnID, teamAScore, fouled, teamBScore));
-        }
-
-        private void OscReportGameReset(ResetReason reason)
-        {
-           //OscBuildOutput(string.Format(oscGameReset, ToReasonString(reason)));
-    }
-
-        private void OscReportGameOver(int winningTeam, bool wonByFoul)
-        {
-            //OscBuildOutput(string.Format(oscGameOver, winningTeam, wonByFoul));
-        }
-
-        #endregion
     }
 }
