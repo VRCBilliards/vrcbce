@@ -40,6 +40,54 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         public PoolCue[] poolCues;
         public ScreenspaceUI pancakeUI;
         public OscSlogger slogger;
+        public Logger logger;
+#endregion
+
+#region Networked Variables
+        [UdonSynced] protected bool gameIsSimulating;
+        [UdonSynced] private int timerSecondsPerShot;
+        [UdonSynced] private bool isPlayerAllowedToPlay;
+        [UdonSynced] private bool guideLineEnabled = true;
+        
+        [UdonSynced] protected bool[] ballsArePocketed;
+        private bool[] oldBallsArePocketed;
+        
+        [UdonSynced] protected bool isTeam2Turn;
+        private bool oldIsTeam2Turn;
+        
+        [UdonSynced] private bool isFoul;
+        [UdonSynced] private bool isGameOver;
+        
+        [UdonSynced] protected bool isOpen = true;
+        private bool oldOpen;
+        
+        [UdonSynced] protected bool isTeam2Blue;
+        
+        [UdonSynced] private bool isGameInMenus = true;
+        private bool oldIsGameInMenus;
+        
+        [UdonSynced] private bool isTeam2Winner;
+        [UdonSynced] private bool isTableLocked = true;
+        [UdonSynced] private bool isTeams;
+        
+        [UdonSynced] private uint gameID;
+        private uint oldGameID;
+        
+        [UdonSynced] private uint turnID;
+        [UdonSynced] private bool isRepositioningCueBall;
+        [UdonSynced] private bool isKorean;
+        [UdonSynced] private int[] scores = new int[2];
+        [UdonSynced] protected Vector3[] currentBallPositions = new Vector3[NUMBER_OF_SIMULATED_BALLS];
+        [UdonSynced] protected Vector3[] currentBallVelocities = new Vector3[NUMBER_OF_SIMULATED_BALLS];
+        [UdonSynced] protected Vector3[] currentAngularVelocities = new Vector3[NUMBER_OF_SIMULATED_BALLS];
+        [UdonSynced] protected uint gameMode;
+        [UdonSynced] private int player1ID;
+        [UdonSynced] private int player2ID;
+        [UdonSynced] private int player3ID;
+        [UdonSynced] private int player4ID;
+        [UdonSynced] private bool gameWasReset;
+        [UdonSynced] private ResetReason latestResetReason;
+        
 #endregion
 
 #region Table Dimensions
@@ -132,9 +180,8 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         private float shaderToggleFloat = 0;
 
         [Header("Cues")]
-        public GameObject cueTip;
+        protected GameObject cueTip;
         public GameObject[] cueTips;
-        private Transform cueTipTransform;
         public MeshRenderer[] cueRenderObjs;
         private Material[] cueMaterials = new Material[2];
 
@@ -192,7 +239,6 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         public AudioClip[] hitsSfx;
         public AudioClip newTurnSfx;
         public AudioClip pointMadeSfx;
-        public AudioClip spinSfx;
         public AudioClip hitBallSfx;
 
         [Header("Reflection Probes")]
@@ -203,26 +249,12 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         public Mesh nineBall;
 
         /// <summary>
-        /// True whilst balls are rolling
-        /// </summary>
-        [UdonSynced] protected bool gameIsSimulating;
-        
-        [UdonSynced] private int timerSecondsPerShot = 0;
-
-        /// <summary>
-        /// Permission for player to play
-        /// </summary>
-        [UdonSynced] private bool isPlayerAllowedToPlay;
-
-        /// <summary>
         /// Player is hitting
         /// </summary>
         private bool isArmed;
 
         private int localPlayerID = -1;
-
-        [UdonSynced] private bool guideLineEnabled = true;
-
+        
         [Header("Desktop Stuff")] public GameObject desktopCursorObject;
         public GameObject desktopHitPosition;
 
@@ -243,68 +275,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         private Transform[] ballPoolTransforms;
         private AudioSource mainSrc;
         private UdonBehaviour udonChips;
-
-        /// <summary>
-        /// 18:0 (0xffff)	Each bit represents each ball, if it has been pocketed or not
-        /// </summary>
-        //[UdonSynced] private uint ballPocketedState;
-        [UdonSynced] protected bool[] ballsArePocketed;
-
-        /// <summary>
-        /// 19:1 (0x02)		Whos turn is it, 0 or 1
-        /// </summary>
-        [UdonSynced] protected bool isTeam2Turn;
-
-        /// <summary>
-        /// 19:2 (0x04)		End-of-turn foul marker
-        /// </summary>
-        [UdonSynced] private bool isFoul;
-
-        /// <summary>
-        /// 19:3 (0x08)		Is the table open?
-        /// </summary>
-        [UdonSynced] protected bool isOpen = true;
-
-        /// <summary>
-        /// 19:4 (0x10)		What colour the players have chosen
-        /// </summary>
-        [UdonSynced] protected bool isTeam2Blue;
-
-        /// <summary>
-        /// 19:5 (0x20)	The game isn't running
-        /// </summary>
-        [UdonSynced] private bool isGameInMenus = true;
-
-        /// <summary>
-        /// 19:6 (0x40)		Who won the game if sn_gameover is set
-        /// </summary>
-        [UdonSynced] private bool isTeam2Winner;
-
-        /// <summary>
-        /// Represents if the game is joinable
-        /// </summary>
-        [UdonSynced] private bool isTableLocked = true;
-
-        /// <summary>
-        /// 19:15 (0x8000)	Teams on/off (1 bit)
-        /// </summary>
-        [UdonSynced] private bool isTeams;
-
-        /// <summary>
-        /// 21:0 (0xffff)	Game number
-        /// </summary>
-        [UdonSynced] private uint gameID;
-
-        [UdonSynced] private uint turnID;
-
-        // Cached data to use when checking for update.
-        private bool[] oldBallsArePocketed;
-
-        private bool oldIsTeam2Turn;
-        private bool oldOpen;
-        private bool oldIsGameInMenus;
-        private uint oldGameID;
-
+        
         /// <summary>
         /// We are waiting for our local simulation to finish, before we unpack data
         /// </summary>
@@ -327,19 +298,10 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         /// </summary>
         private float introAnimTimer;
 
-        /// <summary>
-        /// Repositioner is active
-        /// </summary>
-        [UdonSynced] private bool isRepositioningCueBall;
-
         private float remainingTime;
         private bool isTimerRunning;
         private bool isMadePoint;
         private bool isMadeFoul;
-
-        [UdonSynced] private bool isKorean;
-
-        [UdonSynced] private int[] scores = new int[2];
 
         protected bool is8Ball;
         protected bool isNineBall;
@@ -356,10 +318,6 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         /// Interpreted value
         /// </summary>
         private bool playerIsTeam2;
-
-        [UdonSynced] protected Vector3[] currentBallPositions = new Vector3[NUMBER_OF_SIMULATED_BALLS];
-        [UdonSynced] protected Vector3[] currentBallVelocities = new Vector3[NUMBER_OF_SIMULATED_BALLS];
-        [UdonSynced] protected Vector3[] currentAngularVelocities = new Vector3[NUMBER_OF_SIMULATED_BALLS];
 
         /// <summary>
         /// Runtime target colour
@@ -418,22 +376,6 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         protected int[] rackOrder9Ball = { 2, 3, 4, 5, 9, 6, 7, 8, 1 };
         protected int[] breakRows9ball = { 0, 1, 2, 1, 0 };
 
-        /// <summary>
-        /// 19:8 (0x700)	Gamemode ID 3 bit	{ 0: 8 ball, 1: 9 ball, 2+: undefined }
-        /// </summary>
-        [UdonSynced] protected uint gameMode;
-
-        // Additional synced data added by the port to Manual Sync
-
-        [UdonSynced] private int player1ID;
-        [UdonSynced] private int player2ID;
-        [UdonSynced] private int player3ID;
-        [UdonSynced] private int player4ID;
-
-        public Logger logger;
-
-        [UdonSynced] private bool gameWasReset;
-
         private float ballShadowOffset;
         private MeshRenderer[] shadowRenders;
 
@@ -463,8 +405,6 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
         private float desktopClampX;
         private float desktopClampY;
-
-        [UdonSynced] private ResetReason latestResetReason;
 
         public CueBallOffTableController cueBallController;
 
@@ -532,7 +472,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             cueMaterials[0].SetColor(uniformCueColour, tableBlack);
             cueMaterials[1].SetColor(uniformCueColour, tableBlack);
 
-            cueTipTransform = cueTip.transform;
+            cueTip = cueTips[0];
 
             if (tableReflection)
             {
@@ -723,12 +663,12 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             if (gameIsSimulating)
             {
                 isUpdateLocked = true;
+
+                return;
             }
-            else
-            {
-                // We are free to read this update
-                ReadNetworkData();
-            }
+
+            // We are free to read this update
+            ReadNetworkData();
         }
 
         public void _UnlockTable()
@@ -997,18 +937,22 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         protected abstract Vector3 AimAndHitCueBall(Vector3 copyOfLocalSpacePositionOfCueTip, Vector3 cueballPosition);
 
        private void EnableCustomBallColorSlider(bool enabledState)
-        {
-            if (ballCustomColours)
-            {
-                if ((blueTeamSliders == null) || (orangeTeamSliders == null))
-                {
-                    Debug.Log("At least one of color behaviours are not assigned, did you include the color panels prefab?");
-                    //leaves this message if unassignment crashes the PoolStateMananger
-                }
-                blueTeamSliders._EnableDisable(enabledState);
-                orangeTeamSliders._EnableDisable(enabledState);
-            }
-        }
+       {
+           if (!ballCustomColours)
+           {
+               return;
+           }
+
+           if (blueTeamSliders)
+           {
+               blueTeamSliders._EnableDisable(enabledState);
+           }
+
+           if (orangeTeamSliders)
+           {
+               orangeTeamSliders._EnableDisable(enabledState);
+           }
+       }
 
         private void RemovePlayerFromGame(int playerID)
         {
@@ -1155,6 +1099,8 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
             isTeam2Blue = false;
             isTeam2Winner = false;
+            isFoul = false;
+            isGameOver = false;
 
             ApplyTableColour(false);
 
@@ -1396,6 +1342,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             gameIsSimulating = false;
             isTeam2Turn = false;
             gameWasReset = true;
+            isGameOver = true;
             latestResetReason = reason;
 
             RefreshNetworkData(false);
@@ -1654,18 +1601,18 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 if (foulCondition)
                 {
                     // Loss
-                    OnTurnOverGameWon(!isTeam2Turn);
+                    OnTurnOverGameWon(!isTeam2Turn, true);
                 }
                 else
                 {
                     // Win
-                    OnTurnOverGameWon(isTeam2Turn);
+                    OnTurnOverGameWon(isTeam2Turn, false);
                 }
             }
             else if (deferLossCondition)
             {
                 // Loss
-                OnTurnOverGameWon(!isTeam2Turn);
+                OnTurnOverGameWon(!isTeam2Turn, true);
             }
             else if (foulCondition)
             {
@@ -1724,17 +1671,17 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             RequestSerialization();
             ReadNetworkData();
         }
-
-        /// <summary>
-        /// Decode networking string
-        /// </summary>
+        
         protected void ReadNetworkData()
         {
             if (logger)
             {
                 logger._Log(name, "ReadNetworkData");
             }
+            
+            UpdateScores();
 
+            // Assume the marker is off - one of the On... functions might turn it back on again
             if (marker)
             {
                 marker.SetActive(false);
@@ -1742,76 +1689,33 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             
             if (gameID > oldGameID && !isGameInMenus)
             {
-                OnRemoteNewGame();
-
-                if (((localPlayerID >= 0) && (playerIsTeam2 == isTeam2Turn)) || isGameModePractice)
-                {
-                    if (logger)
-                    {
-                        logger._Log(name, "enabling marker because it is the start of the game and we are breaking");
-                    }
-
-                    isRepositioningCueBall = true;
-                    repoMaxX = -SPOT_POSITION_X;
-                    ballRigidbodies[0].isKinematic = true;
-
-                    if (marker)
-                    {
-                        markerTransform.localPosition = currentBallPositions[0];
-                        if (!isFourBall)
-                        {
-                            marker.SetActive(true);
-                        }
-
-                        ((VRC_Pickup)marker.gameObject.GetComponent(typeof(VRC_Pickup))).pickupable = true;
-                    }
-                }
-                else
-                {
-                    markerTransform.localPosition = currentBallPositions[0];
-
-                    if (!isFourBall)
-                    {
-                        marker.SetActive(true);
-                    }
-
-                    ((VRC_Pickup)marker.gameObject.GetComponent(typeof(VRC_Pickup))).pickupable = false;
-                }
-            }
-
-            // If the turn has changed...
-            if (isTeam2Turn != oldIsTeam2Turn)
+                OnNewGameStarted();
+            } else if (isTeam2Turn != oldIsTeam2Turn)
             {
                 OnRemoteTurnChange();
+            } else if (!oldIsGameInMenus && isGameInMenus)
+            {
+                OnRemoteGameOver();
             }
 
             if (oldOpen && !isOpen)
             {
                 ApplyTableColour(isTeam2Turn);
             }
-
-            // If the game has ended...
-            if (!oldIsGameInMenus && isGameInMenus)
-            {
-                OnRemoteGameOver();
-            }
-
+            
             CopyGameStateToOldState();
 
             if (isTableLocked)
             {
                 poolMenu._EnableUnlockTableButton();
-                ResetScores();
             }
             else if (!isGameInMenus)
             {
                 poolMenu._EnableResetButton();
-                UpdateScores();
             }
             else
             {
                 poolMenu._EnableMainMenu();
-                ResetScores();
             }
 
             poolMenu._UpdateMainMenuView(
@@ -1831,7 +1735,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             {
                 lastTimerSeconds = timerSecondsPerShot;
 
-                int numberOfPlayers = 0;
+                var numberOfPlayers = 0;
 
                 if (!isTableLocked)
                 {
@@ -1872,61 +1776,11 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             // Its basically 'turn start' event
             if (isPlayerAllowedToPlay)
             {
-                if (((localPlayerID >= 0) && (playerIsTeam2 == isTeam2Turn)) || isGameModePractice)
-                {
-                    // Update for desktop
-                    isDesktopLocalTurn = true;
-
-                    // Reset hit point
-                    desktopHitCursor = Vector3.zero;
-                }
-                else
-                {
-                    isDesktopLocalTurn = false;
-                }
-
-                if (isNineBall)
-                {
-                    int target = GetLowestNumberedBall(ballsArePocketed);
-
-                    if (marker9ball)
-                    {
-                        marker9ball.SetActive(true);
-                        marker9ball.transform.localPosition = currentBallPositions[target];
-                    }
-                    ApplyTableColour(isTeam2Turn);
-                }
-
-                if (!tableModelHasRails || !hasRunSyncOnce)
-                {
-                    PlaceSunkBallsIntoRestingPlace();
-                }
-
-                if (timerSecondsPerShot > 0 && !isTimerRunning)
-                {
-                    ResetTimer();
-                }
+                OnLocalTurnStart();
             }
             else
             {
-                if (marker9ball)
-                {
-                    marker9ball.SetActive(false);
-                }
-
-                isTimerRunning = false;
-                isMadePoint = false;
-                isMadeFoul = false;
-
-                if (devhit)
-                {
-                    devhit.SetActive(false);
-                }
-
-                if (guideline)
-                {
-                    guideline.gameObject.SetActive(false);
-                }
+                OnRemoteTurnStart();
             }
 
             // Start of turn so we've hit nothing
@@ -1937,6 +1791,106 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             hasRunSyncOnce = true;
         }
 
+        private void OnRemoteTurnStart()
+        {
+            if (marker9ball)
+            {
+                marker9ball.SetActive(false);
+            }
+
+            isTimerRunning = false;
+            isMadePoint = false;
+            isMadeFoul = false;
+
+            if (devhit)
+            {
+                devhit.SetActive(false);
+            }
+
+            if (guideline)
+            {
+                guideline.gameObject.SetActive(false);
+            }
+        }
+
+        private void OnLocalTurnStart()
+        {
+            if (((localPlayerID >= 0) && (playerIsTeam2 == isTeam2Turn)) || isGameModePractice)
+            {
+                // Update for desktop
+                isDesktopLocalTurn = true;
+
+                // Reset hit point
+                desktopHitCursor = Vector3.zero;
+            }
+            else
+            {
+                isDesktopLocalTurn = false;
+            }
+
+            if (isNineBall)
+            {
+                int target = GetLowestNumberedBall(ballsArePocketed);
+
+                if (marker9ball)
+                {
+                    marker9ball.SetActive(true);
+                    marker9ball.transform.localPosition = currentBallPositions[target];
+                }
+
+                ApplyTableColour(isTeam2Turn);
+            }
+
+            if (!tableModelHasRails || !hasRunSyncOnce)
+            {
+                PlaceSunkBallsIntoRestingPlace();
+            }
+
+            if (timerSecondsPerShot > 0 && !isTimerRunning)
+            {
+                ResetTimer();
+            }
+        }
+
+        private void OnNewGameStarted()
+        {
+            OnRemoteNewGame();
+
+            if (((localPlayerID >= 0) && (playerIsTeam2 == isTeam2Turn)) || isGameModePractice)
+            {
+                if (logger)
+                {
+                    logger._Log(name, "enabling marker because it is the start of the game and we are breaking");
+                }
+
+                isRepositioningCueBall = true;
+                repoMaxX = -SPOT_POSITION_X;
+                ballRigidbodies[0].isKinematic = true;
+
+                if (marker)
+                {
+                    markerTransform.localPosition = currentBallPositions[0];
+                    if (!isFourBall)
+                    {
+                        marker.SetActive(true);
+                    }
+
+                    ((VRC_Pickup) marker.gameObject.GetComponent(typeof(VRC_Pickup))).pickupable = true;
+                }
+            }
+            else
+            {
+                markerTransform.localPosition = currentBallPositions[0];
+
+                if (!isFourBall)
+                {
+                    marker.SetActive(true);
+                }
+
+                ((VRC_Pickup) marker.gameObject.GetComponent(typeof(VRC_Pickup))).pickupable = false;
+            }
+        }
+
 
         public void OnDisable()
         {
@@ -1945,8 +1899,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             // is a late-joiner.
             hasRunSyncOnce = false;
         }
-
-
+        
         private void TeamColors()
         {
             ballColors[0] = Color.white;
@@ -1960,6 +1913,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 ballColors[i] = tableOrange;
             }
         }
+        
         private void UsColors()
         {
             // Set colors
@@ -2680,7 +2634,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             return 0;
         }
 
-        private void OnTurnOverGameWon(bool newIsTeam2Winner)
+        private void OnTurnOverGameWon(bool newIsTeam2Winner, bool causedByFoul)
         {
             if (logger)
             {
@@ -2692,6 +2646,8 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             poolCues[1].tableIsActive = false;
 
             isTeam2Winner = newIsTeam2Winner;
+            isFoul = causedByFoul;
+            isGameOver = true;
 
             RefreshNetworkData(isTeam2Turn);
         }
@@ -2808,6 +2764,11 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             _EndHit();
             isPlayerAllowedToPlay = false;
             isFoul = false; // In case did not drop foul marker
+            
+            float vol = Mathf.Clamp(currentBallVelocities[0].magnitude * 0.1f, 0f, 1f);
+            
+            cueTipSrc.transform.SetPositionAndRotation(cueTip.transform.position, new Quaternion());
+            cueTipSrc.PlayOneShot(hitBallSfx, vol);
 
             // Commit changes
             gameIsSimulating = true;
@@ -2818,10 +2779,6 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             RefreshNetworkData(isTeam2Turn);
 
             isSimulatedByUs = true;
-
-            float vol = Mathf.Clamp(currentBallVelocities[0].magnitude * 0.1f, 0f, 0.6f);
-            cueTipSrc.transform.position = cueTipTransform.position;
-            cueTipSrc.PlayOneShot(hitBallSfx, vol);
         }
 
         // TODO: Single use function, but it short-circuits so cannot be easily put into its using function.
@@ -2903,7 +2860,6 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                         // Shot cancel
                         if (!isDesktopSafeRemove)
                         {
-                            cue.transform.localPosition = new Vector3(2000.0f, 2000.0f, 2000.0f);
                             isDesktopLocalTurn = false;
                             HitBallWithCue(cueTip.transform.forward, Mathf.Pow(shootAmt * 2.0f, 1.4f) * 7.0f);
                         }
@@ -2989,29 +2945,28 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
         private void UpdateScores()
         {
-            if (logger)
-            {
-                logger._Log(name, "UpdateScores");
-            }
-
             if (isFourBall)
             {
-                poolMenu._SetScore(false, scores[0]);
-                poolMenu._SetScore(true, scores[1]);
-                
-                ReportFourBallScore(false);
+                ReportFourBallScore();
 
                 return;
             }
             
             if (isNineBall)
             {
-                poolMenu._SetScore(false, -1);
-                poolMenu._SetScore(true, -1);
-                
-                ReportNineBallScore(false);
+                ReportNineBallScore();
 
                 return;
+            }
+            
+            ReportEightBallScore();
+        }
+
+        private void ReportEightBallScore()
+        {
+            if (logger)
+            {
+                logger._Log(name, "ReportEightBallScore");
             }
             
             int sunkBlues = 0;
@@ -3032,7 +2987,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                     sunkOranges++;
                 }
             }
-
+            
             if (isGameInMenus)
             {
                 if (isTeam2Winner && ballsArePocketed[1])
@@ -3053,31 +3008,52 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
             poolMenu._SetScore(false, teamAScore);
             poolMenu._SetScore(true, teamBScore);
+            
+            if (slogger)
+            {
+                slogger.OscReportScoresUpdated(isGameOver, turnID, teamAScore, isFoul, teamBScore);
+            }
+        }
+
+        private void ReportNineBallScore()
+        {
+            if (logger)
+            {
+                logger._Log(name, "ReportNineBallScore");
+            }
+            
+            poolMenu._SetScore(false, -1);
+            poolMenu._SetScore(true, -1);
+            
+            if (slogger)
+            {
+                bool gameOver = false;
+         
+                if (isGameInMenus)
+                {
+                    if (ballsArePocketed[1])
+                    {
+                        gameOver = true;
+                    }
+                }
                 
-            ReportEightBallScore(false, teamAScore, teamBScore);
-        }
-
-        private void ReportEightBallScore(bool gameOver, int teamAScore, int teamBScore)
-        {
-            if (slogger)
-            {
-                slogger.OscReportEndOfTurn(gameOver, turnID, teamAScore, isFoul, teamBScore);
+                slogger.OscReportScoresUpdated(gameOver, turnID, -1, isFoul, -1);
             }
         }
 
-        private void ReportNineBallScore(bool gameOver)
+        private void ReportFourBallScore()
         {
-            if (slogger)
+            if (logger)
             {
-                slogger.OscReportEndOfTurn(gameOver, turnID, -1, isFoul, -1);
+                logger._Log(name, "ReportFourBallScore");
             }
-        }
-
-        private void ReportFourBallScore(bool gameOver)
-        {
+            
+            poolMenu._SetScore(false, scores[0]);
+            poolMenu._SetScore(true, scores[1]);
+            
             if (slogger)
             {
-                slogger.OscReportEndOfTurn(gameOver, turnID, scores[0], isFoul, scores[1]);
+                slogger.OscReportScoresUpdated(scores[0] >= 10 || scores[1] >= 10, turnID, scores[0], isFoul, scores[1]);
             }
         }
 
@@ -3116,9 +3092,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 _Reset(ResetReason.PlayerLeft);
             }
         }
-
-        public GameObject pressE;
-
+        
         /// <Summary> Is the local player near the table? </Summary>
         private bool isNearTable;
 
@@ -3172,9 +3146,9 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             
             canEnterDesktopTopDownView = true;
 
-            if (pressE)
+            if (pancakeUI)
             {
-                pressE.SetActive(true);
+                pancakeUI.gameObject.SetActive(true);
             }
         }
 
@@ -3182,9 +3156,9 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         {
             canEnterDesktopTopDownView = false;
 
-            if (pressE)
+            if (pancakeUI)
             {
-                pressE.SetActive(false);
+                pancakeUI.gameObject.SetActive(false);
             }
         }
 

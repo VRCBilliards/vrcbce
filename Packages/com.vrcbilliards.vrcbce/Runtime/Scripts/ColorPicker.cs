@@ -18,8 +18,8 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
     public class ColorPicker : UdonSharpBehaviour
     {
-        [FormerlySerializedAs("PoolTable")] [Header("Interface with the core code")]
-        public PoolStateManager poolTable;
+        [Header("Interface with the core code")]
+        private PoolStateManager poolTable;
         public bool solidsBlue = true;
         private bool isPanelEnabled = false;
 
@@ -41,6 +41,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
         private void Start()
         {
+            poolTable = GetComponentInParent<PoolStateManager>();
             slidersAll = GetComponentsInChildren<Slider>();
             displayOutput = GetComponentInChildren<Renderer>();
             colorButtons = GetComponentsInChildren<PrefabColor>();

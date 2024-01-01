@@ -703,6 +703,11 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         
         public void _EnteredFlatscreenPlayerCamera(UnityEngine.Transform camera)
         {
+            if (!camera)
+            {
+                return;
+            }
+            
             tableUI._StopLookingAtHead(camera);
         }
 

@@ -6,6 +6,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
     /// <summary>
     /// Originally credited to Phasedragon, this logger can be placed in world to be hooked into.
     /// </summary>
+    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class Logger : UdonSharpBehaviour
     {
         public TMPro.TextMeshProUGUI text;

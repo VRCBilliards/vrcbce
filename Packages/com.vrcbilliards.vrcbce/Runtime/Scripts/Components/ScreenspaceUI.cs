@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using System;
+using TMPro;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
@@ -18,6 +19,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts.Compon
         public GameObject escImage;
         public string startPlaying;
         public string quitPlaying;
+        [SerializeField] public string androidMobileNotProperlySupported;
         public TextMeshProUGUI text;
         
         // Camera animation
@@ -32,7 +34,16 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts.Compon
         private float animTime;
 
         public bool isAnimating;
-        
+
+        public void OnEnable()
+        {
+#if UNITY_ANDROID
+            if (!Networking.LocalPlayer.IsUserInVR()) {
+                text.text = androidMobileNotProperlySupported;
+            }
+#endif
+        }
+
         public void _EnterDesktopTopDownView(Camera newCam)
         {
             text.text = quitPlaying;
@@ -86,13 +97,15 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts.Compon
         private void EndAnimation()
         {
             isAnimating = false;
-
-            if (cam)
-            {
-                cam.transform.SetPositionAndRotation(camPos, camRot);
-            }
             
             animTime = 0;
+
+            if (!cam)
+            {
+                return;
+            }
+            
+            cam.transform.SetPositionAndRotation(camPos, camRot);
             cam.orthographic = true;
         }
     }

@@ -1,5 +1,6 @@
 ﻿using UdonSharp;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts.Components
 {
@@ -13,7 +14,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts.Compon
         public string oscJoinedTeam = "joinedTeam,playerID={0}";
         public string oscGameStartedPlayer = "gameStarted,isPlayer=true";
         public string oscGameStartedSpectator = "gameStarted,isPlayer=false";
-        public string oscEndOfTurn = "endOfTurn,turnID={0],gameOver={1},teamAScore={2},fouled={3},teamBScore={4}";
+         public string oscScoresUpdated = "scoresUpdated,turnID={0},gameOver={1},teamAScore={2},fouled={3},teamBScore={4}";
         public string oscGameReset = "gameReset,reason={0}";
 
         private void OscBuildOutput(string input)
@@ -31,9 +32,9 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts.Compon
              OscBuildOutput(isPlaying ? oscGameStartedPlayer : oscGameStartedSpectator);
         }
 
-        public void OscReportEndOfTurn(bool isGameOver, uint turnID, int teamAScore, bool fouled, int teamBScore)
+        public void OscReportScoresUpdated(bool isGameOver, uint turnID, int teamAScore, bool fouled, int teamBScore)
         {
-             OscBuildOutput(string.Format(oscEndOfTurn, turnID, isGameOver, teamAScore, fouled, teamBScore));
+             OscBuildOutput(string.Format(oscScoresUpdated, turnID, isGameOver, teamAScore, fouled, teamBScore));
         }
 
         public void OscReportGameReset(ResetReason reason)
