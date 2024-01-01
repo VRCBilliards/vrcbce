@@ -112,3 +112,5 @@ The original creator of this prefab was harry_t. harry_t did (unsuccessfully) at
 💻 Vowgan & Legoman99573 - Misc. commits
 
 harry_t - Original Prefab, Physics code
+
+Metaphira - Maintainer of the "Pool Parlour" fork of the original prefab that included drastically better physics. Our 1.6.0 physics rewrite is overwhelimgly based on their work and we're indebted to them.
