@@ -4,8 +4,11 @@ using VRC.SDK3.Components;
 using VRC.SDKBase;
 using VRC.Udon;
 
-namespace VRCBilliards
+namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 {
+    /// <summary>
+    /// Controls the behaviour of the white guidance line.
+    /// </summary>
     [RequireComponent(typeof(LineRenderer))]
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class ShotGuideController : UdonSharpBehaviour
@@ -27,7 +30,6 @@ namespace VRCBilliards
         {
             if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.right), out hit, maxLengthOfLine, tableLayers))
             {
-
                 line.SetPosition(1, new Vector3(hit.distance, 0, 0));
                 line.endWidth = Mathf.Lerp(line.startWidth, 0, Mathf.InverseLerp(0, maxLengthOfLine, hit.distance));
             }

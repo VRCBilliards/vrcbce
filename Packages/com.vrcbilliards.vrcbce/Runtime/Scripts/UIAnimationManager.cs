@@ -3,7 +3,7 @@ using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 
-namespace VRCBilliards
+namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 {
     /// <summary>
     /// Proprietary animation manager for M.O.O.N's UI
@@ -20,7 +20,7 @@ namespace VRCBilliards
         public TextMeshProUGUI modeLeft;
         public TextMeshProUGUI modeRight;
 
-        public FairlySadPanda.UsefulThings.Logger logger;
+        public Logger logger;
 
         [UdonSynced]
         [HideInInspector]

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: PoolPositioner
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: c775f573451a7994f8a8fb18e9080354,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 977a650a33a4ab14a9e980d4e21ceab6,
     type: 2}
   udonAssembly: 
   assemblyError: 
@@ -21,7 +21,7 @@ MonoBehaviour:
   compiledVersion: 2
   behaviourSyncMode: 1
   hasInteractEvent: 0
-  scriptID: -6496048249804274201
+  scriptID: -8493861689015063451
   serializationData:
     SerializedFormat: 2
     SerializedBytes: 
@@ -62,7 +62,8 @@ MonoBehaviour:
       Data: 3|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: VRCBilliards.PoolStateManager, VRCBilliards.VRCBCE.Runtime
+      Data: VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts.BasePoolStateManager,
+        VRCBilliards.VRCBCE.Runtime
     - Name: 
       Entry: 8
       Data: 

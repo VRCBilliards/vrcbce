@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: UIAnimationManager
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: b049d2425cd6242479d191c2022d7747,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 528f7565b8fe85245956df03975eb169,
     type: 2}
   udonAssembly: 
   assemblyError: 
@@ -21,7 +21,7 @@ MonoBehaviour:
   compiledVersion: 2
   behaviourSyncMode: 4
   hasInteractEvent: 0
-  scriptID: -8118245694424046893
+  scriptID: 7662904546156241072
   serializationData:
     SerializedFormat: 2
     SerializedBytes: 
@@ -62,7 +62,8 @@ MonoBehaviour:
       Data: 3|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: VRCBilliards.PoolMenu, VRCBilliards.VRCBCE.Runtime
+      Data: VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts.PoolMenu,
+        VRCBilliards.VRCBCE.Runtime
     - Name: 
       Entry: 8
       Data: 
@@ -422,7 +423,8 @@ MonoBehaviour:
       Data: 21|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: FairlySadPanda.UsefulThings.Logger, VRCBilliards.VRCBCE.Runtime
+      Data: VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts.Logger,
+        VRCBilliards.VRCBCE.Runtime
     - Name: 
       Entry: 8
       Data: 
