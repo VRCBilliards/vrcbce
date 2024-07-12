@@ -4939,13 +4939,15 @@ ParticleSystemRenderer:
   m_RenderAlignment: 0
   m_Pivot: {x: 0, y: 0, z: 0}
   m_Flip: {x: 0, y: 0, z: 0}
-  m_UseCustomVertexStreams: 1
   m_EnableGPUInstancing: 1
   m_ApplyActiveColorSpace: 1
   m_AllowRoll: 1
   m_FreeformStretching: 0
   m_RotateWithStretchDirection: 1
+  m_UseCustomVertexStreams: 1
   m_VertexStreams: 00030409
+  m_UseCustomTrailVertexStreams: 0
+  m_TrailVertexStreams: 00010304
   m_Mesh: {fileID: 4300000, guid: 57a0dd9be2515f84c89eddcf65516404, type: 3}
   m_Mesh1: {fileID: 0}
   m_Mesh2: {fileID: 0}
@@ -9841,13 +9843,15 @@ ParticleSystemRenderer:
   m_RenderAlignment: 0
   m_Pivot: {x: 0, y: 0, z: 0}
   m_Flip: {x: 0, y: 0, z: 0}
-  m_UseCustomVertexStreams: 1
   m_EnableGPUInstancing: 1
   m_ApplyActiveColorSpace: 1
   m_AllowRoll: 1
   m_FreeformStretching: 0
   m_RotateWithStretchDirection: 1
+  m_UseCustomVertexStreams: 1
   m_VertexStreams: 00030409
+  m_UseCustomTrailVertexStreams: 0
+  m_TrailVertexStreams: 00010304
   m_Mesh: {fileID: 4300002, guid: 57a0dd9be2515f84c89eddcf65516404, type: 3}
   m_Mesh1: {fileID: 0}
   m_Mesh2: {fileID: 0}
@@ -23764,8 +23768,7 @@ MonoBehaviour:
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 6767113457082695050}
   toggleObjects:
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 711438652474290803}
 --- !u!114 &6767113457082695050
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -24355,6 +24358,12 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: eac7cdc0b42cf524c9094fd52419a2ce, type: 3}
+--- !u!1 &711438652474290803 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2274518542247171433, guid: eac7cdc0b42cf524c9094fd52419a2ce,
+    type: 3}
+  m_PrefabInstance: {fileID: 1607573133179021082}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &711438652474290805 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2274518542247171439, guid: eac7cdc0b42cf524c9094fd52419a2ce,
@@ -24367,7 +24376,7 @@ MonoBehaviour:
     type: 3}
   m_PrefabInstance: {fileID: 1607573133179021082}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 711438652474290803}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0524b2fa8d2baba4b9c50beaf3df10a5, type: 3}

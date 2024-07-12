@@ -454,7 +454,7 @@ MonoBehaviour:
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 2070519982196792867}
   toggleObjects:
-  - {fileID: 0}
+  - {fileID: 3796233258863421636}
 --- !u!114 &2070519982196792867
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1248,6 +1248,7 @@ MonoBehaviour:
   m_Script: {fileID: -1533785930, guid: 661092b4961be7145bfbe56e1e62337b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  AllowFocusView: 1
 --- !u!65 &3589744891060665262
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -8452,13 +8453,15 @@ ParticleSystemRenderer:
   m_RenderAlignment: 0
   m_Pivot: {x: 0, y: 0, z: 0}
   m_Flip: {x: 0, y: 0, z: 0}
-  m_UseCustomVertexStreams: 1
   m_EnableGPUInstancing: 1
   m_ApplyActiveColorSpace: 1
   m_AllowRoll: 1
   m_FreeformStretching: 0
   m_RotateWithStretchDirection: 1
+  m_UseCustomVertexStreams: 1
   m_VertexStreams: 00030409
+  m_UseCustomTrailVertexStreams: 0
+  m_TrailVertexStreams: 00010304
   m_Mesh: {fileID: 4300000, guid: 57a0dd9be2515f84c89eddcf65516404, type: 3}
   m_Mesh1: {fileID: 0}
   m_Mesh2: {fileID: 0}
@@ -13441,13 +13444,15 @@ ParticleSystemRenderer:
   m_RenderAlignment: 0
   m_Pivot: {x: 0, y: 0, z: 0}
   m_Flip: {x: 0, y: 0, z: 0}
-  m_UseCustomVertexStreams: 1
   m_EnableGPUInstancing: 1
   m_ApplyActiveColorSpace: 1
   m_AllowRoll: 1
   m_FreeformStretching: 0
   m_RotateWithStretchDirection: 1
+  m_UseCustomVertexStreams: 1
   m_VertexStreams: 00030409
+  m_UseCustomTrailVertexStreams: 0
+  m_TrailVertexStreams: 00010304
   m_Mesh: {fileID: 4300002, guid: 57a0dd9be2515f84c89eddcf65516404, type: 3}
   m_Mesh1: {fileID: 0}
   m_Mesh2: {fileID: 0}
@@ -24747,7 +24752,6 @@ MonoBehaviour:
   ballCustomColours: 0
   blueTeamSliders: {fileID: 0}
   orangeTeamSliders: {fileID: 0}
-  cueTip: {fileID: 7574990830194630331}
   cueTips:
   - {fileID: 7574990830816724833}
   - {fileID: 7574990830194630331}
@@ -24837,7 +24841,6 @@ MonoBehaviour:
   - {fileID: 8300000, guid: bb95fc5748cbf214cb38b70c79318de0, type: 3}
   newTurnSfx: {fileID: 8300000, guid: 63ad488066e075e45b9c19396d993619, type: 3}
   pointMadeSfx: {fileID: 8300000, guid: 22e0b772b4b1938478c0a84bd8b2912f, type: 3}
-  spinSfx: {fileID: 8300000, guid: 145bbd1a0d9f9984a9c0fd65011d2e29, type: 3}
   hitBallSfx: {fileID: 8300000, guid: 2b2755702b49d5544904d01d69be3680, type: 3}
   tableReflection: {fileID: 7574990830399100624}
   cueballMeshes:
@@ -24854,7 +24857,6 @@ MonoBehaviour:
   tiltAmount: {fileID: 3589744891771408461}
   desktopAngleIncrement: 15
   cueBallController: {fileID: 2737280998927138983}
-  screenspaceUI: {fileID: 7413171090930662055}
   numberOfCuesHeldByLocalPlayer: 0
   MAX_SIMULATION_TIME_PER_FRAME: 0.1
   TIME_PER_STEP: 0.0125
@@ -27690,13 +27692,19 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 3116025407124372909}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &3796233258863421636 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2274518542247171433, guid: eac7cdc0b42cf524c9094fd52419a2ce,
+    type: 3}
+  m_PrefabInstance: {fileID: 3116025407124372909}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &7705393862066908976 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4742666980358902429, guid: eac7cdc0b42cf524c9094fd52419a2ce,
     type: 3}
   m_PrefabInstance: {fileID: 3116025407124372909}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 3796233258863421636}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0524b2fa8d2baba4b9c50beaf3df10a5, type: 3}

@@ -133,7 +133,7 @@ MonoBehaviour:
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 2070519982196792867}
   toggleObjects:
-  - {fileID: 0}
+  - {fileID: 3654264652230636598}
 --- !u!114 &2070519982196792867
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -257,6 +257,7 @@ MonoBehaviour:
   m_Script: {fileID: -1533785930, guid: 661092b4961be7145bfbe56e1e62337b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  AllowFocusView: 1
 --- !u!65 &3589744891060665262
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2425,7 +2426,6 @@ MonoBehaviour:
   ballCustomColours: 0
   blueTeamSliders: {fileID: 5729314296724354896}
   orangeTeamSliders: {fileID: 2897453537118849176}
-  cueTip: {fileID: 7574990830194630331}
   cueTips:
   - {fileID: 7574990830816724833}
   - {fileID: 7574990830194630331}
@@ -2515,7 +2515,6 @@ MonoBehaviour:
   - {fileID: 8300000, guid: bb95fc5748cbf214cb38b70c79318de0, type: 3}
   newTurnSfx: {fileID: 8300000, guid: 63ad488066e075e45b9c19396d993619, type: 3}
   pointMadeSfx: {fileID: 8300000, guid: 22e0b772b4b1938478c0a84bd8b2912f, type: 3}
-  spinSfx: {fileID: 8300000, guid: 145bbd1a0d9f9984a9c0fd65011d2e29, type: 3}
   hitBallSfx: {fileID: 8300000, guid: 2b2755702b49d5544904d01d69be3680, type: 3}
   tableReflection: {fileID: 7574990830399100624}
   cueballMeshes:
@@ -2532,7 +2531,6 @@ MonoBehaviour:
   tiltAmount: {fileID: 3589744891771408461}
   desktopAngleIncrement: 15
   cueBallController: {fileID: 2737280998927138983}
-  screenspaceUI: {fileID: 7413171090930662055}
   numberOfCuesHeldByLocalPlayer: 0
   MAX_SIMULATION_TIME_PER_FRAME: 0.1
   TIME_PER_STEP: 0.0125
@@ -4148,7 +4146,7 @@ PrefabInstance:
     - target: {fileID: 3901484750277217609, guid: 917b38a359c7c15418cdeac508b4fe30,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.84949994
+      value: -0.8495
       objectReference: {fileID: 0}
     - target: {fileID: 3962715659019194267, guid: 917b38a359c7c15418cdeac508b4fe30,
         type: 3}
@@ -4574,6 +4572,12 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 3116025407124372909}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &3654264652230636598 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1839956628598966683, guid: 917b38a359c7c15418cdeac508b4fe30,
+    type: 3}
+  m_PrefabInstance: {fileID: 3116025407124372909}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &5729314296724354896 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7258892642995342077, guid: 917b38a359c7c15418cdeac508b4fe30,
@@ -4592,7 +4596,7 @@ MonoBehaviour:
     type: 3}
   m_PrefabInstance: {fileID: 3116025407124372909}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 3654264652230636598}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0524b2fa8d2baba4b9c50beaf3df10a5, type: 3}
