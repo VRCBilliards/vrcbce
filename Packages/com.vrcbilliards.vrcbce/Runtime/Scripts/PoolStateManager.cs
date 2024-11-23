@@ -328,7 +328,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
             float a = jkPlane.GetDistanceToPoint(Q);
             float b = Q.y - o.y;
-            float c = Mathf.Sqrt(Mathf.Pow(ballRadius, 2) - Mathf.Pow(a, 2) - Mathf.Pow(b, 2));
+            float c = Mathf.Sqrt(Mathf.Max(0,Mathf.Pow(ballRadius, 2) - Mathf.Pow(a, 2) - Mathf.Pow(b, 2)));
 
             float adj = Mathf.Sqrt(Mathf.Pow(q.x, 2) + Mathf.Pow(q.z, 2));
             float opp = q.y;
@@ -352,7 +352,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
             // https://billiards.colostate.edu/physics_articles/Alciatore_pool_physics_article.pdf
             float alpha = -Mathf.Atan(
-               (5f / 2f * a / ballRadius * Mathf.Sqrt(1f - Mathf.Pow(a / ballRadius, 2))) /
+               (5f / 2f * a / ballRadius * Mathf.Sqrt(Mathf.Max(0,1f - Mathf.Pow(a / ballRadius, 2)))) /
                (1 + MASS_OF_BALL / m_e + 5f / 2f * (1f - Mathf.Pow(a / ballRadius, 2)))
             ) * 180 / Mathf.PI;
 

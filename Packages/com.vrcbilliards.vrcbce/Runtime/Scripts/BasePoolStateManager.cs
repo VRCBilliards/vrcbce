@@ -1850,6 +1850,9 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             {
                 ResetTimer();
             }
+
+            // sanitize old cue tip location data to prevent stale data from causing unintended effects.
+            localSpacePositionOfCueTipLastFrame = tableSurface.transform.InverseTransformPoint(cueTip.transform.position);
         }
 
         private void OnNewGameStarted()
