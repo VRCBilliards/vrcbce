@@ -6,6 +6,8 @@
 
 ## The Essential VRChat game prefab - by the community, for the community
 
+23/11/24 Notice: Keep an eye out for an all-new rewrite, VRCBCE 2.0! Blog post here about what's been going on: https://github.com/VRCBilliards/vrcbce/discussions/202
+
 A pool table for VRChat SDK3 worlds. Want to play 8 Ball, 9 Ball, or Japanese / Korean 4 Ball? This is the prefab for you! With the power of the Udon Networking Update, you can even have several tables in the same world without issue!
 
 This prefab exists as a "Community Edition" of the original ht8b pool table. It simplifies the code a lot and makes it easier to edit. It is also provided under MIT, and the maintainers of this codebase commit to being open and inclusive to anyone who would like to modify the prefab, add additional modes, fix bugs, and use the prefab as a learning tool. We **strongly** encourage anyone to have a go modifying and/or contributing to this prefab!
