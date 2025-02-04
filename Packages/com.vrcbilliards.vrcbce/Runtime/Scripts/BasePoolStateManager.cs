@@ -123,7 +123,8 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 #region Desktop        
         private const float DEFAULT_DESKTOP_CUE_ANGLE = 10.0f;
         protected const float DESKTOP_CURSOR_SPEED = 0.035f;
-        private const float MAX_DESKTOP_CUE_ANGLE = 90.0f;
+        // This should never be 90.0f or higher, as it puts the physics simulation into a weird state.
+        private const float MAX_DESKTOP_CUE_ANGLE = 89.0f;
         private const float MIN_DESKTOP_CUE_ANGLE = 0.0f;
 #endregion
         [Header("Options")]
