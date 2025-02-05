@@ -2521,16 +2521,18 @@ MonoBehaviour:
   - {fileID: 4300024, guid: 56dbeace3e19a5141b5853d303665813, type: 3}
   - {fileID: 4300026, guid: 56dbeace3e19a5141b5853d303665813, type: 3}
   nineBall: {fileID: 4300006, guid: 56dbeace3e19a5141b5853d303665813, type: 3}
-  desktopCursorObject: {fileID: 7574990831127182031}
   desktopHitPosition: {fileID: 7574990829585960531}
   desktopBase: {fileID: 7574990830058853910}
   desktopCueParents:
   - {fileID: 7574990830996651390}
   - {fileID: 7574990831511979687}
-  desktopOverlayPower: {fileID: 7574990831006510362}
+  desktopOverlayPower: {fileID: 0}
   tiltAmount: {fileID: 3589744891771408461}
   desktopAngleIncrement: 15
   cueBallController: {fileID: 2737280998927138983}
+  powerBar: {fileID: 5604568715292750162}
+  topBar: {fileID: 3269725864505638145}
+  initialPowerBarPos: {x: 0, y: 0, z: 0}
   numberOfCuesHeldByLocalPlayer: 0
   MAX_SIMULATION_TIME_PER_FRAME: 0.1
   TIME_PER_STEP: 0.0125
@@ -2957,6 +2959,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 151389536752580311, guid: e8e2155f0b57dee47a5b4d56bded44e8,
         type: 3}
+    - target: {fileID: 1866711807493767409, guid: e8e2155f0b57dee47a5b4d56bded44e8,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 38.929962
+      objectReference: {fileID: 0}
     - target: {fileID: 2569889520933857814, guid: e8e2155f0b57dee47a5b4d56bded44e8,
         type: 3}
       propertyPath: behaviour
@@ -3116,6 +3123,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 96a734e6e6524278b20673ba9474c72f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &3269725864505638145 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4124982535036906334, guid: e8e2155f0b57dee47a5b4d56bded44e8,
+    type: 3}
+  m_PrefabInstance: {fileID: 1467759629085922911}
+  m_PrefabAsset: {fileID: 0}
 --- !u!198 &3329129894623938670 stripped
 ParticleSystem:
   m_CorrespondingSourceObject: {fileID: 4210291272853937713, guid: e8e2155f0b57dee47a5b4d56bded44e8,
@@ -3143,6 +3156,12 @@ Transform:
 --- !u!4 &3589744892908061883 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2706613274507317988, guid: e8e2155f0b57dee47a5b4d56bded44e8,
+    type: 3}
+  m_PrefabInstance: {fileID: 1467759629085922911}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &5604568715292750162 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6456448922248931085, guid: e8e2155f0b57dee47a5b4d56bded44e8,
     type: 3}
   m_PrefabInstance: {fileID: 1467759629085922911}
   m_PrefabAsset: {fileID: 0}
@@ -3386,12 +3405,6 @@ PositionConstraint:
     type: 3}
   m_PrefabInstance: {fileID: 1467759629085922911}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &7574990831006510362 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 9025567274847222597, guid: e8e2155f0b57dee47a5b4d56bded44e8,
-    type: 3}
-  m_PrefabInstance: {fileID: 1467759629085922911}
-  m_PrefabAsset: {fileID: 0}
 --- !u!23 &7574990831015386529 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 9025567274833021950, guid: e8e2155f0b57dee47a5b4d56bded44e8,
@@ -3407,12 +3420,6 @@ Transform:
 --- !u!1 &7574990831071038689 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 9025567274912176830, guid: e8e2155f0b57dee47a5b4d56bded44e8,
-    type: 3}
-  m_PrefabInstance: {fileID: 1467759629085922911}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &7574990831127182031 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 9025567274173361296, guid: e8e2155f0b57dee47a5b4d56bded44e8,
     type: 3}
   m_PrefabInstance: {fileID: 1467759629085922911}
   m_PrefabAsset: {fileID: 0}

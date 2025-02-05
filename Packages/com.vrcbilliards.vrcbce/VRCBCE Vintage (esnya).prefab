@@ -4939,13 +4939,15 @@ ParticleSystemRenderer:
   m_RenderAlignment: 0
   m_Pivot: {x: 0, y: 0, z: 0}
   m_Flip: {x: 0, y: 0, z: 0}
-  m_UseCustomVertexStreams: 1
   m_EnableGPUInstancing: 1
   m_ApplyActiveColorSpace: 1
   m_AllowRoll: 1
   m_FreeformStretching: 0
   m_RotateWithStretchDirection: 1
+  m_UseCustomVertexStreams: 1
   m_VertexStreams: 00030409
+  m_UseCustomTrailVertexStreams: 0
+  m_TrailVertexStreams: 00010304
   m_Mesh: {fileID: 4300000, guid: 57a0dd9be2515f84c89eddcf65516404, type: 3}
   m_Mesh1: {fileID: 0}
   m_Mesh2: {fileID: 0}
@@ -9841,13 +9843,15 @@ ParticleSystemRenderer:
   m_RenderAlignment: 0
   m_Pivot: {x: 0, y: 0, z: 0}
   m_Flip: {x: 0, y: 0, z: 0}
-  m_UseCustomVertexStreams: 1
   m_EnableGPUInstancing: 1
   m_ApplyActiveColorSpace: 1
   m_AllowRoll: 1
   m_FreeformStretching: 0
   m_RotateWithStretchDirection: 1
+  m_UseCustomVertexStreams: 1
   m_VertexStreams: 00030409
+  m_UseCustomTrailVertexStreams: 0
+  m_TrailVertexStreams: 00010304
   m_Mesh: {fileID: 4300002, guid: 57a0dd9be2515f84c89eddcf65516404, type: 3}
   m_Mesh1: {fileID: 0}
   m_Mesh2: {fileID: 0}
@@ -10118,16 +10122,18 @@ MonoBehaviour:
   - {fileID: 4300024, guid: 56dbeace3e19a5141b5853d303665813, type: 3}
   - {fileID: 4300026, guid: 56dbeace3e19a5141b5853d303665813, type: 3}
   nineBall: {fileID: 4300006, guid: 56dbeace3e19a5141b5853d303665813, type: 3}
-  desktopCursorObject: {fileID: 5857250873071590596}
   desktopHitPosition: {fileID: 5857250872600979544}
   desktopBase: {fileID: 5857250871994593309}
   desktopCueParents:
   - {fileID: 3135407204531457878}
   - {fileID: 3135407205117195407}
-  desktopOverlayPower: {fileID: 5857250873462328081}
+  desktopOverlayPower: {fileID: 0}
   tiltAmount: {fileID: 686712431923476038}
   desktopAngleIncrement: 15
   cueBallController: {fileID: 7449011694884598415}
+  powerBar: {fileID: 8471703184616773465}
+  topBar: {fileID: 1528553149515275018}
+  initialPowerBarPos: {x: 0, y: 0, z: 0}
   numberOfCuesHeldByLocalPlayer: 0
   MAX_SIMULATION_TIME_PER_FRAME: 0.1
   TIME_PER_STEP: 0.0125
@@ -24386,6 +24392,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 3135407204972759907}
     m_Modifications:
+    - target: {fileID: 1154008634607538854, guid: c02b10cfed62ffc47b6ad81638f9d226,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 38.929962
+      objectReference: {fileID: 0}
     - target: {fileID: 8091653792461784738, guid: c02b10cfed62ffc47b6ad81638f9d226,
         type: 3}
       propertyPath: serializationData.Prefab
@@ -24470,6 +24481,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &1528553149515275018 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3520364653767375113, guid: c02b10cfed62ffc47b6ad81638f9d226,
+    type: 3}
+  m_PrefabInstance: {fileID: 2732660218550592003}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &5857250871994593309 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8405257728537727518, guid: c02b10cfed62ffc47b6ad81638f9d226,
@@ -24488,15 +24505,9 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 2732660218550592003}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &5857250873071590596 stripped
+--- !u!1 &8471703184616773465 stripped
 GameObject:
-  m_CorrespondingSourceObject: {fileID: 8405257729614806727, guid: c02b10cfed62ffc47b6ad81638f9d226,
-    type: 3}
-  m_PrefabInstance: {fileID: 2732660218550592003}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &5857250873462328081 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8405257730559650066, guid: c02b10cfed62ffc47b6ad81638f9d226,
+  m_CorrespondingSourceObject: {fileID: 5800023706372437338, guid: c02b10cfed62ffc47b6ad81638f9d226,
     type: 3}
   m_PrefabInstance: {fileID: 2732660218550592003}
   m_PrefabAsset: {fileID: 0}

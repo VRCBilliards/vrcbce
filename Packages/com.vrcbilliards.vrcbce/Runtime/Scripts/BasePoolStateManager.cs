@@ -25,54 +25,56 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         InvalidState,
         PlayerLeft
     }
-    
+
     /// <summary>
     /// This is the base logic that governs the pool table, devoid of almost all physics code. This code is quite
     /// messy; it includes all setup, teardown, game state and replication logic, and works with all other components
     /// to allow the player to play pool.
     /// </summary>
-
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
     public abstract class BasePoolStateManager : DebuggableUdon
     {
-#region Dependencies        
+        #region Dependencies
+
         public PoolMenu poolMenu;
         public PoolCue[] poolCues;
         public ScreenspaceUI pancakeUI;
         public OscSlogger slogger;
         public Logger logger;
-#endregion
 
-#region Networked Variables
+        #endregion
+
+        #region Networked Variables
+
         [UdonSynced] protected bool gameIsSimulating;
         [UdonSynced] private int timerSecondsPerShot;
         [UdonSynced] private bool isPlayerAllowedToPlay;
         [UdonSynced] private bool guideLineEnabled = true;
-        
+
         [UdonSynced] protected bool[] ballsArePocketed;
         private bool[] oldBallsArePocketed;
-        
+
         [UdonSynced] protected bool isTeam2Turn;
         private bool oldIsTeam2Turn;
-        
+
         [UdonSynced] private bool isFoul;
         [UdonSynced] private bool isGameOver;
-        
+
         [UdonSynced] protected bool isOpen = true;
         private bool oldOpen;
-        
+
         [UdonSynced] protected bool isTeam2Blue;
-        
+
         [UdonSynced] private bool isGameInMenus = true;
         private bool oldIsGameInMenus;
-        
+
         [UdonSynced] private bool isTeam2Winner;
         [UdonSynced] private bool isTableLocked = true;
         [UdonSynced] private bool isTeams;
-        
+
         [UdonSynced] private uint gameID;
         private uint oldGameID;
-        
+
         [UdonSynced] private uint turnID;
         [UdonSynced] private bool isRepositioningCueBall;
         [UdonSynced] private bool isKorean;
@@ -87,75 +89,83 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         [UdonSynced] private int player4ID;
         [UdonSynced] private bool gameWasReset;
         [UdonSynced] private ResetReason latestResetReason;
-        
-#endregion
 
-#region Table Dimensions
+        #endregion
+
+        #region Table Dimensions
 
         /// <summary>
         /// These numbers determine the exact size of your table, and will correspond to the blue, yellow and red
         /// guidance lines you can see in the editor. Theoretically, as long as your table is a cuboid and has six
         /// pockets, we support it.
         /// </summary>
-        
+
         // Note the WIDTH and HEIGHT are halved from their real values - this is due to the reliance of the physics code
         // working in four quadrants to detect collisions.
         public float TABLE_WIDTH = 1.1f;
-        public float TABLE_HEIGHT = 0.64f; 
+
+        public float TABLE_HEIGHT = 0.64f;
         public Vector3 CORNER_POCKET = new Vector3(1.135f, 0.0f, 0.685f);
         public Vector3 MIDDLE_POCKET = new Vector3(0.0f, 0.0f, 0.72f);
         public float POCKET_RADIUS = 0.11f;
         public float POCKET_INNER_RADIUS = 0.078f;
         public float BALL_DIAMETER = 0.06f;
-#endregion
+
+        #endregion
+
         // The number of balls we simulate - this const allows us to increase the number we support in the future.
         protected const int NUMBER_OF_SIMULATED_BALLS = 16;
+
         // A small fraction designed to slightly move balls around when placed, which helps with making the table
         // less deterministic (i.e. less "perfect breaks" etc)
         protected const float RANDOMIZE_F = 0.0001f;
-        
+
         // These four consts dictate some placement of balls when placed.
         public float SPOT_POSITION_X = 0.5334f;
         public float SPOT_CAROM_X = 0.8001f;
         public float BALL_PL_X = 0.03f;
         public float BALL_PL_Y = 0.05196152422f;
-        
-#region Desktop        
+
+        #region Desktop
+
         private const float DEFAULT_DESKTOP_CUE_ANGLE = 10.0f;
-        protected const float DESKTOP_CURSOR_SPEED = 0.035f;
+
         // This should never be 90.0f or higher, as it puts the physics simulation into a weird state.
         private const float MAX_DESKTOP_CUE_ANGLE = 89.0f;
         private const float MIN_DESKTOP_CUE_ANGLE = 0.0f;
-#endregion
-        [Header("Options")]
 
-        [Tooltip("Use fake shadows? They may clash with your world's lighting.")]
+        #endregion
+
+        [Header("Options")] [Tooltip("Use fake shadows? They may clash with your world's lighting.")]
         public bool fakeBallShadows = true;
+
         [Tooltip("Does the table model for this table have rails that guide the ball when the ball sinks?")]
         public bool tableModelHasRails;
 
-        [Header("Important Objects")]
-        public Transform sunkBallsPositionRoot;
+        [Header("Important Objects")] public Transform sunkBallsPositionRoot;
         public GameObject shadows;
         public ParticleSystem plusOneParticleSystem;
+
         public ParticleSystem minusOneParticleSystem;
+
         // Where's the surface of the table?
         public Transform tableSurface;
 
-        [Header("Shader Information")]
-        public string uniformTableColour = "_EmissionColor";
+        [Header("Shader Information")] public string uniformTableColour = "_EmissionColor";
         public string uniformMarkerColour = "_Color";
         public string uniformCueColour = "_EmissionColor";
         public string uniformBallColour = "_BallColour";
         public string uniformBallFloat = "_CustomColor";
         public string ballMaskToggle = "_Turnoff";
 
-        [Tooltip("Change the length of the intro ball-drop animation. If you set this to zero, the animation will not play at all.")]
+        [Tooltip(
+            "Change the length of the intro ball-drop animation. If you set this to zero, the animation will not play at all.")]
         [Range(0f, 5f)]
         public float introAnimationLength = 2.0f;
 
-        [Header("Table Colours")]
-        [ColorUsage(true, true)] public Color tableBlue = new Color(0.0f, 0.5f, 1.5f, 1.0f);
+        [Header("Table Colours")] [ColorUsage(true, true)]
+        public Color tableBlue = new Color(0.0f, 0.5f, 1.5f, 1.0f);
+
         [ColorUsage(true, true)] public Color tableOrange = new Color(1.5f, 0.5f, 0.0f, 1.0f);
         [ColorUsage(true, true)] public Color tableRed = new Color(1.4f, 0.0f, 0.0f, 1.0f);
         [ColorUsage(true, true)] public Color tableWhite = new Color(1.0f, 1.0f, 1.0f, 1.0f);
@@ -170,18 +180,15 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         public Color fabricBlue = new Color(0.1f, 0.6f, 1.0f, 1.0f);
         public Color fabricGreen = new Color(0.15f, 0.75f, 0.3f, 1.0f);
 
-        [ColorUsage(true, true)]
-        private Color[] ballColors = new Color[NUMBER_OF_SIMULATED_BALLS];
-        
-        [Header("Colour Options")]
-        public bool ballCustomColours;
+        [ColorUsage(true, true)] private Color[] ballColors = new Color[NUMBER_OF_SIMULATED_BALLS];
+
+        [Header("Colour Options")] public bool ballCustomColours;
         public ColorPicker blueTeamSliders;
         public ColorPicker orangeTeamSliders;
 
         private float shaderToggleFloat = 0;
 
-        [Header("Cues")]
-        protected GameObject cueTip;
+        [Header("Cues")] protected GameObject cueTip;
         public GameObject[] cueTips;
         public MeshRenderer[] cueRenderObjs;
         private Material[] cueMaterials = new Material[2];
@@ -193,14 +200,17 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         /// </summary>
         [Header("Table Objects")]
         [Tooltip(
-            "The balls that are used by the table."+
-            "\nThe order of the balls is as follows: cue, black, all blue in ascending order, then all orange in ascending order."+
+            "The balls that are used by the table." +
+            "\nThe order of the balls is as follows: cue, black, all blue in ascending order, then all orange in ascending order." +
             "\nIf the order of the balls is incorrect, gameplay will not proceed correctly."
         )]
         public Transform[] ballTransforms;
+
         private Rigidbody[] ballRigidbodies;
+
         [Tooltip("The shadow object for each ball")]
         public PositionConstraint[] ballShadowPosConstraints;
+
         private Transform[] ballShadowPosConstraintTransforms;
         public ShotGuideController guideline;
         public GameObject devhit;
@@ -210,8 +220,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         public GameObject marker9ball;
         public GameObject pocketBlockers;
 
-        [Header("Materials")]
-        public MeshRenderer[] ballRenderers;
+        [Header("Materials")] public MeshRenderer[] ballRenderers;
 
         public MeshRenderer tableRenderer;
         private Material[] tableMaterials;
@@ -220,33 +229,34 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
         public Material[] cueGrips;
 
-        [Header("Audio")]
-        public GameObject audioSourcePoolContainer;
+        [Header("Audio")] public GameObject audioSourcePoolContainer;
         public AudioSource cueTipSrc;
         public AudioClip introSfx;
         public AudioClip sinkSfx;
+
         /// <summary>
         /// The SFX that plays when a good thing happens (sinking a ball correctly, etc)
         /// </summary>
         public AudioClip successSfx;
+
         /// <summary>
         /// The SFX that plays when a foul occurs
         /// </summary>
         public AudioClip foulSfx;
+
         /// <summary>
         /// The SFX that plays when someone wins
         /// </summary>
         public AudioClip winnerSfx;
+
         public AudioClip[] hitsSfx;
         public AudioClip newTurnSfx;
         public AudioClip pointMadeSfx;
         public AudioClip hitBallSfx;
 
-        [Header("Reflection Probes")]
-        public ReflectionProbe tableReflection;
+        [Header("Reflection Probes")] public ReflectionProbe tableReflection;
 
-        [Header("Meshes")]
-        public Mesh[] cueballMeshes;
+        [Header("Meshes")] public Mesh[] cueballMeshes;
         public Mesh nineBall;
 
         /// <summary>
@@ -255,9 +265,8 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         private bool isArmed;
 
         private int localPlayerID = -1;
-        
-        [Header("Desktop Stuff")] public GameObject desktopCursorObject;
-        public GameObject desktopHitPosition;
+
+        [Header("Desktop Stuff")] public GameObject desktopHitPosition;
 
         public GameObject desktopBase;
 
@@ -266,8 +275,6 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         public GameObject desktopOverlayPower;
         public UnityEngine.UI.Image tiltAmount;
 
-        [Header("UI Stuff")]
-        //public Text[] lobbyNames;
         /*
          * Private variables
          */
@@ -276,7 +283,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         private Transform[] ballPoolTransforms;
         private AudioSource mainSrc;
         private UdonBehaviour udonChips;
-        
+
         /// <summary>
         /// We are waiting for our local simulation to finish, before we unpack data
         /// </summary>
@@ -286,6 +293,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         /// The first ball to be hit by cue ball
         /// </summary>
         private int firstHitBallThisTurn;
+
         private int secondBallHitThisTurn;
         private int thirdBallHitThisTurn;
 
@@ -347,15 +355,14 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
         private Color pointerColourErr;
         private Color pointerClothColour;
-        private Vector3 deskTopCursor = new Vector3(0.0f, 2.0f, 0.0f);
-        private Vector3 desktopHitCursor = new Vector3(0.0f, 0.0f, 0.0f);
+        private Vector3 desktopAimPoint = new Vector3(0.0f, 2.0f, 0.0f);
+        private Vector3 desktopHitPoint = new Vector3(0.0f, 0.0f, 0.0f);
         private float desktopAngle = DEFAULT_DESKTOP_CUE_ANGLE;
         public float desktopAngleIncrement = 15f;
         private bool isDesktopShootingIn;
         private bool isDesktopSafeRemove = true;
         private Vector3 desktopShootVector;
         private Vector3 desktopSafeRemovePoint;
-        private float desktopShootReference;
 
         private bool isDesktopLocalTurn;
         private bool isEnteringDesktopModeThisFrame;
@@ -371,11 +378,9 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
         private float cueFDir;
         protected Vector3 raySphereOutput;
-        private int lastTimerSeconds;
-        private float shootAmt;
-        protected int[] rackOrder8Ball = { 9, 2, 10, 11, 1, 3, 4, 12, 5, 13, 14, 6, 15, 7, 8 };
-        protected int[] rackOrder9Ball = { 2, 3, 4, 5, 9, 6, 7, 8, 1 };
-        protected int[] breakRows9ball = { 0, 1, 2, 1, 0 };
+        protected int[] rackOrder8Ball = {9, 2, 10, 11, 1, 3, 4, 12, 5, 13, 14, 6, 15, 7, 8};
+        protected int[] rackOrder9Ball = {2, 3, 4, 5, 9, 6, 7, 8, 1};
+        protected int[] breakRows9ball = {0, 1, 2, 1, 0};
 
         private float ballShadowOffset;
         private MeshRenderer[] shadowRenders;
@@ -421,12 +426,13 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 return count;
             }
         }
+
         public virtual void Start()
         {
             repoMaxX = TABLE_WIDTH;
             desktopClampX = TABLE_WIDTH;
             desktopClampY = TABLE_HEIGHT;
-            
+
             localPlayer = Networking.LocalPlayer;
             networkingLocalPlayerID = localPlayer.playerId;
             isPlayerInVR = localPlayer.IsUserInVR();
@@ -516,6 +522,10 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             timerText = poolMenu.visibleTimerDuringGame;
             timerOutputFormat = poolMenu.timerOutputFormat;
             timerCountdown = poolMenu.timerCountdown;
+
+            desktopCameraInitialPosition = desktopCamera.transform.localPosition;
+            desktopCameraInitialRotation = desktopCamera.transform.localRotation;
+            initialPowerBarPos = powerBar.transform.localPosition;
         }
 
         public virtual void Update()
@@ -531,7 +541,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             }
             else if (canEnterDesktopTopDownView)
             {
-                if (Input.GetKeyDown(KeyCode.E))
+                if (Input.GetKeyDown(KeyCode.E) || lastInputUseDown)
                 {
                     OnDesktopTopDownViewStart();
                 }
@@ -576,7 +586,8 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
                 if (isArmed)
                 {
-                    copyOfLocalSpacePositionOfCueTip = AimAndHitCueBall(copyOfLocalSpacePositionOfCueTip, cueballPosition);
+                    copyOfLocalSpacePositionOfCueTip =
+                        AimAndHitCueBall(copyOfLocalSpacePositionOfCueTip, cueballPosition);
                 }
                 else
                 {
@@ -632,7 +643,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
             currentBallPositions[0] = temp;
             ballTransforms[0].localPosition = temp;
-            
+
             markerTransform.localPosition = ballTransforms[0].localPosition;
             markerTransform.localRotation = Quaternion.identity;
         }
@@ -890,7 +901,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
             // Get where the cue will strike the ball
             if (IsIntersectingWithSphere(copyOfLocalSpacePositionOfCueTip, cueLocalForwardDirection,
-                cueballPosition))
+                    cueballPosition))
             {
                 if (guideLineEnabled && guideline)
                 {
@@ -937,23 +948,23 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
         protected abstract Vector3 AimAndHitCueBall(Vector3 copyOfLocalSpacePositionOfCueTip, Vector3 cueballPosition);
 
-       private void EnableCustomBallColorSlider(bool enabledState)
-       {
-           if (!ballCustomColours)
-           {
-               return;
-           }
+        private void EnableCustomBallColorSlider(bool enabledState)
+        {
+            if (!ballCustomColours)
+            {
+                return;
+            }
 
-           if (blueTeamSliders)
-           {
-               blueTeamSliders._EnableDisable(enabledState);
-           }
+            if (blueTeamSliders)
+            {
+                blueTeamSliders._EnableDisable(enabledState);
+            }
 
-           if (orangeTeamSliders)
-           {
-               orangeTeamSliders._EnableDisable(enabledState);
-           }
-       }
+            if (orangeTeamSliders)
+            {
+                orangeTeamSliders._EnableDisable(enabledState);
+            }
+        }
 
         private void RemovePlayerFromGame(int playerID)
         {
@@ -1005,13 +1016,13 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             }
 
             Networking.SetOwner(localPlayer, gameObject);
-            timerSecondsPerShot -=5;
+            timerSecondsPerShot -= 5;
 
             if (timerSecondsPerShot <= 0)
             {
                 timerSecondsPerShot = 0;
             }
-                
+
             RefreshNetworkData(false);
         }
 
@@ -1166,10 +1177,14 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             gameMode = 2u;
             RefreshNetworkData(false);
         }
-        
+
         private void Initialize8Ball()
         {
-            ballsArePocketed = new [] { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };
+            ballsArePocketed = new[]
+            {
+                false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
+                false
+            };
 
             for (int i = 0, k = 0; i < 5; i++)
             {
@@ -1186,13 +1201,17 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                     currentAngularVelocities[k] = Vector3.zero;
                 }
             }
+
             TeamColors();
         }
 
         private void Initialize9Ball()
         {
             //ballPocketedState = 0xFC00u;
-            ballsArePocketed = new [] { false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, true };
+            ballsArePocketed = new[]
+            {
+                false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, true
+            };
 
             for (int i = 0, k = 0; i < 5; i++)
             {
@@ -1210,6 +1229,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                     currentAngularVelocities[k] = Vector3.zero;
                 }
             }
+
             UsColors();
         }
 
@@ -1221,7 +1241,8 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         private void Initialize4Ball()
         {
             //ballPocketedState = 0xFDF2u;
-            ballsArePocketed = new [] { false, true, false, false, true, true, true, true, true, false, true, true, true, true, true, true };
+            ballsArePocketed = new[]
+                {false, true, false, false, true, true, true, true, true, false, true, true, true, true, true, true};
 
             currentBallPositions[0] = new Vector3(-SPOT_CAROM_X, 0.0f, 0.0f);
             currentBallPositions[9] = new Vector3(SPOT_CAROM_X, 0.0f, 0.0f);
@@ -1375,7 +1396,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
             poolCues[0]._EnteredFlatscreenPlayerCamera();
             poolCues[1]._EnteredFlatscreenPlayerCamera();
-            
+
             poolMenu._EnteredFlatscreenPlayerCamera(desktopCamera.transform);
             pancakeUI._EnterDesktopTopDownView(desktopCamera);
         }
@@ -1441,6 +1462,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                             {
                                 logger._Log(name, "white ball sunk; foul");
                             }
+
                             foulCondition = true;
                         }
                         // black ball sunk; game over
@@ -1486,7 +1508,8 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                     // Did we hit the correct ball first?
                     if (isBlue) // if blue's turn
                     {
-                        if (!(firstHitBallThisTurn == 1 && winCondition) && (firstHitBallThisTurn < 2 || firstHitBallThisTurn > 8))
+                        if (!(firstHitBallThisTurn == 1 && winCondition) &&
+                            (firstHitBallThisTurn < 2 || firstHitBallThisTurn > 8))
                         {
                             isWrongHit = true;
                         }
@@ -1566,7 +1589,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 if (fourBallCueLeftTable)
                 {
                     Debug.Log("four ball cue left table");
-                    
+
                     currentBallPositions[0] = GetFourBallCueStartingPosition(isTeam2Turn);
                     currentBallVelocities[0] = Vector3.zero;
                     currentAngularVelocities[0] = Vector3.zero;
@@ -1575,11 +1598,11 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                     if (IsCueContacting())
                     {
                         currentBallPositions[0] = GetFourBallCueStartingPosition(!isTeam2Turn);
-                        
+
                         if (IsCueContacting())
                         {
                             currentBallPositions[0] = Vector3.zero;
-                            
+
                             // Let the players fix it
                             isFoul = true;
                         }
@@ -1587,7 +1610,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
                     fourBallCueLeftTable = false;
                 }
-                
+
                 isCorrectBallSunk = isMadePoint;
                 isOpponentColourSunk = isMadeFoul;
                 winCondition = scores[Convert.ToInt32(isTeam2Turn)] >= 10;
@@ -1672,14 +1695,14 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             RequestSerialization();
             ReadNetworkData();
         }
-        
+
         protected void ReadNetworkData()
         {
             if (logger)
             {
                 logger._Log(name, "ReadNetworkData");
             }
-            
+
             UpdateScores();
 
             // Assume the marker is off - one of the On... functions might turn it back on again
@@ -1687,14 +1710,16 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             {
                 marker.SetActive(false);
             }
-            
+
             if (gameID > oldGameID && !isGameInMenus)
             {
                 OnNewGameStarted();
-            } else if (isTeam2Turn != oldIsTeam2Turn)
+            }
+            else if (isTeam2Turn != oldIsTeam2Turn)
             {
                 OnRemoteTurnChange();
-            } else if (!oldIsGameInMenus && isGameInMenus)
+            }
+            else if (!oldIsGameInMenus && isGameInMenus)
             {
                 OnRemoteGameOver();
             }
@@ -1703,7 +1728,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             {
                 ApplyTableColour(isTeam2Turn);
             }
-            
+
             CopyGameStateToOldState();
 
             if (isTableLocked)
@@ -1722,9 +1747,9 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             poolMenu._UpdateMainMenuView(
                 isTeams,
                 isTeam2Turn,
-                (int)gameMode,
+                (int) gameMode,
                 isKorean,
-                (int)timerSecondsPerShot,
+                (int) timerSecondsPerShot,
                 player1ID,
                 player2ID,
                 player3ID,
@@ -1734,8 +1759,6 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
             if (isGameInMenus)
             {
-                lastTimerSeconds = timerSecondsPerShot;
-
                 var numberOfPlayers = 0;
 
                 if (!isTableLocked)
@@ -1770,7 +1793,10 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
             if (isFourBall)
             {
-                ballsArePocketed = new[] { false, true, false, false, true, true, true, true, true, false, true, true, true, true, true, true };
+                ballsArePocketed = new[]
+                {
+                    false, true, false, false, true, true, true, true, true, false, true, true, true, true, true, true
+                };
             }
 
             // Check this every read
@@ -1822,7 +1848,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 isDesktopLocalTurn = true;
 
                 // Reset hit point
-                desktopHitCursor = Vector3.zero;
+                desktopHitPoint = Vector3.zero;
             }
             else
             {
@@ -1853,7 +1879,8 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             }
 
             // sanitize old cue tip location data to prevent stale data from causing unintended effects.
-            localSpacePositionOfCueTipLastFrame = tableSurface.transform.InverseTransformPoint(cueTip.transform.position);
+            localSpacePositionOfCueTipLastFrame =
+                tableSurface.transform.InverseTransformPoint(cueTip.transform.position);
         }
 
         private void OnNewGameStarted()
@@ -1903,7 +1930,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             // is a late-joiner.
             hasRunSyncOnce = false;
         }
-        
+
         private void TeamColors()
         {
             ballColors[0] = Color.white;
@@ -1912,12 +1939,13 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             {
                 ballColors[i] = tableBlue;
             }
+
             for (int i = 9; i < NUMBER_OF_SIMULATED_BALLS; i++)
             {
                 ballColors[i] = tableOrange;
             }
         }
-        
+
         private void UsColors()
         {
             // Set colors
@@ -1945,7 +1973,6 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             ballColors[9] = Color.yellow;
             ballColors[2] = Color.red;
             ballColors[3] = Color.red;
-
         }
 
         /// <summary>
@@ -2135,7 +2162,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 {
                     cue._Respawn(true);
                 }
-                
+
                 if (slogger)
                 {
                     slogger.OscReportGameReset(latestResetReason);
@@ -2146,7 +2173,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 poolMenu._TeamWins(isTeam2Winner);
                 PlayAudioClip(winnerSfx);
             }
-            
+
             if (marker9ball)
             {
                 marker9ball.SetActive(false);
@@ -2181,7 +2208,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             poolMenu._UpdateMainMenuView(
                 isTeams,
                 isTeam2Turn,
-                (int)gameMode,
+                (int) gameMode,
                 isKorean,
                 timerSecondsPerShot,
                 player1ID,
@@ -2197,7 +2224,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             {
                 cue._Respawn(true);
             }
-            
+
             EnableCustomBallColorSlider(false);
         }
 
@@ -2268,7 +2295,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                     if (marker)
                     {
                         marker.SetActive(true);
-                        ((VRC_Pickup)marker.gameObject.GetComponent(typeof(VRC_Pickup))).pickupable = true;
+                        ((VRC_Pickup) marker.gameObject.GetComponent(typeof(VRC_Pickup))).pickupable = true;
                         markerTransform.localPosition = currentBallPositions[0];
                     }
                 }
@@ -2276,7 +2303,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 {
                     marker.SetActive(true);
                     markerTransform.localPosition = currentBallPositions[0];
-                    ((VRC_Pickup)marker.gameObject.GetComponent(typeof(VRC_Pickup))).pickupable = false;
+                    ((VRC_Pickup) marker.gameObject.GetComponent(typeof(VRC_Pickup))).pickupable = false;
                 }
             }
 
@@ -2335,7 +2362,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             is8Ball = gameMode == 0u;
             isNineBall = gameMode == 1u;
             isFourBall = gameMode == 2u;
-            
+
             // Cue ball
             currentBallPositions[0] = new Vector3(-SPOT_POSITION_X, 0.0f, 0.0f);
             currentBallVelocities[0] = Vector3.zero;
@@ -2679,7 +2706,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             oldIsGameInMenus = isGameInMenus;
             oldGameID = gameID;
             oldIsTeam2Turn = isTeam2Turn;
-            
+
             for (int i = 0; i < NUMBER_OF_SIMULATED_BALLS; i++)
             {
                 oldBallsArePocketed[i] = ballsArePocketed[i];
@@ -2696,7 +2723,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             {
                 OnDesktopTopDownViewStart();
             }
-            
+
             Debug.Log("amogus");
         }
 
@@ -2733,7 +2760,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                     cue._Respawn(false);
                 }
             }
-            
+
             poolMenu._LeftFlatscreenPlayerCamera();
             pancakeUI._ExitDesktopTopDownView();
         }
@@ -2768,9 +2795,9 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             _EndHit();
             isPlayerAllowedToPlay = false;
             isFoul = false; // In case did not drop foul marker
-            
+
             float vol = Mathf.Clamp(currentBallVelocities[0].magnitude * 0.1f, 0f, 1f);
-            
+
             cueTipSrc.transform.SetPositionAndRotation(cueTip.transform.position, new Quaternion());
             cueTipSrc.PlayOneShot(hitBallSfx, vol);
 
@@ -2785,31 +2812,92 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             isSimulatedByUs = true;
         }
 
+        // TODO: Yes this should be at the top of the file but I've not worked on this code for 24 months and am lazy.
+        private Vector3 desktopCameraInitialPosition;
+        private Quaternion desktopCameraInitialRotation;
+        private float lastLookHorizontal;
+        private float lastLookVertical;
+        private bool lastInputUseDown;
+        private float inputHeldDownTime;
+        private float desktopShootForce;
+        private const float desktopShotPowerMult = 0.15f;
+        public GameObject powerBar;
+        public GameObject topBar;
+        public Vector3 initialPowerBarPos;
+
+        public override void InputUse(bool value, VRC.Udon.Common.UdonInputEventArgs args)
+        {
+            lastInputUseDown = value;
+        }
+
+        public override void InputLookHorizontal(float value, VRC.Udon.Common.UdonInputEventArgs args)
+        {
+            lastLookHorizontal = value;
+        }
+        
+        public override void InputLookVertical(float value, VRC.Udon.Common.UdonInputEventArgs args)
+        {
+            lastLookVertical = value;
+        }
+        
+        // function RotatePointAroundPivot(point: Vector3, pivot: Vector3, angles: Vector3): Vector3 {
+        //     var dir: Vector3 = point - pivot; // get point direction relative to pivot
+        //     dir = Quaternion.Euler(angles) * dir; // rotate it
+        //     point = dir + pivot; // calculate rotated point
+        //     return point; // return it
+        // }
+
         // TODO: Single use function, but it short-circuits so cannot be easily put into its using function.
         private void HandleUpdatingDesktopViewUI()
         {
+            #if UNITY_ANDROID
+                lastLookHorizontal *= 3;
+                lastLookVertical *= 3;
+            #endif
+            
             if (isEnteringDesktopModeThisFrame)
             {
                 isEnteringDesktopModeThisFrame = false;
+
                 return;
             }
+            
+            if (Input.GetKey(KeyCode.W))
+                desktopHitPoint += Vector3.forward * Time.smoothDeltaTime;
 
-            deskTopCursor.x = Mathf.Clamp
-            (
-                deskTopCursor.x + (Input.GetAxis("Mouse X") * DESKTOP_CURSOR_SPEED),
-                -desktopClampX,
-                desktopClampX
-            );
-            deskTopCursor.z = Mathf.Clamp
-            (
-                deskTopCursor.z + (Input.GetAxis("Mouse Y") * DESKTOP_CURSOR_SPEED),
-                -desktopClampY,
-                desktopClampY
-            );
+            if (Input.GetKey(KeyCode.S))
+                desktopHitPoint += Vector3.back * Time.smoothDeltaTime;
 
-            if (isDesktopLocalTurn)
+            if (Input.GetKey(KeyCode.A))
+                desktopHitPoint += Vector3.left * Time.smoothDeltaTime;
+
+            if (Input.GetKey(KeyCode.D))
+                desktopHitPoint += Vector3.right * Time.smoothDeltaTime;
+
+            if (Input.GetKey(KeyCode.UpArrow))
+                lastLookVertical = desktopAngleIncrement * Time.smoothDeltaTime; //desktopAngle += desktopAngleIncrement * Time.smoothDeltaTime;
+
+            if (Input.GetKey(KeyCode.DownArrow))
+                lastLookVertical = -desktopAngleIncrement * Time.smoothDeltaTime; // desktopAngle -= desktopAngleIncrement * Time.smoothDeltaTime;
+
+            if (Input.GetKey(KeyCode.LeftArrow))
+                lastLookHorizontal = -0.25f;
+                
+            if (Input.GetKey(KeyCode.RightArrow))
+                lastLookHorizontal = 0.25f;
+            
+            var dir = desktopAimPoint - currentBallPositions[0];
+            dir = Quaternion.Euler(new Vector3(0f, lastLookHorizontal, 0f)) * dir;
+            desktopAimPoint = dir + currentBallPositions[0];
+
+            if (!isDesktopLocalTurn)
             {
-                Vector3 ncursor = deskTopCursor;
+                desktopCamera.transform.SetLocalPositionAndRotation(desktopCameraInitialPosition,
+                    desktopCameraInitialRotation);
+            }
+            else
+            {
+                Vector3 ncursor = desktopAimPoint;
                 ncursor.y = 0.0f;
                 Vector3 delta = ncursor - currentBallPositions[0];
                 newDesktopCue = Convert.ToUInt32(isTeam2Turn);
@@ -2821,8 +2909,10 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                     oldDesktopCue = newDesktopCue;
                 }
 
-                if (Input.GetButton("Fire1"))
+                if (lastInputUseDown)
                 {
+                    inputHeldDownTime = Mathf.Clamp(inputHeldDownTime, 0.0f, 0.5f);
+
                     if (!isDesktopShootingIn)
                     {
                         isDesktopShootingIn = true;
@@ -2830,34 +2920,26 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                         // Create shooting vector
                         desktopShootVector = delta.normalized;
 
-                        // Project reference start point
-                        desktopShootReference = Vector3.Dot(desktopShootVector, ncursor);
-
                         // Create copy of cursor for later
-                        desktopSafeRemovePoint = deskTopCursor;
+                        desktopSafeRemovePoint = desktopAimPoint;
 
                         // Unlock cursor position from table
                         desktopClampX = Mathf.Infinity;
                         desktopClampY = Mathf.Infinity;
                     }
 
-                    // Calculate shoot amount via projection
-                    shootAmt = desktopShootReference - Vector3.Dot(desktopShootVector, ncursor);
-                    isDesktopSafeRemove = shootAmt < 0.0f;
-
-                    shootAmt = Mathf.Clamp(shootAmt, 0.0f, 0.5f);
+                    // Calculate shoot amount;
+                    desktopShootForce += Time.smoothDeltaTime * desktopShotPowerMult;
+                    isDesktopSafeRemove = desktopShootForce < 0.0f;
+                    desktopShootForce = Mathf.Clamp(desktopShootForce, 0.0f, 0.5f);
 
                     // Set delta back to dkShootVector
                     delta = desktopShootVector;
-
-                    // Disable cursor in shooting mode
-                    if (desktopCursorObject)
-                    {
-                        desktopCursorObject.SetActive(false);
-                    }
                 }
                 else
                 {
+                    inputHeldDownTime = 0;
+
                     // Trigger shot
                     if (isDesktopShootingIn)
                     {
@@ -2865,11 +2947,11 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                         if (!isDesktopSafeRemove)
                         {
                             isDesktopLocalTurn = false;
-                            HitBallWithCue(cueTip.transform.forward, Mathf.Pow(shootAmt * 2.0f, 1.4f) * 7.0f);
+                            HitBallWithCue(cueTip.transform.forward, Mathf.Pow(desktopShootForce * 2.0f, 1.4f) * 7.0f);
                         }
 
                         // Restore cursor position
-                        deskTopCursor = desktopSafeRemovePoint;
+                        desktopAimPoint = desktopSafeRemovePoint;
                         desktopClampX = TABLE_WIDTH;
                         desktopClampY = TABLE_HEIGHT;
 
@@ -2878,73 +2960,43 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                     }
 
                     isDesktopShootingIn = false;
-                    shootAmt = 0.0f;
-
-                    if (desktopCursorObject)
-                    {
-                        desktopCursorObject.SetActive(true);
-                    }
+                    desktopShootForce = 0.0f;
                 }
 
-                if (Input.GetKey(KeyCode.W))
-                {
-                    desktopHitCursor += Vector3.forward * Time.deltaTime;
-                }
-
-                if (Input.GetKey(KeyCode.S))
-                {
-                    desktopHitCursor += Vector3.back * Time.deltaTime;
-                }
-
-                if (Input.GetKey(KeyCode.A))
-                {
-                    desktopHitCursor += Vector3.left * Time.deltaTime;
-                }
-
-                if (Input.GetKey(KeyCode.D))
-                {
-                    desktopHitCursor += Vector3.right * Time.deltaTime;
-                }
-
-                if (Input.GetKey(KeyCode.UpArrow))
-                {
-                    desktopAngle += desktopAngleIncrement * Time.deltaTime;
-                }
-                
-                if (Input.GetKey(KeyCode.DownArrow))
-                {
-                    desktopAngle -= desktopAngleIncrement * Time.deltaTime;
-                }
-                
-                desktopAngle = Mathf.Clamp(desktopAngle, MIN_DESKTOP_CUE_ANGLE, MAX_DESKTOP_CUE_ANGLE);
+                desktopAngle = Mathf.Clamp(desktopAngle + lastLookVertical, MIN_DESKTOP_CUE_ANGLE, MAX_DESKTOP_CUE_ANGLE);
 
                 if (tiltAmount)
-                {
-                    tiltAmount.fillAmount = Mathf.InverseLerp(MIN_DESKTOP_CUE_ANGLE, MAX_DESKTOP_CUE_ANGLE, desktopAngle);
-                }
+                    tiltAmount.fillAmount =
+                        Mathf.InverseLerp(MIN_DESKTOP_CUE_ANGLE, MAX_DESKTOP_CUE_ANGLE, desktopAngle);
 
                 // Clamp in circle
-                if (desktopHitCursor.magnitude > 0.90f)
-                {
-                    desktopHitCursor = desktopHitCursor.normalized * 0.9f;
-                }
+                if (desktopHitPoint.magnitude > 0.90f)
+                    desktopHitPoint = desktopHitPoint.normalized * 0.9f;
 
-                desktopHitPosition.transform.localPosition = desktopHitCursor;
+                desktopHitPosition.transform.localPosition = desktopHitPoint;
 
                 // Create rotation
                 Quaternion xr = Quaternion.AngleAxis(desktopAngle, Vector3.right);
                 Quaternion r = Quaternion.AngleAxis(Mathf.Atan2(delta.x, delta.z) * Mathf.Rad2Deg, Vector3.up);
 
-                Vector3 worldHit = new Vector3(desktopHitCursor.x * BALL_PL_X, desktopHitCursor.z * BALL_PL_X,
-                    -0.89f - shootAmt);
+                Vector3 worldHit = new Vector3(desktopHitPoint.x * BALL_PL_X, desktopHitPoint.z * BALL_PL_X,
+                    -0.89f - desktopShootForce);
 
                 cue.transform.localRotation = r * xr;
                 cue.transform.position =
                     tableSurface.transform.TransformPoint(currentBallPositions[0] + (r * xr * worldHit));
+
+                desktopCamera.transform.position = cue.transform.position;
+                desktopCamera.transform.localRotation = cue.transform.localRotation;
             }
 
-            desktopCursorObject.transform.localPosition = deskTopCursor;
-            desktopOverlayPower.transform.localScale = new Vector3(1.0f - (shootAmt * 2.0f), 1.0f, 1.0f);
+            Vector3 powerBarPos = powerBar.transform.localPosition;
+            powerBarPos.x = Mathf.Lerp(initialPowerBarPos.x, topBar.transform.localPosition.x,
+                desktopShootForce * 2.0f);
+            powerBar.transform.localPosition = powerBarPos;
+
+            lastLookHorizontal = 0.0f;
+            lastLookVertical = 0.0f;
         }
 
         private void UpdateScores()
@@ -2955,14 +3007,14 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
                 return;
             }
-            
+
             if (isNineBall)
             {
                 ReportNineBallScore();
 
                 return;
             }
-            
+
             ReportEightBallScore();
         }
 
@@ -2972,7 +3024,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             {
                 logger._Log(name, "ReportEightBallScore");
             }
-            
+
             int sunkBlues = 0;
             int sunkOranges = 0;
 
@@ -2991,7 +3043,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                     sunkOranges++;
                 }
             }
-            
+
             if (isGameInMenus)
             {
                 if (isTeam2Winner && ballsArePocketed[1])
@@ -3012,7 +3064,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
             poolMenu._SetScore(false, teamAScore);
             poolMenu._SetScore(true, teamBScore);
-            
+
             if (slogger)
             {
                 slogger.OscReportScoresUpdated(isGameOver, turnID, teamAScore, isFoul, teamBScore);
@@ -3025,14 +3077,14 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             {
                 logger._Log(name, "ReportNineBallScore");
             }
-            
+
             poolMenu._SetScore(false, -1);
             poolMenu._SetScore(true, -1);
-            
+
             if (slogger)
             {
                 bool gameOver = false;
-         
+
                 if (isGameInMenus)
                 {
                     if (ballsArePocketed[1])
@@ -3040,7 +3092,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                         gameOver = true;
                     }
                 }
-                
+
                 slogger.OscReportScoresUpdated(gameOver, turnID, -1, isFoul, -1);
             }
         }
@@ -3051,13 +3103,14 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             {
                 logger._Log(name, "ReportFourBallScore");
             }
-            
+
             poolMenu._SetScore(false, scores[0]);
             poolMenu._SetScore(true, scores[1]);
-            
+
             if (slogger)
             {
-                slogger.OscReportScoresUpdated(scores[0] >= 10 || scores[1] >= 10, turnID, scores[0], isFoul, scores[1]);
+                slogger.OscReportScoresUpdated(scores[0] >= 10 || scores[1] >= 10, turnID, scores[0], isFoul,
+                    scores[1]);
             }
         }
 
@@ -3096,7 +3149,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 _Reset(ResetReason.PlayerLeft);
             }
         }
-        
+
         /// <Summary> Is the local player near the table? </Summary>
         private bool isNearTable;
 
@@ -3104,7 +3157,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         private bool canEnterDesktopTopDownView;
 
         [HideInInspector] public ushort numberOfCuesHeldByLocalPlayer;
-        
+
         private int ClothColour = Shader.PropertyToID("_ClothColour");
         private int MainTex = Shader.PropertyToID("_MainTex");
 
@@ -3114,7 +3167,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             {
                 return;
             }
-            
+
             isNearTable = true;
             CheckIfCanEnterDesktopTopDownView();
         }
@@ -3147,7 +3200,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             {
                 return;
             }
-            
+
             canEnterDesktopTopDownView = true;
 
             if (pancakeUI)
@@ -3219,9 +3272,9 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 int clip = UnityEngine.Random.Range(0, hitsSfx.Length - 1);
                 float vol = Mathf.Clamp01(currentBallVelocities[ballID].magnitude * reflection.magnitude);
                 ballPoolTransforms[ballID].position = ballTransforms[ballID].position;
-                ballPool[ballID].PlayOneShot(hitsSfx[clip], vol);    
+                ballPool[ballID].PlayOneShot(hitsSfx[clip], vol);
             }
-            
+
             if (ballID != 0)
             {
                 return;
@@ -3276,7 +3329,8 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
                         secondBallHitThisTurn = otherBallID;
 
-                        Debug.Log($"Scoring a point due to hitting balls {firstHitBallThisTurn} and {secondBallHitThisTurn}");
+                        Debug.Log(
+                            $"Scoring a point due to hitting balls {firstHitBallThisTurn} and {secondBallHitThisTurn}");
                         OnLocalCaromPoint(ballTransforms[otherBallID]);
                     }
                     else if (thirdBallHitThisTurn == 0)
@@ -3287,7 +3341,8 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                         }
 
                         thirdBallHitThisTurn = otherBallID;
-                        Debug.Log($"Scoring a point due to hitting balls {firstHitBallThisTurn} and {secondBallHitThisTurn} and {thirdBallHitThisTurn}");
+                        Debug.Log(
+                            $"Scoring a point due to hitting balls {firstHitBallThisTurn} and {secondBallHitThisTurn} and {thirdBallHitThisTurn}");
                         OnLocalCaromPoint(ballTransforms[otherBallID]);
                     }
                 }
@@ -3297,6 +3352,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 firstHitBallThisTurn = otherBallID;
             }
         }
+
         private void PlayAudioClip(AudioClip clip)
         {
             if (clip == null)

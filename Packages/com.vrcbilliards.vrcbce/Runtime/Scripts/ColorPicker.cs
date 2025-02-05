@@ -1,13 +1,8 @@
-﻿
-using System;
-using UdonSharp;
+﻿using UdonSharp;
 using UnityEngine;
 using UnityEngine.Serialization;
 using VRC.SDKBase;
-using VRC.Udon;
 using UnityEngine.UI;
-using VRC.Udon.Common.Interfaces;
-using VRCBilliards;
 
 namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 {
