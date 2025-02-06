@@ -1118,6 +1118,9 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             // Unrotate result
             currentBallVelocities[id] += rb * V1;
             currentAngularVelocities[id] += rb * W1;
+
+            if (id == 0) 
+                cushionsHitThisTurn++;
         }
         
         void CheckIfBallsArePocketed(int id)

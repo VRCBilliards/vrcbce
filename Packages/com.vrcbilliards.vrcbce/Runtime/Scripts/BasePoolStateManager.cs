@@ -77,12 +77,17 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
         [UdonSynced] private uint turnID;
         [UdonSynced] private bool isRepositioningCueBall;
-        [UdonSynced] private bool isKorean;
+
         [UdonSynced] private int[] scores = new int[2];
         [UdonSynced] protected Vector3[] currentBallPositions = new Vector3[NUMBER_OF_SIMULATED_BALLS];
         [UdonSynced] protected Vector3[] currentBallVelocities = new Vector3[NUMBER_OF_SIMULATED_BALLS];
         [UdonSynced] protected Vector3[] currentAngularVelocities = new Vector3[NUMBER_OF_SIMULATED_BALLS];
-        [UdonSynced] protected uint gameMode;
+        
+        // TODO: These gameMode vars are sloppy and are a good candidate for a refactor into one value, and really
+        // this can just be a string.
+        [UdonSynced] protected uint gameMode; // 0 = 8ball, 1 = 9ball, 2 = Carom
+        [UdonSynced] private bool isKorean; // False = Japanese 4-Ball Carom, True = Korean 4-Ball Carom
+        [UdonSynced] private bool isThreeCushionCarom; 
         [UdonSynced] private int player1ID;
         [UdonSynced] private int player2ID;
         [UdonSynced] private int player3ID;
@@ -293,9 +298,15 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         /// The first ball to be hit by cue ball
         /// </summary>
         private int firstHitBallThisTurn;
+        
+        // TODO: This would be a good option.
+
+        [Range(10, 50), Tooltip("How many points do your players need to win a carom game? This is the same for all carom variants.")] 
+        public int scoreNeededToWinCarom = 10;
 
         private int secondBallHitThisTurn;
         private int thirdBallHitThisTurn;
+        protected int cushionsHitThisTurn;
 
         /// <summary>
         /// If the simulation was initiated by us, only set from update
@@ -1158,10 +1169,28 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             Networking.SetOwner(localPlayer, gameObject);
 
             isKorean = false;
+            isThreeCushionCarom = false;
 
             gameMode = 2u;
             RefreshNetworkData(false);
         }
+        
+        public void _SelectThreeCushionCarom()
+        {
+            if (logger)
+            {
+                logger._Log(name, "SelectThreeCushionCarom");
+            }
+
+            Networking.SetOwner(localPlayer, gameObject);
+
+            isKorean = false;
+            isThreeCushionCarom = true;
+
+            gameMode = 2u;
+            RefreshNetworkData(false);
+        }
+
 
         public void _Select4BallKorean()
         {
@@ -1173,6 +1202,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             Networking.SetOwner(localPlayer, gameObject);
 
             isKorean = true;
+            isThreeCushionCarom = false;
 
             gameMode = 2u;
             RefreshNetworkData(false);
@@ -1613,7 +1643,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
                 isCorrectBallSunk = isMadePoint;
                 isOpponentColourSunk = isMadeFoul;
-                winCondition = scores[Convert.ToInt32(isTeam2Turn)] >= 10;
+                winCondition = scores[Convert.ToInt32(isTeam2Turn)] >= scoreNeededToWinCarom;
             }
             else
             {
@@ -1749,6 +1779,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 isTeam2Turn,
                 (int) gameMode,
                 isKorean,
+                isThreeCushionCarom,
                 (int) timerSecondsPerShot,
                 player1ID,
                 player2ID,
@@ -1814,6 +1845,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             firstHitBallThisTurn = 0;
             secondBallHitThisTurn = 0;
             thirdBallHitThisTurn = 0;
+            cushionsHitThisTurn = 0;
 
             hasRunSyncOnce = true;
         }
@@ -2210,6 +2242,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 isTeam2Turn,
                 (int) gameMode,
                 isKorean,
+                isThreeCushionCarom,
                 timerSecondsPerShot,
                 player1ID,
                 player2ID,
@@ -2827,25 +2860,38 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
         public override void InputUse(bool value, VRC.Udon.Common.UdonInputEventArgs args)
         {
+            if (!isInDesktopTopDownView)
+            {
+                if (canEnterDesktopTopDownView)
+                {
+                    OnDesktopTopDownViewStart();
+                }
+                
+                return;
+            }
+            
             lastInputUseDown = value;
         }
 
         public override void InputLookHorizontal(float value, VRC.Udon.Common.UdonInputEventArgs args)
         {
+            if (!isInDesktopTopDownView)
+            {
+                return;
+            }
+            
             lastLookHorizontal = value;
         }
         
         public override void InputLookVertical(float value, VRC.Udon.Common.UdonInputEventArgs args)
         {
+            if (!isInDesktopTopDownView)
+            {
+                return;
+            }
+            
             lastLookVertical = value;
         }
-        
-        // function RotatePointAroundPivot(point: Vector3, pivot: Vector3, angles: Vector3): Vector3 {
-        //     var dir: Vector3 = point - pivot; // get point direction relative to pivot
-        //     dir = Quaternion.Euler(angles) * dir; // rotate it
-        //     point = dir + pivot; // calculate rotated point
-        //     return point; // return it
-        // }
 
         // TODO: Single use function, but it short-circuits so cannot be easily put into its using function.
         private void HandleUpdatingDesktopViewUI()
@@ -3280,76 +3326,129 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 return;
             }
 
-            if (isFourBall)
+            if (gameMode == 2u)
             {
                 if (isKorean)
                 {
-                    if (otherBallID == 9)
-                    {
-                        if (isMadeFoul)
-                        {
-                            return;
-                        }
-
-                        isMadeFoul = true;
-                        scores[Convert.ToUInt32(isTeam2Turn)]--;
-
-                        if (scores[Convert.ToUInt32(isTeam2Turn)] < 0)
-                        {
-                            scores[Convert.ToUInt32(isTeam2Turn)] = 0;
-                        }
-
-                        SpawnMinusOne(ballTransforms[otherBallID]);
-                    }
-                    else if (firstHitBallThisTurn == 0)
-                    {
-                        firstHitBallThisTurn = otherBallID;
-                    }
-                    else if (otherBallID != firstHitBallThisTurn)
-                    {
-                        if (secondBallHitThisTurn == 0)
-                        {
-                            secondBallHitThisTurn = otherBallID;
-                            OnLocalCaromPoint(ballTransforms[otherBallID]);
-                        }
-                    }
+                    HandleKorean4BallScoring(otherBallID);
+                } 
+                else if (isThreeCushionCarom)
+                {
+                    HandleThreeCushionCarom(otherBallID);
                 }
                 else
                 {
-                    if (firstHitBallThisTurn == 0)
-                    {
-                        firstHitBallThisTurn = otherBallID;
-                    }
-                    else if (secondBallHitThisTurn == 0)
-                    {
-                        if (otherBallID == firstHitBallThisTurn)
-                        {
-                            return;
-                        }
-
-                        secondBallHitThisTurn = otherBallID;
-
-                        Debug.Log(
-                            $"Scoring a point due to hitting balls {firstHitBallThisTurn} and {secondBallHitThisTurn}");
-                        OnLocalCaromPoint(ballTransforms[otherBallID]);
-                    }
-                    else if (thirdBallHitThisTurn == 0)
-                    {
-                        if (otherBallID == firstHitBallThisTurn || otherBallID == secondBallHitThisTurn)
-                        {
-                            return;
-                        }
-
-                        thirdBallHitThisTurn = otherBallID;
-                        Debug.Log(
-                            $"Scoring a point due to hitting balls {firstHitBallThisTurn} and {secondBallHitThisTurn} and {thirdBallHitThisTurn}");
-                        OnLocalCaromPoint(ballTransforms[otherBallID]);
-                    }
+                    HandleJapanese4BallScoring(otherBallID);
                 }
+            }
+
+
+            else if (firstHitBallThisTurn == 0)
+            {
+                firstHitBallThisTurn = otherBallID;
+            }
+        }
+
+        private void HandleJapanese4BallScoring(int otherBallID)
+        {
+            if (firstHitBallThisTurn == 0)
+            {
+                firstHitBallThisTurn = otherBallID;
+            }
+            else if (secondBallHitThisTurn == 0)
+            {
+                if (otherBallID == firstHitBallThisTurn)
+                {
+                    return;
+                }
+
+                secondBallHitThisTurn = otherBallID;
+
+                Debug.Log(
+                    $"Scoring a point due to hitting balls {firstHitBallThisTurn} and {secondBallHitThisTurn}");
+                OnLocalCaromPoint(ballTransforms[otherBallID]);
+            }
+            else if (thirdBallHitThisTurn == 0)
+            {
+                if (otherBallID == firstHitBallThisTurn || otherBallID == secondBallHitThisTurn)
+                {
+                    return;
+                }
+
+                thirdBallHitThisTurn = otherBallID;
+                Debug.Log(
+                    $"Scoring a point due to hitting balls {firstHitBallThisTurn} and {secondBallHitThisTurn} and {thirdBallHitThisTurn}");
+                OnLocalCaromPoint(ballTransforms[otherBallID]);
+            }
+        }
+
+        private void HandleKorean4BallScoring(int otherBallID)
+        {
+            if (otherBallID == 9)
+            {
+                if (isMadeFoul)
+                {
+                    return;
+                }
+
+                isMadeFoul = true;
+                scores[Convert.ToUInt32(isTeam2Turn)]--;
+
+                if (scores[Convert.ToUInt32(isTeam2Turn)] < 0)
+                {
+                    scores[Convert.ToUInt32(isTeam2Turn)] = 0;
+                }
+
+                SpawnMinusOne(ballTransforms[otherBallID]);
             }
             else if (firstHitBallThisTurn == 0)
             {
                 firstHitBallThisTurn = otherBallID;
+            }
+            else if (otherBallID != firstHitBallThisTurn)
+            {
+                if (secondBallHitThisTurn == 0)
+                {
+                    secondBallHitThisTurn = otherBallID;
+                    OnLocalCaromPoint(ballTransforms[otherBallID]);
+                }
+            }
+        }
+
+        private void HandleThreeCushionCarom(int otherBallID)
+        {
+            // Three cushion billiards is a normal carom game with one exception: you need to hit THREE cushions during
+            // your carom shot (before you hit the second object ball) for a score to count. It is an extremely hard
+            // game.
+            
+            if (otherBallID == 9)
+            {
+                if (isMadeFoul)
+                {
+                    return;
+                }
+
+                // Note we do not penalize in this game. This game is already stupidly hard.
+                isMadeFoul = true;
+            }
+            else if (firstHitBallThisTurn == 0)
+            {
+                firstHitBallThisTurn = otherBallID;
+            }
+            else if (otherBallID != firstHitBallThisTurn && secondBallHitThisTurn == 0)
+            {
+                secondBallHitThisTurn = otherBallID;
+
+                if (cushionsHitThisTurn < 3)
+                {
+                    Debug.Log($"Not scoring a point despite hitting {firstHitBallThisTurn} and {secondBallHitThisTurn}: only hit {cushionsHitThisTurn} cushions");
+
+                    return;
+                }
+                
+                Debug.Log($"Scoring a point by hitting {firstHitBallThisTurn} and {secondBallHitThisTurn}: hit {cushionsHitThisTurn} cushions");
+                
+                OnLocalCaromPoint(ballTransforms[otherBallID]);
             }
         }
 

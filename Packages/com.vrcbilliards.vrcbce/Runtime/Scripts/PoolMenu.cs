@@ -41,6 +41,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         public string uSA9BallString = "American 9-Ball";
         public string jP4BallString = "Japanese 4-Ball";
         public string kN4BallString = "Korean 4-Ball";
+        public string threeCushionCaromString = "Three Cushion Carom";
         
         [Header("Guide Line")]
         public bool toggleGuideLineButtonsActive = true;
@@ -162,6 +163,11 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         public void _Select4BallKorean()
         {
             manager._Select4BallKorean();
+        }
+        
+        public void _SelectThreeCushionCarom()
+        {
+            manager._SelectThreeCushionCarom();
         }
 
         public void _Select8Ball()
@@ -318,6 +324,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             bool isTeam2Playing,
             int gameMode,
             bool isKorean4Ball,
+            bool isThreeBallCarom,
             int timeSeconds,
             int player1ID,
             int player2ID,
@@ -356,6 +363,11 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                     {
                         if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = kN4BallString;
                         UpdateButtonColors(gameModeButtons, 3);
+                    }
+                    else if (isThreeBallCarom)
+                    {
+                        if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = threeCushionCaromString;
+                        UpdateButtonColors(gameModeButtons, 2);
                     }
                     else
                     {
