@@ -106,7 +106,6 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts.Compon
             }
             
             cam.transform.SetPositionAndRotation(camPos, camRot);
-            cam.orthographic = true;
         }
     }
 }

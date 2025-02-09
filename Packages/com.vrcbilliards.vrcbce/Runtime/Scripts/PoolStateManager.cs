@@ -1,5 +1,7 @@
 using UdonSharp;
 using UnityEngine;
+using VRC.Udon.Common.Enums;
+
 // ReSharper disable InconsistentNaming
 
 // ReSharper disable CheckNamespace
@@ -22,13 +24,13 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         private float BALL_DIAMETER_SQUARED_MINUS_EPSILON;
         private float ballRadius;
         private float ONE_OVER_BALL_RADIUS;
-        public float EARTH_GRAVITY = 9.80665f;             // Earth's gravitational acceleration
+        public float EARTH_GRAVITY = 9.80665f; // Earth's gravitational acceleration
         private float BALL_DIAMETER_SQUARED;
         private float BALL_RADIUS_SQUARED;
         public float MASS_OF_BALL = 0.165f; // Weight of ball in kg
         private float POCKET_INNER_RADIUS_SQUARED;
         public Vector3 CONTACT_POINT = new Vector3(0.0f, -0.03f, 0.0f);
-        
+
         // Cue input tracking
         private const float SIN_A = 0.28078832987f;
         private const float COS_A = 0.95976971915f;
@@ -67,41 +69,43 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         [SerializeField] private bool showEditorDebugCarom;
         [SerializeField] private bool showEditorDebug8ball;
         [SerializeField] private bool showEditorDebug9Ball;
-        
+
+        private bool enableVerboseLogging = false;
+
         public void OnDrawGizmos()
         {
 #if UNITY_EDITOR
             var margin = (ballRadius * 2);
-            
+
             CalculateTableCollisionConstants();
 
             Gizmos.matrix = transform.localToWorldMatrix;
-            
+
             if (showEditorDebugBoundaries)
             {
                 // The bounds of table collision, minus any further geometry.
                 // Keep in mind that collision is calculated from the centre of balls.
                 Gizmos.color = Color.cyan;
-                Gizmos.DrawWireCube(Vector3.zero, new Vector3(TABLE_WIDTH*2, 0, TABLE_HEIGHT*2));
+                Gizmos.DrawWireCube(Vector3.zero, new Vector3(tableWidth * 2, 0, tableHeight * 2));
                 Gizmos.color = Color.blue;
-                Gizmos.DrawWireCube(Vector3.zero, new Vector3(TABLE_WIDTH*2 - margin, 0, TABLE_HEIGHT*2 - margin));
-                
+                Gizmos.DrawWireCube(Vector3.zero, new Vector3(tableWidth * 2 - margin, 0, tableHeight * 2 - margin));
+
                 Gizmos.color = Color.red;
-                Gizmos.DrawWireSphere(CORNER_POCKET, POCKET_INNER_RADIUS);
-                Gizmos.DrawWireSphere(MIDDLE_POCKET, POCKET_INNER_RADIUS);
-                Gizmos.DrawWireSphere(-CORNER_POCKET, POCKET_INNER_RADIUS);
-                Gizmos.DrawWireSphere(-MIDDLE_POCKET, POCKET_INNER_RADIUS);
-                Gizmos.DrawWireSphere(new Vector3(-CORNER_POCKET.x, 0, CORNER_POCKET.z), POCKET_INNER_RADIUS);
-                Gizmos.DrawWireSphere(new Vector3(CORNER_POCKET.x, 0, -CORNER_POCKET.z), POCKET_INNER_RADIUS);
-                
+                Gizmos.DrawWireSphere(cornerPocket, pocketInnerRadius);
+                Gizmos.DrawWireSphere(middlePocket, pocketInnerRadius);
+                Gizmos.DrawWireSphere(-cornerPocket, pocketInnerRadius);
+                Gizmos.DrawWireSphere(-middlePocket, pocketInnerRadius);
+                Gizmos.DrawWireSphere(new Vector3(-cornerPocket.x, 0, cornerPocket.z), pocketInnerRadius);
+                Gizmos.DrawWireSphere(new Vector3(cornerPocket.x, 0, -cornerPocket.z), pocketInnerRadius);
+
                 Gizmos.color = Color.yellow;
-                Gizmos.DrawWireSphere(CORNER_POCKET, POCKET_RADIUS);
-                Gizmos.DrawWireSphere(MIDDLE_POCKET, POCKET_RADIUS);
-                Gizmos.DrawWireSphere(-CORNER_POCKET, POCKET_RADIUS);
-                Gizmos.DrawWireSphere(-MIDDLE_POCKET, POCKET_RADIUS);
-                Gizmos.DrawWireSphere(new Vector3(-CORNER_POCKET.x, 0, CORNER_POCKET.z), POCKET_RADIUS);
-                Gizmos.DrawWireSphere(new Vector3(CORNER_POCKET.x, 0, -CORNER_POCKET.z), POCKET_RADIUS);
-                
+                Gizmos.DrawWireSphere(cornerPocket, pocketOuterRadius);
+                Gizmos.DrawWireSphere(middlePocket, pocketOuterRadius);
+                Gizmos.DrawWireSphere(-cornerPocket, pocketOuterRadius);
+                Gizmos.DrawWireSphere(-middlePocket, pocketOuterRadius);
+                Gizmos.DrawWireSphere(new Vector3(-cornerPocket.x, 0, cornerPocket.z), pocketOuterRadius);
+                Gizmos.DrawWireSphere(new Vector3(cornerPocket.x, 0, -cornerPocket.z), pocketOuterRadius);
+
                 Gizmos.color = Color.magenta;
                 Gizmos.DrawWireCube(vA, Vector3.one * 0.01f);
                 Gizmos.DrawWireCube(vB, Vector3.one * 0.01f);
@@ -110,17 +114,17 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 Gizmos.DrawWireCube(vX, Vector3.one * 0.01f);
                 Gizmos.DrawWireCube(vY, Vector3.one * 0.01f);
                 Gizmos.DrawWireCube(vZ, Vector3.one * 0.01f);
-                
+
                 Gizmos.color = Color.white;
-                Gizmos.DrawWireCube(pK,  Vector3.one * 0.01f);
-                Gizmos.DrawWireCube(pL,  Vector3.one * 0.01f);
-                Gizmos.DrawWireCube(pN,  Vector3.one * 0.01f);
-                Gizmos.DrawWireCube(pO,  Vector3.one * 0.01f);
-                Gizmos.DrawWireCube(pP,  Vector3.one * 0.01f);
-                Gizmos.DrawWireCube(pQ,  Vector3.one * 0.01f);
-                Gizmos.DrawWireCube(pR,  Vector3.one * 0.01f);
-                Gizmos.DrawWireCube(pS,  Vector3.one * 0.01f);
-                Gizmos.DrawWireCube(pT,  Vector3.one * 0.01f);   
+                Gizmos.DrawWireCube(pK, Vector3.one * 0.01f);
+                Gizmos.DrawWireCube(pL, Vector3.one * 0.01f);
+                Gizmos.DrawWireCube(pN, Vector3.one * 0.01f);
+                Gizmos.DrawWireCube(pO, Vector3.one * 0.01f);
+                Gizmos.DrawWireCube(pP, Vector3.one * 0.01f);
+                Gizmos.DrawWireCube(pQ, Vector3.one * 0.01f);
+                Gizmos.DrawWireCube(pR, Vector3.one * 0.01f);
+                Gizmos.DrawWireCube(pS, Vector3.one * 0.01f);
+                Gizmos.DrawWireCube(pT, Vector3.one * 0.01f);
             }
 
             if (showEditorDebugCarom)
@@ -137,7 +141,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 // break position
                 Gizmos.color = Color.white;
                 Gizmos.DrawWireSphere(new Vector3(-SPOT_POSITION_X, 0, 0), BALL_PL_X);
-                
+
                 // ball positions
                 Gizmos.color = Color.green;
                 for (int i = 0, k = 0; i < 5; i++)
@@ -159,7 +163,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 // break position
                 Gizmos.color = Color.white;
                 Gizmos.DrawWireSphere(new Vector3(-SPOT_POSITION_X, 0, 0), BALL_PL_X);
-                
+
                 // ball positions
                 Gizmos.color = Color.green;
                 for (int i = 0, k = 0; i < 5; i++)
@@ -178,7 +182,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             }
 #endif
         }
-        
+
         public override void Start()
         {
             base.Start();
@@ -188,24 +192,24 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
         private void CalculateTableCollisionConstants()
         {
-            BALL_DIAMETER_SQUARED_MINUS_EPSILON = Mathf.Pow(BALL_DIAMETER, 2) - 0.0002f;
-            ballRadius = BALL_DIAMETER / 2;
-            ONE_OVER_BALL_RADIUS = 1 / (BALL_DIAMETER/2);
-            BALL_DIAMETER_SQUARED = Mathf.Pow(BALL_DIAMETER, 2);
-            BALL_RADIUS_SQUARED = Mathf.Pow(BALL_DIAMETER/2, 2);
-            
-            POCKET_INNER_RADIUS_SQUARED = Mathf.Pow(POCKET_INNER_RADIUS, 2);
+            BALL_DIAMETER_SQUARED_MINUS_EPSILON = Mathf.Pow(ballDiameter, 2) - 0.0002f;
+            ballRadius = ballDiameter / 2;
+            ONE_OVER_BALL_RADIUS = 1 / (ballDiameter / 2);
+            BALL_DIAMETER_SQUARED = Mathf.Pow(ballDiameter, 2);
+            BALL_RADIUS_SQUARED = Mathf.Pow(ballDiameter / 2, 2);
 
-            tableWidthMinusHeight = TABLE_WIDTH - TABLE_HEIGHT;
+            POCKET_INNER_RADIUS_SQUARED = Mathf.Pow(pocketInnerRadius, 2);
+
+            tableWidthMinusHeight = tableWidth - tableHeight;
             // Major source vertices
-            vA.x = POCKET_RADIUS * 0.92f;
-            vA.z = TABLE_HEIGHT;
+            vA.x = pocketOuterRadius * 0.92f;
+            vA.z = tableHeight;
 
-            vB.x = TABLE_WIDTH - POCKET_RADIUS;
-            vB.z = TABLE_HEIGHT;
+            vB.x = tableWidth - pocketOuterRadius;
+            vB.z = tableHeight;
 
-            vC.x = TABLE_WIDTH;
-            vC.z = TABLE_HEIGHT - POCKET_RADIUS;
+            vC.x = tableWidth;
+            vC.z = tableHeight - pocketOuterRadius;
 
             vD.x = vA.x - 0.016f;
             vD.z = vA.z + 0.060f;
@@ -268,7 +272,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             base.Update();
 
             // Run sim only if things are moving
-            if (gameIsSimulating)
+            if (turnIsRunning)
             {
                 accumulatedTime += Time.deltaTime;
 
@@ -292,9 +296,11 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 cueLocalForwardDirection);
 
             // Check for potential skips due to low frame rate
-            if (sweepTimeBall > 0.0f && sweepTimeBall < (localSpacePositionOfCueTipLastFrame - copyOfLocalSpacePositionOfCueTip).magnitude)
+            if (sweepTimeBall > 0.0f && sweepTimeBall <
+                (localSpacePositionOfCueTipLastFrame - copyOfLocalSpacePositionOfCueTip).magnitude)
             {
-                copyOfLocalSpacePositionOfCueTip = localSpacePositionOfCueTipLastFrame + cueLocalForwardDirection * sweepTimeBall;
+                copyOfLocalSpacePositionOfCueTip =
+                    localSpacePositionOfCueTipLastFrame + cueLocalForwardDirection * sweepTimeBall;
             }
 
             // Hit condition is when cuetip is gone inside ball
@@ -316,19 +322,19 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             Vector3 o = ballTransforms[0].localPosition; // location of ball in surface
 
             Vector3 up = tableSurface.up;
-            
+
             Vector3 j = -Vector3.ProjectOnPlane(q, up); // project cue direction onto table surface, gives us j
             Vector3 i = Vector3.Cross(j, up);
 
             Plane jkPlane = new Plane(i, o);
-            
+
             Debug.DrawLine(o, o + i, Color.red, 15f);
 
             Vector3 Q = raySphereOutput; // point of impact in surface space
 
             float a = jkPlane.GetDistanceToPoint(Q);
             float b = Q.y - o.y;
-            float c = Mathf.Sqrt(Mathf.Max(0,Mathf.Pow(ballRadius, 2) - Mathf.Pow(a, 2) - Mathf.Pow(b, 2)));
+            float c = Mathf.Sqrt(Mathf.Max(0, Mathf.Pow(ballRadius, 2) - Mathf.Pow(a, 2) - Mathf.Pow(b, 2)));
 
             float adj = Mathf.Sqrt(Mathf.Pow(q.x, 2) + Mathf.Pow(q.z, 2));
             float opp = q.y;
@@ -338,7 +344,9 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             float sinTheta = Mathf.Sin(theta);
 
             float k_CUE_MASS = 0.5f; // kg
-            float F = 2 * MASS_OF_BALL * velocity / (1 + MASS_OF_BALL / k_CUE_MASS + 5 / (2 * ballRadius) * (Mathf.Pow(a, 2) + Mathf.Pow(b, 2) * Mathf.Pow(cosTheta, 2) + Mathf.Pow(c, 2) * Mathf.Pow(sinTheta, 2) - 2 * b * c * cosTheta * sinTheta));
+            float F = 2 * MASS_OF_BALL * velocity / (1 + MASS_OF_BALL / k_CUE_MASS + 5 / (2 * ballRadius) *
+                (Mathf.Pow(a, 2) + Mathf.Pow(b, 2) * Mathf.Pow(cosTheta, 2) + Mathf.Pow(c, 2) * Mathf.Pow(sinTheta, 2) -
+                 2 * b * c * cosTheta * sinTheta));
 
             float I = 2f / 5f * MASS_OF_BALL * Mathf.Pow(ballRadius, 2);
             Vector3 v = new Vector3(0, -F / MASS_OF_BALL * cosTheta, -F / MASS_OF_BALL * sinTheta);
@@ -352,18 +360,18 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
             // https://billiards.colostate.edu/physics_articles/Alciatore_pool_physics_article.pdf
             float alpha = -Mathf.Atan(
-               (5f / 2f * a / ballRadius * Mathf.Sqrt(Mathf.Max(0,1f - Mathf.Pow(a / ballRadius, 2)))) /
-               (1 + MASS_OF_BALL / m_e + 5f / 2f * (1f - Mathf.Pow(a / ballRadius, 2)))
+                (5f / 2f * a / ballRadius * Mathf.Sqrt(Mathf.Max(0, 1f - Mathf.Pow(a / ballRadius, 2)))) /
+                (1 + MASS_OF_BALL / m_e + 5f / 2f * (1f - Mathf.Pow(a / ballRadius, 2)))
             ) * 180 / Mathf.PI;
 
             // rewrite to the axis we expect
             v = new Vector3(-v.x, v.z, -v.y);
             w = new Vector3(w.x, -w.z, w.y);
-            
+
             if (v.y > 0)
             {
-                Debug.Log("POOL TABLE JUMPING DEBUG: No scooping - y is " + v.y);
-                
+                LogVerbose("POOL TABLE JUMPING DEBUG: No scooping - y is " + v.y);
+
                 // no scooping
                 v.y = 0;
             }
@@ -371,23 +379,25 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             {
                 // the ball must not be under the cue after one time step
                 float k_MIN_HORIZONTAL_VEL = (ballRadius - c) / TIME_PER_STEP;
-                
+
                 if (v.z < k_MIN_HORIZONTAL_VEL)
                 {
-                    Debug.Log("POOL TABLE JUMPING DEBUG: Not enough strength to be a jump shot - y is " + v.y);
-                    
+                    LogVerbose("POOL TABLE JUMPING DEBUG: Not enough strength to be a jump shot - y is " + v.y);
+
                     // not enough strength to be a jump shot
                     v.y = 0;
                 }
                 else
                 {
-                    Debug.Log("POOL TABLE JUMPING DEBUG: Jump shot triggered! y is " + v.y);
-                    
+                    LogVerbose("POOL TABLE JUMPING DEBUG: Jump shot triggered! y is " + v.y);
+
                     // dampen y velocity because the table will eat a lot of energy (we're driving the ball straight into it)
                     v.y = -v.y * 0.35f;
                 }
-            } else {
-                Debug.Log("POOL TABLE JUMPING DEBUG: No jump triggered... y is " + v.y);
+            }
+            else
+            {
+                LogVerbose("POOL TABLE JUMPING DEBUG: No jump triggered... y is " + v.y);
             }
 
             // translate
@@ -401,7 +411,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             // done
             currentBallVelocities[0] = v;
             currentAngularVelocities[0] = w;
-            
+
             HandleCueBallHit();
         }
 
@@ -452,7 +462,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                     {
                         continue;
                     }
-                    
+
                     if ((currentBallPositions[0] - currentBallPositions[i]).sqrMagnitude < BALL_DIAMETER_SQUARED)
                     {
                         return true;
@@ -468,7 +478,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                     {
                         continue;
                     }
-                    
+
                     if ((currentBallPositions[0] - currentBallPositions[i]).sqrMagnitude < BALL_DIAMETER_SQUARED)
                     {
                         return true;
@@ -481,10 +491,12 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 {
                     return true;
                 }
+
                 if ((currentBallPositions[0] - currentBallPositions[2]).sqrMagnitude < BALL_DIAMETER_SQUARED)
                 {
                     return true;
                 }
+
                 if ((currentBallPositions[0] - currentBallPositions[3]).sqrMagnitude < BALL_DIAMETER_SQUARED)
                 {
                     return true;
@@ -494,21 +506,30 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             return false;
         }
 
+        private bool isCueOutOfBounds;
+
         private void AdvancePhysicsStep()
         {
-            bool ballsMoving = false;
+            var ballsMoving = false;
 
             // Cue angular velocity
-            bool[] moved = new bool[NUMBER_OF_SIMULATED_BALLS];
+            var moved = new bool[NUMBER_OF_SIMULATED_BALLS];
 
             if (!ballsArePocketed[0])
             {
                 if (currentBallPositions[0].y < 0)
                 {
-                    currentBallPositions[0].y = 0;
-                    //currentBallPositions[0].y = -currentBallPositions[0].y * 0.5f; // bounce with restitution
+                    currentBallPositions[0].y = -currentBallPositions[0].y * 0.35f; // bounce with restitution
+                    currentBallVelocities[0].y = -currentBallVelocities[0].y * 0.35f;
+
+                    // Nullify small bounces
+                    if (currentBallVelocities[0].y < 0.0025f)
+                    {
+                        currentBallPositions[0].y = 0;
+                        currentBallVelocities[0].y = 0;
+                    }
                 }
-                
+
                 // Apply movement
                 Vector3 deltaPos = CalculateCueBallDeltaPosition();
                 currentBallPositions[0] += deltaPos;
@@ -518,14 +539,12 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             }
 
             // Run main simulation / inter-ball collision
-            
-            for (int i = 1; i < ballsArePocketed.Length; i++)
+
+            for (var i = 1; i < ballsArePocketed.Length; i++)
             {
                 if (ballsArePocketed[i])
-                {
                     continue;
-                }
-                
+
                 currentBallVelocities[i].y = 0;
                 currentBallPositions[i].y = 0;
 
@@ -535,92 +554,72 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
                 ballsMoving |= StepOneBall(i, moved);
             }
-            
+
             // Check if simulation has settled
-            if (!ballsMoving && gameIsSimulating && !lockoutEndTurnToAllowCueBallToMove)
+            if (!ballsMoving && turnIsRunning)
             {
-                gameIsSimulating = false;
+                if (isCueOutOfBounds && !allowEndOfTurn)
+                    return;
+                
+                turnIsRunning = false;
+                isCueOutOfBounds = false;
+                allowEndOfTurn = false;
 
                 // Make sure we only run this from the client who initiated the move
                 if (isSimulatedByUs)
-                {
                     HandleEndOfTurn();
-                }
 
                 // Check if there was a network update on hold
-                if (isUpdateLocked)
-                {
-                    isUpdateLocked = false;
+                if (!isUpdateLocked)
+                    return;
 
-                    ReadNetworkData();
-                }
+                isUpdateLocked = false;
+
+                ReadNetworkData();
 
                 return;
             }
-
-            bool canCueBallBounceOffCushion = currentBallPositions[0].y < ballRadius;
             
+            if (!isCueOutOfBounds)
+                if (Mathf.Abs(currentBallPositions[0].x) > tableWidth + ballRadius + 0.0001f ||
+                    Mathf.Abs(currentBallPositions[0].z) > tableHeight + ballRadius + 0.0001f)
+                    HandleCueBallOffTable();
+
             if (isFourBall)
             {
-                if (canCueBallBounceOffCushion && moved[0])
-                {
-                    ApplyCushionCaromBounce(0);
-                }
+                if (moved[0] && !isCueOutOfBounds)
+                    CalculateCaromBallPhysics(0);
                 if (moved[9])
-                {
-                    ApplyCushionCaromBounce(9);
-                }
+                    CalculateCaromBallPhysics(9);
                 if (moved[2])
-                {
-                    ApplyCushionCaromBounce(2);
-                }
+                    CalculateCaromBallPhysics(2);
                 if (moved[3])
-                {
-                    ApplyCushionCaromBounce(3);
-                }
+                    CalculateCaromBallPhysics(3);
             }
             else
             {
+                if (moved[0] && !ballsArePocketed[0] && !isCueOutOfBounds)
+                    CalculatePoolBallPhysics(0);
+                
                 // Run edge collision
-                for (var i = 0; i < ballsArePocketed.Length; i++)
+                for (var i = 1; i < ballsArePocketed.Length; i++)
                 {
-                    if (moved[i] && !ballsArePocketed[i] && (i != 0 || canCueBallBounceOffCushion))
-                    {
-                        CalculateBallPosition(i);
-                    }
+                    if (moved[i] && !ballsArePocketed[i])
+                        CalculatePoolBallPhysics(i);
                 }
-           }
+                
+                if (moved[0] && !isCueOutOfBounds)
+                    CheckIfBallsArePocketed(0);
 
-            bool outOfBounds = false;
-            if (!ballsArePocketed[0])
-            {
-                if (Mathf.Abs(currentBallPositions[0].x) > TABLE_WIDTH + ballRadius + 0.0001f || Mathf.Abs(currentBallPositions[0].z) > TABLE_HEIGHT + ballRadius+ 0.0001f)
+                // Run triggers
+                for (var i = 1; i < ballsArePocketed.Length; i++)
                 {
-                    HandleCueBallOffTable();
-                    outOfBounds = true;
-                }
-            }
-
-            if (isFourBall)
-            {
-                return;
-            }
-            
-            if (moved[0] && canCueBallBounceOffCushion && !outOfBounds)
-            {
-                CheckIfBallsArePocketed(0);
-            }
-
-            // Run triggers
-            for (int i = 1; i < ballsArePocketed.Length; i++)
-            {
-                if (moved[i] && !ballsArePocketed[i])
-                {
-                    CheckIfBallsArePocketed(i);
+                    if (moved[i] && !ballsArePocketed[i])
+                        CheckIfBallsArePocketed(i);
                 }
             }
         }
-        
+
         private Vector3 CalculateCueBallDeltaPosition()
         {
             // Get what will be the next position
@@ -665,7 +664,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 {
                     continue;
                 }
-            
+
                 minlf = lf;
                 minid = i;
                 mins = s;
@@ -675,7 +674,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             {
                 return originalDelta;
             }
-        
+
             nmag = minlf - Mathf.Sqrt(mins);
 
             // Assign new position if got appropriate magnitude
@@ -686,7 +685,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
             return originalDelta;
         }
-        
+
         private bool StepOneBall(int id, bool[] moved)
         {
             GameObject ball = ballTransforms[id].gameObject;
@@ -716,12 +715,12 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 {
                     continue;
                 }
-                
+
                 dist = Mathf.Sqrt(dist);
                 Vector3 normal = delta / dist;
 
                 // static resolution
-                Vector3 res = (BALL_DIAMETER - dist) * normal;
+                Vector3 res = (ballDiameter - dist) * normal;
                 currentBallPositions[i] += res;
                 currentBallPositions[id] -= res;
                 moved[i] = true;
@@ -742,7 +741,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
             return isBallMoving;
         }
-        
+
         private bool updateVelocity(int id, GameObject ball)
         {
             bool ballMoving = false;
@@ -847,12 +846,13 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             currentAngularVelocities[id] = W;
             currentBallVelocities[id] = V;
 
-            ball.transform.Rotate(this.transform.TransformDirection(W.normalized), W.magnitude * TIME_PER_STEP * -Mathf.Rad2Deg, Space.World);
+            ball.transform.Rotate(this.transform.TransformDirection(W.normalized),
+                W.magnitude * TIME_PER_STEP * -Mathf.Rad2Deg, Space.World);
 
             return ballMoving;
         }
-        
-        void CalculateBallPosition(int id)
+
+        void CalculatePoolBallPhysics(int id)
         {
             Vector3 nToVNormalized, _V, V, a_to_v;
             float dot;
@@ -868,13 +868,13 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             {
                 if (ballUnderTest.x > ballUnderTest.z + tableWidthMinusHeight) // Minor B
                 {
-                    if (ballUnderTest.z < TABLE_HEIGHT - POCKET_RADIUS)
+                    if (ballUnderTest.z < tableHeight - pocketOuterRadius)
                     {
                         // Region H
-                        if (ballUnderTest.x > TABLE_WIDTH - ballRadius)
+                        if (ballUnderTest.x > tableWidth - ballRadius)
                         {
                             // Static resolution
-                            ballUnderTest.x = TABLE_WIDTH - ballRadius;
+                            ballUnderTest.x = tableWidth - ballRadius;
 
                             // Dynamic
                             ApplyCushionBounce(id, Vector3.Scale(vCvWNormal, signPos));
@@ -1065,91 +1065,70 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
             currentBallPositions[id] = Vector3.Scale(ballUnderTest, signPos);
         }
-        
+
         void ApplyCushionBounce(int id, Vector3 n)
         {
+            // Don't bounce if the cushions obviously could not collide.
+            if (currentBallPositions[id].y > ballRadius)
+                return;
+
             // Reject bounce if velocity is going the same way as normal
             // this state means we tunneled, but it happens only on the corner
             // vertexes
-            Vector3 source_v = currentBallVelocities[id];
-            if (Vector3.Dot(source_v, n) > 0.0f)
-            {
+            Vector3 currentBallVelocity = currentBallVelocities[id];
+            if (Vector3.Dot(currentBallVelocity, n) > 0.0f)
                 return;
-            }
 
             // Rotate V, W to be in the reference frame of cushion
             Quaternion rq = Quaternion.AngleAxis(Mathf.Atan2(-n.z, -n.x) * Mathf.Rad2Deg, Vector3.up);
             Quaternion rb = Quaternion.Inverse(rq);
-            Vector3 V = rq * source_v;
+            Vector3 V = rq * currentBallVelocity;
             Vector3 W = rq * currentAngularVelocities[id];
 
-            Vector3 V1;
-            Vector3 W1;
-            float k, c, s_x, s_z;
+            Vector3 V1 = new Vector3(-V.x * F - 0.00240675711f * W.z, 0f,
+                0.71428571428f * V.z + 0.00857142857f * (W.x * SIN_A - W.y * COS_A) - V.z);
 
-            //V1.x = -V.x * ((2.0f/7.0f) * k_SINA2 + k_EP1 * k_COSA2) - (2.0f/7.0f) * k_BALL_PL_X * W.z * k_SINA;
-            //V1.z = (5.0f/7.0f)*V.z + (2.0f/7.0f) * k_BALL_PL_X * (W.x * k_SINA - W.y * k_COSA) - V.z;
-            //V1.y = 0.0f; 
-            // (baked):
-            V1.x = -V.x * F - 0.00240675711f * W.z;
-            V1.z = 0.71428571428f * V.z + 0.00857142857f * (W.x * SIN_A - W.y * COS_A) - V.z;
-            V1.y = 0.0f;
+            var s_x = V.x * SIN_A + W.z;
+            var s_z = -V.z - W.y * COS_A + W.x * SIN_A;
 
-            // s_x = V.x * k_SINA - V.y * k_COSA + W.z;
-            // (baked): y component not used:
-            s_x = V.x * SIN_A + W.z;
-            s_z = -V.z - W.y * COS_A + W.x * SIN_A;
-
-            // k = (5.0f * s_z) / ( 2 * k_BALL_MASS * k_A ); 
-            // (baked):
-            k = s_z * 0.71428571428f;
-
-            // c = V.x * k_COSA - V.y * k_COSA;
-            // (baked): y component not used
-            c = V.x * COS_A;
-
-            W1.x = k * SIN_A;
-
-            //W1.z = (5.0f / (2.0f * k_BALL_MASS)) * (-s_x / k_A + ((k_SINA * c * k_EP1) / k_B) * (k_COSA - k_SINA));
-            // (baked):
-            W1.z = 15.625f * (-s_x * 0.04571428571f + c * 0.0546021744f);
-            W1.y = k * COS_A;
-
+            var k = s_z * 0.71428571428f;
+            var c = V.x * COS_A;
+            Vector3 W1 = new Vector3(k * SIN_A, k * COS_A, 15.625f * (-s_x * 0.04571428571f + c * 0.0546021744f));
+            
             // Unrotate result
             currentBallVelocities[id] += rb * V1;
             currentAngularVelocities[id] += rb * W1;
 
-            if (id == 0) 
+            if (id == 0)
                 cushionsHitThisTurn++;
         }
-        
+
         void CheckIfBallsArePocketed(int id)
         {
             Vector3 A = currentBallPositions[id];
             Vector3 absA = new Vector3(Mathf.Abs(A.x), A.y, Mathf.Abs(A.z));
 
             if (
-                (absA - CORNER_POCKET).sqrMagnitude < POCKET_INNER_RADIUS_SQUARED ||
-                (absA - MIDDLE_POCKET).sqrMagnitude < POCKET_INNER_RADIUS_SQUARED ||
-                absA.z > MIDDLE_POCKET.z ||
-                absA.z > -absA.x + CORNER_POCKET.x + CORNER_POCKET.z
+                (absA - cornerPocket).sqrMagnitude < POCKET_INNER_RADIUS_SQUARED ||
+                (absA - middlePocket).sqrMagnitude < POCKET_INNER_RADIUS_SQUARED ||
+                absA.z > middlePocket.z ||
+                absA.z > -absA.x + cornerPocket.x + cornerPocket.z
             )
             {
                 TriggerPocketBall(id);
-                
+
                 currentBallVelocities[id] = Vector3.zero;
                 currentAngularVelocities[id] = Vector3.zero;
             }
         }
-        
-        void ApplyCushionCaromBounce(int id)
+
+        void CalculateCaromBallPhysics(int id)
         {
-            float zz, zx;
             Vector3 A = currentBallPositions[id];
 
             // Setup major regions
-            zx = Mathf.Sign(A.x);
-            zz = Mathf.Sign(A.z);
+            var zx = Mathf.Sign(A.x);
+            var zz = Mathf.Sign(A.z);
 
             if (A.x * zx > pR.x)
             {
@@ -1164,34 +1143,34 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             }
         }
 
-        private bool lockoutEndTurnToAllowCueBallToMove;
+        private bool allowEndOfTurn;
 
-        public void _ReleaseWhiteBall()
+        public void _AllowEndOfTurn()
         {
-            lockoutEndTurnToAllowCueBallToMove = false;
+            allowEndOfTurn = true;
 
             if (cueBallController)
-            {
                 cueBallController._DisableDonking();
-            }
         }
 
         private void HandleCueBallOffTable()
         {
+            // Only run this once.
+            if (isCueOutOfBounds)
+                return;
+            
+            isCueOutOfBounds = true;
+            
             if (isFourBall)
-            {
                 fourBallCueLeftTable = true;
-            }
             else
-            {
                 ballsArePocketed[0] = true;
-            }
-            
-            HandleFoulEffects();
 
-            lockoutEndTurnToAllowCueBallToMove = true;
-            SendCustomEventDelayedSeconds(nameof(_ReleaseWhiteBall), 5f);
+            HandleFoulEffects();
             
+            // Run this at the end of the frame so we don't affect this frame's logic.
+            SendCustomEventDelayedSeconds(nameof(_AllowEndOfTurn), 5f, EventTiming.LateUpdate);
+
             // VFX ( make ball move )
             Rigidbody body = ballTransforms[0].gameObject.GetComponent<Rigidbody>();
             body.isKinematic = false;
@@ -1202,9 +1181,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             ));
 
             if (cueBallController)
-            {
                 cueBallController._EnableDonking();
-            }
         }
 
         private void TriggerPocketBall(int id)
@@ -1221,7 +1198,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             }
 
             // place ball on the rack
-            currentBallPositions[id] = Vector3.zero + (float)total * BALL_DIAMETER * Vector3.zero;
+            currentBallPositions[id] = Vector3.zero + (float) total * ballDiameter * Vector3.zero;
 
             // This is where we actually save the pocketed/non-pocketed state of balls.
             ballsArePocketed[id] = true;
@@ -1249,10 +1226,10 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
             if (id == 0)
             {
-                lockoutEndTurnToAllowCueBallToMove = true;
-                SendCustomEventDelayedSeconds(nameof(_ReleaseWhiteBall), 5f);
+                isCueOutOfBounds = true;
+                SendCustomEventDelayedSeconds(nameof(_AllowEndOfTurn), 5f);
             }
-            
+
             // VFX ( make ball move )
             Rigidbody body = ballTransforms[id].gameObject.GetComponent<Rigidbody>();
             body.isKinematic = false;
@@ -1261,6 +1238,14 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
                 currentBallVelocities[id].y,
                 currentBallVelocities[id].z
             ));
+        }
+
+        private void LogVerbose(string input)
+        {
+            if (enableVerboseLogging)
+            {
+                Debug.Log(input);
+            }
         }
     }
 }

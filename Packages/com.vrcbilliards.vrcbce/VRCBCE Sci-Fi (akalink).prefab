@@ -2384,13 +2384,13 @@ MonoBehaviour:
   pancakeUI: {fileID: 7413171090930662055}
   slogger: {fileID: 403604432704466747}
   logger: {fileID: 0}
-  TABLE_WIDTH: 1.1
-  TABLE_HEIGHT: 0.64
-  CORNER_POCKET: {x: 1.135, y: 0, z: 0.685}
-  MIDDLE_POCKET: {x: 0, y: 0, z: 0.72}
-  POCKET_RADIUS: 0.11
-  POCKET_INNER_RADIUS: 0.078
-  BALL_DIAMETER: 0.06
+  tableWidth: 1.1
+  tableHeight: 0.64
+  cornerPocket: {x: 1.135, y: 0, z: 0.685}
+  middlePocket: {x: 0, y: 0, z: 0.72}
+  pocketOuterRadius: 0.11
+  pocketInnerRadius: 0.078
+  ballDiameter: 0.06
   SPOT_POSITION_X: 0.5334
   SPOT_CAROM_X: 0.8001
   BALL_PL_X: 0.03
@@ -2526,8 +2526,8 @@ MonoBehaviour:
   desktopCueParents:
   - {fileID: 7574990830996651390}
   - {fileID: 7574990831511979687}
-  desktopOverlayPower: {fileID: 0}
   tiltAmount: {fileID: 3589744891771408461}
+  scoreNeededToWinCarom: 10
   desktopAngleIncrement: 15
   cueBallController: {fileID: 2737280998927138983}
   powerBar: {fileID: 5604568715292750162}
@@ -2975,6 +2975,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2569889520933857814, guid: e8e2155f0b57dee47a5b4d56bded44e8,
         type: 3}
+    - target: {fileID: 2706613274440259845, guid: e8e2155f0b57dee47a5b4d56bded44e8,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -538.99994
+      objectReference: {fileID: 0}
     - target: {fileID: 2706613274507317988, guid: e8e2155f0b57dee47a5b4d56bded44e8,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -3067,7 +3072,8 @@ PrefabInstance:
         type: 3}
       propertyPath: serializedProgramAsset
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 11400000, guid: 977a650a33a4ab14a9e980d4e21ceab6,
+        type: 2}
     - target: {fileID: 9025567273589249881, guid: e8e2155f0b57dee47a5b4d56bded44e8,
         type: 3}
       propertyPath: serializedProgramAsset

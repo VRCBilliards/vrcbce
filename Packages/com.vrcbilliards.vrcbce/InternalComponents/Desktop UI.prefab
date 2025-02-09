@@ -112,7 +112,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 1.2276611, y: 38.929962}
-  m_SizeDelta: {x: -20, y: -77.860085}
+  m_SizeDelta: {x: -20, y: 6.1398926}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3318120536040607545
 CanvasRenderer:
@@ -727,10 +727,10 @@ RectTransform:
   - {fileID: 3200909986285551121}
   m_Father: {fileID: 6497564106299956108}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -539, y: 0}
-  m_SizeDelta: {x: -1080, y: 0}
+  m_AnchorMin: {x: 0, y: 0.5}
+  m_AnchorMax: {x: 0, y: 0.5}
+  m_AnchoredPosition: {x: 101, y: 0}
+  m_SizeDelta: {x: 200, y: 1040}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &3200909986064807058
 GameObject:
@@ -2874,15 +2874,15 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0
+  near clip plane: 0.01
   far clip plane: 10
-  field of view: 73.7
-  orthographic: 1
+  field of view: 60
+  orthographic: 0
   orthographic size: 1.25
   m_Depth: 10
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 133393
+    m_Bits: 4294967295
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0

@@ -96,7 +96,7 @@ GameObject:
   - component: {fileID: 4326981231387033963}
   - component: {fileID: 248388053953346836}
   m_Layer: 0
-  m_Name: Header
+  m_Name: VRCBilliards Community Edition (v1.6.0_b1 M.O.O.N UI)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -149,7 +149,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: VRCBilliards Community Edition (v1.6.0 M.O.O.N UI)
+  m_text: VRCBilliards Community Edition (v1.6.0_b1 M.O.O.N UI)
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9a3b1e8a8dbce9c40858b1d009683eca, type: 2}
   m_sharedMaterial: {fileID: -2341511444795799642, guid: 9a3b1e8a8dbce9c40858b1d009683eca,
@@ -4137,6 +4137,7 @@ MonoBehaviour:
   uSA9BallString: American 9-Ball
   jP4BallString: Japanese 4-Ball
   kN4BallString: Korean 4-Ball
+  threeCushionCaromString: Three Cushion Carom
   toggleGuideLineButtonsActive: 1
   guideLineEnableButton: {fileID: 0}
   guideLineDisableButton: {fileID: 0}

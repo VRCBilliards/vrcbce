@@ -4164,7 +4164,7 @@ MonoBehaviour:
     PrefabModifications: []
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 6190150218171147622}
-  gameStateManager: {fileID: 0}
+  gameStateManager: {fileID: 1767626763782629582}
 --- !u!114 &6190150218171147622
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19110,13 +19110,13 @@ MonoBehaviour:
   pancakeUI: {fileID: 4243126716499367678}
   slogger: {fileID: 705157339790263765}
   logger: {fileID: 0}
-  TABLE_WIDTH: 1.1
-  TABLE_HEIGHT: 0.64
-  CORNER_POCKET: {x: 1.135, y: 0, z: 0.685}
-  MIDDLE_POCKET: {x: 0, y: 0, z: 0.72}
-  POCKET_RADIUS: 0.11
-  POCKET_INNER_RADIUS: 0.078
-  BALL_DIAMETER: 0.06
+  tableWidth: 1.1
+  tableHeight: 0.64
+  cornerPocket: {x: 1.135, y: 0, z: 0.685}
+  middlePocket: {x: 0, y: 0, z: 0.72}
+  pocketOuterRadius: 0.11
+  pocketInnerRadius: 0.078
+  ballDiameter: 0.06
   SPOT_POSITION_X: 0.5334
   SPOT_CAROM_X: 0.8001
   BALL_PL_X: 0.03
@@ -19252,8 +19252,8 @@ MonoBehaviour:
   desktopCueParents:
   - {fileID: 6190150219564390224}
   - {fileID: 6190150218970344585}
-  desktopOverlayPower: {fileID: 0}
   tiltAmount: {fileID: 6407152557363056558}
+  scoreNeededToWinCarom: 10
   desktopAngleIncrement: 15
   cueBallController: {fileID: 1802799147471792777}
   powerBar: {fileID: 2665285683624029873}
@@ -25872,6 +25872,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 38.929962
+      objectReference: {fileID: 0}
+    - target: {fileID: 3200909985796836178, guid: c02b10cfed62ffc47b6ad81638f9d226,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -538.99994
       objectReference: {fileID: 0}
     - target: {fileID: 8091653792461784738, guid: c02b10cfed62ffc47b6ad81638f9d226,
         type: 3}
