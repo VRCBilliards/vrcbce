@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
+    <ui:VisualElement name="Banner" style="background-image: resource(&apos;Sprites/vrcbce_banner&apos;); height: 48px; -unity-background-scale-mode: scale-to-fit;" />
+    <ui:VisualElement name="Categories" class="unity-inspector-element unity-inspector-element--uie" style="flex-grow: 1;">
+        <ui:VisualElement name="Header" style="border-left-color: rgba(0, 0, 0, 0.25); border-right-color: rgba(0, 0, 0, 0.25); border-top-color: rgba(0, 0, 0, 0.25); border-bottom-color: rgba(0, 0, 0, 0.25); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; padding-top: 6px; padding-right: 6px; padding-bottom: 6px; padding-left: 6px;">
+            <ui:Label tabindex="-1" text="Critically speaking, Portal is one of the best games ever made. Emotionally speaking, Portal is one of the best games ever made. " parse-escape-sequences="true" display-tooltip-when-elided="true" name="HeaderLabel" style="white-space: normal;" />
+        </ui:VisualElement>
+        <ui:VisualElement name="UserProperties" style="flex-grow: 0; margin-top: 8px; margin-bottom: 8px;" />
+    </ui:VisualElement>
+</ui:UXML>
