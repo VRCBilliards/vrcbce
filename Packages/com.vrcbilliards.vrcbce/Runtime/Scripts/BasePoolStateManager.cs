@@ -155,13 +155,13 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
         #endregion
 
-        [Header("Options")] [Tooltip("Use fake shadows? They may clash with your world's lighting.")]
+        /*[Header("Options")]*/ [Tooltip("Use fake shadows? They may clash with your world's lighting.")]
         public bool fakeBallShadows = true;
 
         [Tooltip("Does the table model for this table have rails that guide the ball when the ball sinks?")]
         public bool tableModelHasRails;
 
-        [Header("Important Objects")] public Transform sunkBallsPositionRoot;
+        /*[Header("Important Objects")]*/ public Transform sunkBallsPositionRoot;
         public GameObject shadows;
         public ParticleSystem plusOneParticleSystem;
 
@@ -170,7 +170,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         // Where's the surface of the table?
         public Transform tableSurface;
 
-        [Header("Shader Information")] public string uniformTableColour = "_EmissionColor";
+        /*[Header("Shader Information")]*/ public string uniformTableColour = "_EmissionColor";
         public string uniformMarkerColour = "_Color";
         public string uniformCueColour = "_EmissionColor";
         public string uniformBallColour = "_BallColour";
@@ -182,7 +182,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         [Range(0f, 5f)]
         public float introAnimationLength = 2.0f;
 
-        [Header("Table Colours")] [ColorUsage(true, true)]
+        /*[Header("Table Colours")]*/ [ColorUsage(true, true)]
         public Color tableBlue = new Color(0.0f, 0.5f, 1.5f, 1.0f);
 
         [ColorUsage(true, true)] public Color tableOrange = new Color(1.5f, 0.5f, 0.0f, 1.0f);
@@ -201,13 +201,13 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
         [ColorUsage(true, true)] private Color[] ballColors = new Color[NUMBER_OF_SIMULATED_BALLS];
 
-        [Header("Colour Options")] public bool ballCustomColours;
+        /*[Header("Colour Options")]*/ public bool ballCustomColours;
         public ColorPicker blueTeamSliders;
         public ColorPicker orangeTeamSliders;
 
         private float shaderToggleFloat = 0;
 
-        [Header("Cues")] protected GameObject cueTip;
+        /*[Header("Cues")]*/ protected GameObject cueTip;
         public GameObject[] cueTips;
         public MeshRenderer[] cueRenderObjs;
         private Material[] cueMaterials = new Material[2];
@@ -217,7 +217,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         /// The order of the balls is as follows: cue, black, all blue in ascending order, then all orange in ascending order.
         /// If the order of the balls is incorrect, gameplay will not proceed correctly.
         /// </summary>
-        [Header("Table Objects")]
+        /*[Header("Table Objects")]*/
         [Tooltip(
             "The balls that are used by the table." +
             "\nThe order of the balls is as follows: cue, black, all blue in ascending order, then all orange in ascending order." +
@@ -239,7 +239,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         public GameObject marker9ball;
         public GameObject pocketBlockers;
 
-        [Header("Materials")] public MeshRenderer[] ballRenderers;
+        /*[Header("Materials")]*/ public MeshRenderer[] ballRenderers;
 
         public MeshRenderer tableRenderer;
         private Material[] tableMaterials;
@@ -248,7 +248,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
         public Material[] cueGrips;
 
-        [Header("Audio")] public GameObject audioSourcePoolContainer;
+        /*[Header("Audio")]*/ public GameObject audioSourcePoolContainer;
         public AudioSource cueTipSrc;
         public AudioClip introSfx;
         public AudioClip sinkSfx;
@@ -273,9 +273,9 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         public AudioClip pointMadeSfx;
         public AudioClip hitBallSfx;
 
-        [Header("Reflection Probes")] public ReflectionProbe tableReflection;
+        /*[Header("Reflection Probes")]*/ public ReflectionProbe tableReflection;
 
-        [Header("Meshes")] public Mesh[] cueballMeshes;
+        /*[Header("Meshes")]*/ public Mesh[] cueballMeshes;
         public Mesh nineBall;
 
         /// <summary>
@@ -285,7 +285,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
         private int localPlayerID = -1;
 
-        [Header("Desktop Stuff")] public GameObject desktopHitPosition;
+        /*[Header("Desktop Stuff")]*/ public GameObject desktopHitPosition;
 
         public GameObject desktopBase;
 
