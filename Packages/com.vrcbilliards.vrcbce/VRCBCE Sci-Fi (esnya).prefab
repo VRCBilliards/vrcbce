@@ -22675,13 +22675,13 @@ MonoBehaviour:
   pancakeUI: {fileID: 7413171090930662055}
   slogger: {fileID: 403604432704466747}
   logger: {fileID: 0}
-  TABLE_WIDTH: 1.1
-  TABLE_HEIGHT: 0.64
-  CORNER_POCKET: {x: 1.135, y: 0, z: 0.685}
-  MIDDLE_POCKET: {x: 0, y: 0, z: 0.72}
-  POCKET_RADIUS: 0.11
-  POCKET_INNER_RADIUS: 0.078
-  BALL_DIAMETER: 0.06
+  tableWidth: 1.1
+  tableHeight: 0.64
+  cornerPocket: {x: 1.135, y: 0, z: 0.685}
+  middlePocket: {x: 0, y: 0, z: 0.72}
+  pocketOuterRadius: 0.11
+  pocketInnerRadius: 0.078
+  ballDiameter: 0.06
   SPOT_POSITION_X: 0.5334
   SPOT_CAROM_X: 0.8001
   BALL_PL_X: 0.03
@@ -22817,8 +22817,8 @@ MonoBehaviour:
   desktopCueParents:
   - {fileID: 7574990830996651390}
   - {fileID: 7574990831511979687}
-  desktopOverlayPower: {fileID: 5673995627055334226}
   tiltAmount: {fileID: 1616940728682669164}
+  scoreNeededToWinCarom: 10
   desktopAngleIncrement: 15
   cueBallController: {fileID: 2737280998927138983}
   powerBar: {fileID: 7667025964839830899}
@@ -25408,6 +25408,12 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 6796971528128639691, guid: eac7cdc0b42cf524c9094fd52419a2ce,
         type: 3}
+    - target: {fileID: 8170787602231869271, guid: eac7cdc0b42cf524c9094fd52419a2ce,
+        type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 8170787602231869271, guid: eac7cdc0b42cf524c9094fd52419a2ce,
+        type: 3}
     - target: {fileID: 8715975228510286748, guid: eac7cdc0b42cf524c9094fd52419a2ce,
         type: 3}
       propertyPath: serializationData.Prefab
@@ -25487,11 +25493,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 3589744892908061883}
     m_Modifications:
-    - target: {fileID: 1154008634607538854, guid: c02b10cfed62ffc47b6ad81638f9d226,
-        type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 38.929962
-      objectReference: {fileID: 0}
     - target: {fileID: 8091653792461784738, guid: c02b10cfed62ffc47b6ad81638f9d226,
         type: 3}
       propertyPath: serializationData.Prefab
@@ -25553,11 +25554,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Desktop UI
       objectReference: {fileID: 0}
-    - target: {fileID: 8405257728537727518, guid: c02b10cfed62ffc47b6ad81638f9d226,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -25596,12 +25592,6 @@ GameObject:
 --- !u!1 &5673995625883187826 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8405257729143655003, guid: c02b10cfed62ffc47b6ad81638f9d226,
-    type: 3}
-  m_PrefabInstance: {fileID: 4187060857879261225}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &5673995627055334226 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8405257730114532219, guid: c02b10cfed62ffc47b6ad81638f9d226,
     type: 3}
   m_PrefabInstance: {fileID: 4187060857879261225}
   m_PrefabAsset: {fileID: 0}
