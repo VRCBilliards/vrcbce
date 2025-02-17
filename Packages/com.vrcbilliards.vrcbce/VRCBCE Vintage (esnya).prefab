@@ -24398,16 +24398,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 3135407204972759907}
     m_Modifications:
-    - target: {fileID: 1154008634607538854, guid: c02b10cfed62ffc47b6ad81638f9d226,
-        type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 38.929962
-      objectReference: {fileID: 0}
-    - target: {fileID: 3200909985796836178, guid: c02b10cfed62ffc47b6ad81638f9d226,
-        type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: -538.99994
-      objectReference: {fileID: 0}
     - target: {fileID: 8091653792461784738, guid: c02b10cfed62ffc47b6ad81638f9d226,
         type: 3}
       propertyPath: serializationData.Prefab
@@ -24469,12 +24459,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Desktop UI
       objectReference: {fileID: 0}
-    - target: {fileID: 8864295456830384342, guid: c02b10cfed62ffc47b6ad81638f9d226,
-        type: 3}
-      propertyPath: serializedProgramAsset
-      value: 
-      objectReference: {fileID: 11400000, guid: 207f8966138cc134d80a83da8390ebf4,
-        type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

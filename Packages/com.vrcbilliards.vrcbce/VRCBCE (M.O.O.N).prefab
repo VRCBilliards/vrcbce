@@ -10131,8 +10131,8 @@ MonoBehaviour:
   scoreNeededToWinCarom: 10
   desktopAngleIncrement: 15
   cueBallController: {fileID: 7449011694884598415}
-  powerBar: {fileID: 0}
-  topBar: {fileID: 0}
+  powerBar: {fileID: 8471703184616773465}
+  topBar: {fileID: 1528553149515275018}
   initialPowerBarPos: {x: 0, y: 0, z: 0}
   numberOfCuesHeldByLocalPlayer: 0
   MAX_SIMULATION_TIME_PER_FRAME: 0.1
@@ -24173,11 +24173,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 3135407204972759907}
     m_Modifications:
-    - target: {fileID: 3200909985796836178, guid: c02b10cfed62ffc47b6ad81638f9d226,
-        type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: -538.99994
-      objectReference: {fileID: 0}
     - target: {fileID: 8091653792461784738, guid: c02b10cfed62ffc47b6ad81638f9d226,
         type: 3}
       propertyPath: serializationData.Prefab
@@ -24239,12 +24234,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Desktop UI
       objectReference: {fileID: 0}
-    - target: {fileID: 8864295456830384342, guid: c02b10cfed62ffc47b6ad81638f9d226,
+    - target: {fileID: 8405257728537727518, guid: c02b10cfed62ffc47b6ad81638f9d226,
         type: 3}
-      propertyPath: serializedProgramAsset
-      value: 
-      objectReference: {fileID: 11400000, guid: 207f8966138cc134d80a83da8390ebf4,
-        type: 2}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -24262,6 +24256,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &1528553149515275018 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3520364653767375113, guid: c02b10cfed62ffc47b6ad81638f9d226,
+    type: 3}
+  m_PrefabInstance: {fileID: 2732660218550592003}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &5857250871994593309 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8405257728537727518, guid: c02b10cfed62ffc47b6ad81638f9d226,
@@ -24277,6 +24277,12 @@ Transform:
 --- !u!1 &5857250872600979544 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8405257729143655003, guid: c02b10cfed62ffc47b6ad81638f9d226,
+    type: 3}
+  m_PrefabInstance: {fileID: 2732660218550592003}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &8471703184616773465 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5800023706372437338, guid: c02b10cfed62ffc47b6ad81638f9d226,
     type: 3}
   m_PrefabInstance: {fileID: 2732660218550592003}
   m_PrefabAsset: {fileID: 0}

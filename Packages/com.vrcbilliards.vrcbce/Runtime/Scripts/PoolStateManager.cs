@@ -65,10 +65,10 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         private Vector3 vCvWNormal = new Vector3(-1.0f, 0.0f, 0.0f);
         private Vector3 signPos = new Vector3(0.0f, 1.0f, 0.0f);
 
-        [SerializeField] internal bool showEditorDebugBoundaries;
-        [SerializeField] internal bool showEditorDebugCarom;
-        [SerializeField] internal bool showEditorDebug8ball;
-        [SerializeField] internal bool showEditorDebug9Ball;
+        public bool showEditorDebugBoundaries;
+        public bool showEditorDebugCarom;
+        public bool showEditorDebug8ball;
+        public bool showEditorDebug9Ball;
 
         private bool enableVerboseLogging = false;
 
