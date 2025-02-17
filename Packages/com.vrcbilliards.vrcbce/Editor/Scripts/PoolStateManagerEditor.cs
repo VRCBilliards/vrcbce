@@ -17,7 +17,8 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Editor.Scripts
         private Label HeaderLabel;
 
         private const string HEADER_TEXT =
-            "This is the Pool State Manager's description. Replace this text within PoolStateManagerEditor.cs";
+            "This is the Pool State Manager, the central script that controls VRCBCE's functionality. You shouldn't need to change many fields inside this script. \n\n" +
+            "The debug settings below are of use for custom tables with different dimensions.\n\n" + "This UI was kindly provided by VowganVR.";
 
         private SerializedProperty _propPoolMenu;
         private SerializedProperty _propPoolCues;
@@ -335,6 +336,14 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Editor.Scripts
         {
             AddUserProperty(_propFakeBallShadows);
             AddUserProperty(_propTableModelHasRails);
+            
+            AddNewCategory("Debug Visuals", new[]
+            {
+                _propShowEditorDebugBoundaries,
+                _propShowEditorDebugCarom,
+                _propShowEditorDebug8ball,
+                _propShowEditorDebug9Ball,
+            });
 
             AddNewCategory("Table Settings", new[]
             {
@@ -461,14 +470,6 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Editor.Scripts
                 _propEARTH_GRAVITY,
                 _propMASS_OF_BALL,
                 _propCONTACT_POINT,
-            });
-
-            AddNewCategory("Debug Visuals", new[]
-            {
-                _propShowEditorDebugBoundaries,
-                _propShowEditorDebugCarom,
-                _propShowEditorDebug8ball,
-                _propShowEditorDebug9Ball,
             });
         }
 
