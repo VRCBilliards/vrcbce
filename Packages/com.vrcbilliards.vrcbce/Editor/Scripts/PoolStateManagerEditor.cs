@@ -113,6 +113,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Editor.Scripts
         private SerializedProperty _propShowEditorDebugCarom;
         private SerializedProperty _propShowEditorDebug8ball;
         private SerializedProperty _propShowEditorDebug9Ball;
+        private SerializedProperty _propShowEditorDebugThreeCushionCarom;
 
         private const int FOLDOUT_PADDING_BOTTOM = 8;
 
@@ -307,6 +308,8 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Editor.Scripts
                 = serializedObject.FindProperty(nameof(PoolStateManager.showEditorDebug8ball));
             _propShowEditorDebug9Ball
                 = serializedObject.FindProperty(nameof(PoolStateManager.showEditorDebug9Ball));
+            _propShowEditorDebugThreeCushionCarom
+                = serializedObject.FindProperty(nameof(PoolStateManager.showEditorDebugThreeCushionCarom));
             
             #endregion
         }
@@ -343,6 +346,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Editor.Scripts
                 _propShowEditorDebugCarom,
                 _propShowEditorDebug8ball,
                 _propShowEditorDebug9Ball,
+                _propShowEditorDebugThreeCushionCarom,
             });
 
             AddNewCategory("Table Settings", new[]

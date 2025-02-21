@@ -2,7 +2,10 @@
     "name": "VRCBilliards.VRCBCE.Editor",
     "rootNamespace": "",
     "references": [
-        "VRCBilliards.VRCBCE.Runtime"
+        "VRCBilliards.VRCBCE.Runtime",
+        "UdonSharp.Runtime",
+        "VRC.Udon",
+        "VRC.Udon.Serialization.OdinSerializer"
     ],
     "includePlatforms": [
         "Editor"
