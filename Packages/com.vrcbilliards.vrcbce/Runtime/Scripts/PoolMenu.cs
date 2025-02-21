@@ -247,10 +247,8 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
         public void _EndGame()
         {
-            if (isSignedUpToPlay)
-            {
+            if (isSignedUpToPlay || Networking.IsMaster || Networking.IsInstanceOwner)
                 manager._ForceReset();
-            }
         }
 
         public void _EnableResetButton()
@@ -322,9 +320,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
         public void _UpdateMainMenuView(
             bool newIsTeams,
             bool isTeam2Playing,
-            int gameMode,
-            bool isKorean4Ball,
-            bool isThreeBallCarom,
+            GameMode gameMode,
             int timeSeconds,
             int player1ID,
             int player2ID,
@@ -348,32 +344,39 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             
             switch (gameMode)
             {
-                case 0:
-                    if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = uSA8BallString;
+                case GameMode.EightBall:
+                    if (VRC.SDKBase.Utilities.IsValid(gameModeTxt))
+                        gameModeTxt.text = uSA8BallString;
+
                     UpdateButtonColors(gameModeButtons, 0);
 
                     break;
-                case 1:
-                    if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = uSA9BallString; 
+                case GameMode.NineBall:
+                    if (VRC.SDKBase.Utilities.IsValid(gameModeTxt))
+                        gameModeTxt.text = uSA9BallString; 
+                    
                     UpdateButtonColors(gameModeButtons, 1);
 
                     break;
-                case 2:
-                    if (isKorean4Ball)
-                    {
-                        if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = kN4BallString;
-                        UpdateButtonColors(gameModeButtons, 3);
-                    }
-                    else if (isThreeBallCarom)
-                    {
-                        if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = threeCushionCaromString;
-                        UpdateButtonColors(gameModeButtons, 2);
-                    }
-                    else
-                    {
-                        if (VRC.SDKBase.Utilities.IsValid(gameModeTxt)) gameModeTxt.text = jP4BallString;
-                        UpdateButtonColors(gameModeButtons, 2);
-                    }
+                case GameMode.KoreanCarom:
+                    if (VRC.SDKBase.Utilities.IsValid(gameModeTxt))
+                        gameModeTxt.text = kN4BallString;
+                    
+                    UpdateButtonColors(gameModeButtons, 3);
+                
+                    break;
+                case GameMode.JapaneseCarom:
+                    if (VRC.SDKBase.Utilities.IsValid(gameModeTxt))
+                        gameModeTxt.text = jP4BallString;
+                    
+                    UpdateButtonColors(gameModeButtons, 2);
+
+                    break;
+                case GameMode.ThreeCushionCarom:
+                    if (VRC.SDKBase.Utilities.IsValid(gameModeTxt))
+                        gameModeTxt.text = threeCushionCaromString;
+                    
+                    UpdateButtonColors(gameModeButtons, 2);
 
                     break;
             }
@@ -630,7 +633,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 
         public void _GameWasReset(ResetReason reason)
         {
-            winnerText.text = BasePoolStateManager.ToReasonString(reason);
+            winnerText.text = PoolStateManager.ToReasonString(reason);
         }
 
         public void _TeamWins(bool isTeam2)

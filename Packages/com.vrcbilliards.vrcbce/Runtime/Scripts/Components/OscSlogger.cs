@@ -39,7 +39,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts.Compon
 
         public void OscReportGameReset(ResetReason reason)
         {
-            OscBuildOutput(string.Format(oscGameReset, BasePoolStateManager.ToReasonString(reason)));
+            OscBuildOutput(string.Format(oscGameReset, PoolStateManager.ToReasonString(reason)));
         }
     }
 }
