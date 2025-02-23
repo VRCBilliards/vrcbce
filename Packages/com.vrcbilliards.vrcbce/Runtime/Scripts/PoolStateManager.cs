@@ -11,7 +11,7 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
 public partial class PoolStateManager : DebuggableUdon
 {
     #if UNITY_ANDROID
-       private const float MAX_SIMULATION_TIME_PER_FRAME = 0.05f; // max time to process per frame on quest (~4)
+       public const float MAX_SIMULATION_TIME_PER_FRAME = 0.05f; // max time to process per frame on quest (~4)
 #else
         public float MAX_SIMULATION_TIME_PER_FRAME = 0.1f; // max time to process per frame on pc (~8)
 #endif
