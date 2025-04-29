@@ -794,15 +794,13 @@ namespace VRCBilliardsCE.Packages.com.vrcbilliards.vrcbce.Runtime.Scripts
             }
 
             cueArmedShotDirection = cueLocalForwardDirection;
+            Vector3 shotVector = (cueballPosition - raySphereOutput) * 0.1f;
+            
+            // This is a bit of a hack; we abuse the shot vector and then divide it by 10 which gives us 
+            // a mostly-accurate account of where the shot will go.
+            cueArmedShotDirection += shotVector.normalized / 10;
 
-            if (!isInDesktopTopDownView)
-            {
-                // Compute deflection in VR mode
-                Vector3 scuffdir = cueballPosition - raySphereOutput;
-                cueArmedShotDirection += scuffdir.normalized * 0.17f;
-            }
-
-            cueFDir = Mathf.Atan2(cueArmedShotDirection.z, cueArmedShotDirection.x);
+            cueFDir = Mathf.Atan2(shotVector.z, shotVector.x);
 
             // Update the prediction line direction
             Transform transform1 = guideline.transform;

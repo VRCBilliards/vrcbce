@@ -167,6 +167,9 @@ public partial class PoolStateManager : DebuggableUdon
             return copyOfLocalSpacePositionOfCueTip;
         }
 
+        private const float CUE_MASS = 0.5f; // kg
+        private const float m_e = 0.02f;
+
         private void HitBallWithCue(Vector3 shotDirection, float velocity)
         {
             //shotDirection = tableSurface.rotation * shotDirection;
@@ -184,35 +187,36 @@ public partial class PoolStateManager : DebuggableUdon
             Debug.DrawLine(o, o + i, Color.red, 15f);
 
             Vector3 Q = raySphereOutput; // point of impact in surface space
+# if UNITY_EDITOR
+            var worldCueHitPoint = tableSurface.position + Q;
+            
+            Debug.DrawLine(worldCueHitPoint, worldCueHitPoint + shotDirection, Color.magenta, 15f);
+# endif
+            var a = jkPlane.GetDistanceToPoint(Q);
+            var b = Q.y - o.y;
+            var c = Mathf.Sqrt(Mathf.Max(0, Mathf.Pow(ballRadius, 2) - Mathf.Pow(a, 2) - Mathf.Pow(b, 2)));
 
-            float a = jkPlane.GetDistanceToPoint(Q);
-            float b = Q.y - o.y;
-            float c = Mathf.Sqrt(Mathf.Max(0, Mathf.Pow(ballRadius, 2) - Mathf.Pow(a, 2) - Mathf.Pow(b, 2)));
+            var adj = Mathf.Sqrt(Mathf.Pow(q.x, 2) + Mathf.Pow(q.z, 2));
+            var opp = q.y;
+            var theta = -Mathf.Atan(opp / adj);
 
-            float adj = Mathf.Sqrt(Mathf.Pow(q.x, 2) + Mathf.Pow(q.z, 2));
-            float opp = q.y;
-            float theta = -Mathf.Atan(opp / adj);
-
-            float cosTheta = Mathf.Cos(theta);
-            float sinTheta = Mathf.Sin(theta);
-
-            float k_CUE_MASS = 0.5f; // kg
-            float F = 2 * MASS_OF_BALL * velocity / (1 + MASS_OF_BALL / k_CUE_MASS + 5 / (2 * ballRadius) *
+            var cosTheta = Mathf.Cos(theta);
+            var sinTheta = Mathf.Sin(theta);
+            
+            var f = 2 * MASS_OF_BALL * velocity / (1 + MASS_OF_BALL / CUE_MASS + 5 / (2 * ballRadius) *
                 (Mathf.Pow(a, 2) + Mathf.Pow(b, 2) * Mathf.Pow(cosTheta, 2) + Mathf.Pow(c, 2) * Mathf.Pow(sinTheta, 2) -
                  2 * b * c * cosTheta * sinTheta));
 
-            float I = 2f / 5f * MASS_OF_BALL * Mathf.Pow(ballRadius, 2);
-            Vector3 v = new Vector3(0, -F / MASS_OF_BALL * cosTheta, -F / MASS_OF_BALL * sinTheta);
-            Vector3 w = 1 / I * new Vector3(-c * F * sinTheta + b * F * cosTheta, a * F * sinTheta, -a * F * cosTheta);
+            var I = 2f / 5f * MASS_OF_BALL * Mathf.Pow(ballRadius, 2);
+            Vector3 v = new Vector3(0, -f / MASS_OF_BALL * cosTheta, -f / MASS_OF_BALL * sinTheta);
+            Vector3 w = 1 / I * new Vector3(-c * f * sinTheta + b * f * cosTheta, a * f * sinTheta, -a * f * cosTheta);
 
             // the paper is inconsistent here. either w.x is inverted (i.e. the i axis points right instead of left) or b is inverted (which means F is wrong too)
             // for my sanity I'm going to assume the former
             w.x = -w.x;
 
-            float m_e = 0.02f;
-
             // https://billiards.colostate.edu/physics_articles/Alciatore_pool_physics_article.pdf
-            float alpha = -Mathf.Atan(
+            var alpha = -Mathf.Atan(
                 (5f / 2f * a / ballRadius * Mathf.Sqrt(Mathf.Max(0, 1f - Mathf.Pow(a / ballRadius, 2)))) /
                 (1 + MASS_OF_BALL / m_e + 5f / 2f * (1f - Mathf.Pow(a / ballRadius, 2)))
             ) * 180 / Mathf.PI;
@@ -358,6 +362,10 @@ public partial class PoolStateManager : DebuggableUdon
 
             if (IsCueInPlay)
             {
+# if UNITY_EDITOR
+                var ballPos = tableSurface.position + currentBallPositions[0];
+# endif
+                
                 if (currentBallPositions[0].y < 0)
                 {
                     currentBallPositions[0].y = -currentBallPositions[0].y * 0.35f; // bounce with restitution
@@ -377,6 +385,10 @@ public partial class PoolStateManager : DebuggableUdon
                 moved[0] = deltaPos != Vector3.zero;
 
                 ballsMoving |= StepOneBall(0, moved);
+                
+# if UNITY_EDITOR
+                Debug.DrawLine(ballPos, tableSurface.position +  currentBallPositions[0], Color.cyan, 15);
+# endif
             }
 
             // Run main simulation / inter-ball collision
